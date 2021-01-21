@@ -19,7 +19,7 @@ package baritone.api.command.argument;
 
 import baritone.api.command.argparser.IArgParser;
 import baritone.api.command.exception.CommandInvalidTypeException;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 /**
  * A {@link ICommandArgument} is an immutable object representing one command argument. It contains data on the index of

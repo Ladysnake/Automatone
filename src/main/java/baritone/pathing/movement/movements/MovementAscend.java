@@ -30,8 +30,9 @@ import baritone.utils.BlockStateInterface;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
-import net.minecraft.util.Direction;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.util.math.Direction;
+
 import java.util.Set;
 
 public class MovementAscend extends Movement {
@@ -77,9 +78,9 @@ public class MovementAscend extends Movement {
             }
             boolean foundPlaceOption = false;
             for (int i = 0; i < 5; i++) {
-                int againstX = destX + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getXOffset();
-                int againstY = y + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getYOffset();
-                int againstZ = destZ + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getZOffset();
+                int againstX = destX + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getOffsetX();
+                int againstY = y + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getOffsetY();
+                int againstZ = destZ + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getOffsetZ();
                 if (againstX == x && againstZ == z) { // we might be able to backplace now, but it doesn't matter because it will have been broken by the time we'd need to use it
                     continue;
                 }
@@ -176,7 +177,7 @@ public class MovementAscend extends Movement {
             ticksWithoutPlacement++;
             if (MovementHelper.attemptToPlaceABlock(state, baritone, dest.down(), false, true) == PlaceResult.READY_TO_PLACE) {
                 state.setInput(Input.SNEAK, true);
-                if (ctx.player().isCrouching()) {
+                if (ctx.player().isSneaking()) {
                     state.setInput(Input.CLICK_RIGHT, true);
                 }
             }
@@ -199,10 +200,10 @@ public class MovementAscend extends Movement {
 
         int xAxis = Math.abs(src.getX() - dest.getX()); // either 0 or 1
         int zAxis = Math.abs(src.getZ() - dest.getZ()); // either 0 or 1
-        double flatDistToNext = xAxis * Math.abs((dest.getX() + 0.5D) - ctx.player().getPositionVec().x) + zAxis * Math.abs((dest.getZ() + 0.5D) - ctx.player().getPositionVec().z);
-        double sideDist = zAxis * Math.abs((dest.getX() + 0.5D) - ctx.player().getPositionVec().x) + xAxis * Math.abs((dest.getZ() + 0.5D) - ctx.player().getPositionVec().z);
+        double flatDistToNext = xAxis * Math.abs((dest.getX() + 0.5D) - ctx.player().getX()) + zAxis * Math.abs((dest.getZ() + 0.5D) - ctx.player().getZ());
+        double sideDist = zAxis * Math.abs((dest.getX() + 0.5D) - ctx.player().getX()) + xAxis * Math.abs((dest.getZ() + 0.5D) - ctx.player().getZ());
 
-        double lateralMotion = xAxis * ctx.player().getMotion().z + zAxis * ctx.player().getMotion().x;
+        double lateralMotion = xAxis * ctx.player().getVelocity().z + zAxis * ctx.player().getVelocity().x;
         if (Math.abs(lateralMotion) > 0.1) {
             return state;
         }
@@ -224,7 +225,7 @@ public class MovementAscend extends Movement {
     public boolean headBonkClear() {
         BetterBlockPos startUp = src.up(2);
         for (int i = 0; i < 4; i++) {
-            BetterBlockPos check = startUp.offset(Direction.byHorizontalIndex(i));
+            BetterBlockPos check = startUp.offset(Direction.fromHorizontal(i));
             if (!MovementHelper.canWalkThrough(ctx, check)) {
                 // We might bonk our head
                 return false;

@@ -34,12 +34,12 @@ import baritone.api.command.helpers.TabCompleteHelper;
 import baritone.api.command.manager.ICommandManager;
 import baritone.command.argument.CommandArguments;
 import baritone.command.manager.CommandManager;
-import net.minecraft.util.Tuple;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Pair;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -68,7 +68,7 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
             event.cancel();
             String commandStr = msg.substring(forceRun ? FORCE_COMMAND_PREFIX.length() : prefix.length());
             if (!runCommand(commandStr) && !commandStr.trim().isEmpty()) {
-                new CommandNotFoundException(CommandManager.expand(commandStr).getA()).handle(null, null);
+                new CommandNotFoundException(CommandManager.expand(commandStr).getLeft()).handle(null, null);
             }
         } else if ((settings.chatControl.value || settings.chatControlAnyway.value) && runCommand(msg)) {
             event.cancel();
@@ -79,14 +79,14 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
         if (settings.echoCommands.value) {
             String msg = command + rest;
             String toDisplay = settings.censorRanCommands.value ? command + " ..." : msg;
-            TextComponent component = new StringTextComponent(String.format("> %s", toDisplay));
+            BaseText component = new LiteralText(String.format("> %s", toDisplay));
             component.setStyle(component.getStyle()
-                    .setFormatting(TextFormatting.WHITE)
-                    .setHoverEvent(new HoverEvent(
+                    .withFormatting(Formatting.WHITE)
+                    .withHoverEvent(new HoverEvent(
                             HoverEvent.Action.SHOW_TEXT,
-                            new StringTextComponent("Click to rerun command")
+                            new LiteralText("Click to rerun command")
                     ))
-                    .setClickEvent(new ClickEvent(
+                    .withClickEvent(new ClickEvent(
                             ClickEvent.Action.RUN_COMMAND,
                             FORCE_COMMAND_PREFIX + msg
                     )));
@@ -107,10 +107,10 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
         if (msg.isEmpty()) {
             return this.runCommand("help");
         }
-        Tuple<String, List<ICommandArgument>> pair = CommandManager.expand(msg);
-        String command = pair.getA();
-        String rest = msg.substring(pair.getA().length());
-        ArgConsumer argc = new ArgConsumer(this.manager, pair.getB());
+        Pair<String, List<ICommandArgument>> pair = CommandManager.expand(msg);
+        String command = pair.getLeft();
+        String rest = msg.substring(pair.getLeft().length());
+        ArgConsumer argc = new ArgConsumer(this.manager, pair.getRight());
         if (!argc.hasAny()) {
             Settings.Setting setting = settings.byLowerName.get(command.toLowerCase(Locale.US));
             if (setting != null) {
@@ -127,7 +127,7 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
                 if (setting.getName().equals("logger")) {
                     continue;
                 }
-                if (setting.getName().equalsIgnoreCase(pair.getA())) {
+                if (setting.getName().equalsIgnoreCase(pair.getLeft())) {
                     logRanCommand(command, rest);
                     try {
                         this.manager.execute(String.format("set %s %s", setting.getName(), argc.getString()));
@@ -138,7 +138,7 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
         }
 
         // If the command exists, then handle echoing the input
-        if (this.manager.getCommand(pair.getA()) != null) {
+        if (this.manager.getCommand(pair.getLeft()) != null) {
             logRanCommand(command, rest);
         }
 

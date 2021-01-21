@@ -21,12 +21,8 @@ import baritone.api.utils.Helper;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidTypeException;
 import baritone.api.command.argument.IArgConsumer;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.text.*;
+import net.minecraft.util.Formatting;
 
 import java.util.Arrays;
 import java.util.List;
@@ -64,59 +60,59 @@ public class Paginator<E> implements Helper {
         return this;
     }
 
-    public void display(Function<E, ITextComponent> transform, String commandPrefix) {
+    public void display(Function<E, Text> transform, String commandPrefix) {
         int offset = (page - 1) * pageSize;
         for (int i = offset; i < offset + pageSize; i++) {
             if (i < entries.size()) {
                 logDirect(transform.apply(entries.get(i)));
             } else {
-                logDirect("--", TextFormatting.DARK_GRAY);
+                logDirect("--", Formatting.DARK_GRAY);
             }
         }
         boolean hasPrevPage = commandPrefix != null && validPage(page - 1);
         boolean hasNextPage = commandPrefix != null && validPage(page + 1);
-        TextComponent prevPageComponent = new StringTextComponent("<<");
+        BaseText prevPageComponent = new LiteralText("<<");
         if (hasPrevPage) {
             prevPageComponent.setStyle(prevPageComponent.getStyle()
-                    .setClickEvent(new ClickEvent(
+                    .withClickEvent(new ClickEvent(
                             ClickEvent.Action.RUN_COMMAND,
                             String.format("%s %d", commandPrefix, page - 1)
                     ))
-                    .setHoverEvent(new HoverEvent(
+                    .withHoverEvent(new HoverEvent(
                             HoverEvent.Action.SHOW_TEXT,
-                            new StringTextComponent("Click to view previous page")
+                            new LiteralText("Click to view previous page")
                     )));
         } else {
-            prevPageComponent.setStyle(prevPageComponent.getStyle().setFormatting(TextFormatting.DARK_GRAY));
+            prevPageComponent.setStyle(prevPageComponent.getStyle().withFormatting(Formatting.DARK_GRAY));
         }
-        TextComponent nextPageComponent = new StringTextComponent(">>");
+        BaseText nextPageComponent = new LiteralText(">>");
         if (hasNextPage) {
             nextPageComponent.setStyle(nextPageComponent.getStyle()
-                    .setClickEvent(new ClickEvent(
+                    .withClickEvent(new ClickEvent(
                             ClickEvent.Action.RUN_COMMAND,
                             String.format("%s %d", commandPrefix, page + 1)
                     ))
-                    .setHoverEvent(new HoverEvent(
+                    .withHoverEvent(new HoverEvent(
                             HoverEvent.Action.SHOW_TEXT,
-                            new StringTextComponent("Click to view next page")
+                            new LiteralText("Click to view next page")
                     )));
         } else {
-            nextPageComponent.setStyle(nextPageComponent.getStyle().setFormatting(TextFormatting.DARK_GRAY));
+            nextPageComponent.setStyle(nextPageComponent.getStyle().withFormatting(Formatting.DARK_GRAY));
         }
-        TextComponent pagerComponent = new StringTextComponent("");
-        pagerComponent.setStyle(pagerComponent.getStyle().setFormatting(TextFormatting.GRAY));
+        BaseText pagerComponent = new LiteralText("");
+        pagerComponent.setStyle(pagerComponent.getStyle().withFormatting(Formatting.GRAY));
         pagerComponent.append(prevPageComponent);
-        pagerComponent.appendString(" | ");
+        pagerComponent.append(" | ");
         pagerComponent.append(nextPageComponent);
-        pagerComponent.appendString(String.format(" %d/%d", page, getMaxPage()));
+        pagerComponent.append(String.format(" %d/%d", page, getMaxPage()));
         logDirect(pagerComponent);
     }
 
-    public void display(Function<E, ITextComponent> transform) {
+    public void display(Function<E, Text> transform) {
         display(transform, null);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Runnable pre, Function<T, ITextComponent> transform, String commandPrefix) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Runnable pre, Function<T, Text> transform, String commandPrefix) throws CommandException {
         int page = 1;
         consumer.requireMax(1);
         if (consumer.hasAny()) {
@@ -139,47 +135,47 @@ public class Paginator<E> implements Helper {
         pagi.display(transform, commandPrefix);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Runnable pre, Function<T, ITextComponent> transform, String commandPrefix) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Runnable pre, Function<T, Text> transform, String commandPrefix) throws CommandException {
         paginate(consumer, new Paginator<>(elems), pre, transform, commandPrefix);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, T[] elems, Runnable pre, Function<T, ITextComponent> transform, String commandPrefix) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, T[] elems, Runnable pre, Function<T, Text> transform, String commandPrefix) throws CommandException {
         paginate(consumer, Arrays.asList(elems), pre, transform, commandPrefix);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Function<T, ITextComponent> transform, String commandPrefix) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Function<T, Text> transform, String commandPrefix) throws CommandException {
         paginate(consumer, pagi, null, transform, commandPrefix);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Function<T, ITextComponent> transform, String commandPrefix) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Function<T, Text> transform, String commandPrefix) throws CommandException {
         paginate(consumer, new Paginator<>(elems), null, transform, commandPrefix);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, T[] elems, Function<T, ITextComponent> transform, String commandPrefix) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, T[] elems, Function<T, Text> transform, String commandPrefix) throws CommandException {
         paginate(consumer, Arrays.asList(elems), null, transform, commandPrefix);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Runnable pre, Function<T, ITextComponent> transform) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Runnable pre, Function<T, Text> transform) throws CommandException {
         paginate(consumer, pagi, pre, transform, null);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Runnable pre, Function<T, ITextComponent> transform) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Runnable pre, Function<T, Text> transform) throws CommandException {
         paginate(consumer, new Paginator<>(elems), pre, transform, null);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, T[] elems, Runnable pre, Function<T, ITextComponent> transform) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, T[] elems, Runnable pre, Function<T, Text> transform) throws CommandException {
         paginate(consumer, Arrays.asList(elems), pre, transform, null);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Function<T, ITextComponent> transform) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Function<T, Text> transform) throws CommandException {
         paginate(consumer, pagi, null, transform, null);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Function<T, ITextComponent> transform) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Function<T, Text> transform) throws CommandException {
         paginate(consumer, new Paginator<>(elems), null, transform, null);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, T[] elems, Function<T, ITextComponent> transform) throws CommandException {
+    public static <T> void paginate(IArgConsumer consumer, T[] elems, Function<T, Text> transform) throws CommandException {
         paginate(consumer, Arrays.asList(elems), null, transform, null);
     }
 }

@@ -47,7 +47,7 @@ public class FindCommand extends Command {
         toFind.stream()
                 .flatMap(block ->
                         ctx.worldData().getCachedWorld().getLocationsOf(
-                                Registry.BLOCK.getKey(block).getPath(),
+                                Registry.BLOCK.getId(block).getPath(),
                                 Integer.MAX_VALUE,
                                 origin.x,
                                 origin.y,

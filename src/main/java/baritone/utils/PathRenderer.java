@@ -26,20 +26,20 @@ import baritone.api.utils.Helper;
 import baritone.api.utils.interfaces.IGoalRenderPos;
 import baritone.behavior.PathingBehavior;
 import baritone.pathing.path.PathExecutor;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.tileentity.BeaconTileEntityRenderer;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.world.DimensionType;
+import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.dimension.DimensionType;
 
 import java.awt.*;
 import java.util.Collection;
@@ -54,7 +54,7 @@ import static org.lwjgl.opengl.GL11.*;
  */
 public final class PathRenderer implements IRenderer, Helper {
 
-    private static final ResourceLocation TEXTURE_BEACON_BEAM = new ResourceLocation("textures/entity/beacon_beam.png");
+    private static final Identifier TEXTURE_BEACON_BEAM = new Identifier("textures/entity/beacon_beam.png");
 
 
     private PathRenderer() {}
@@ -78,15 +78,15 @@ public final class PathRenderer implements IRenderer, Helper {
             ((GuiClick) Helper.mc.currentScreen).onRender(event.getModelViewStack(), event.getProjectionMatrix());
         }
 
-        DimensionType thisPlayerDimension = behavior.baritone.getPlayerContext().world().getDimensionType();
-        DimensionType currentRenderViewDimension = BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext().world().getDimensionType();
+        DimensionType thisPlayerDimension = behavior.baritone.getPlayerContext().world().getDimension();
+        DimensionType currentRenderViewDimension = BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext().world().getDimension();
 
         if (thisPlayerDimension != currentRenderViewDimension) {
             // this is a path for a bot in a different dimension, don't render it
             return;
         }
 
-        Entity renderView = Helper.mc.getRenderViewEntity();
+        Entity renderView = Helper.mc.getCameraEntity();
 
         if (renderView.world != BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext().world()) {
             System.out.println("I have no idea what's going on");
@@ -182,21 +182,21 @@ public final class PathRenderer implements IRenderer, Helper {
 
 
     public static void drawLine(MatrixStack stack, double x1, double y1, double z1, double x2, double y2, double z2) {
-        Matrix4f matrix4f = stack.getLast().getMatrix();
+        Matrix4f matrix4f = stack.peek().getModel();
 
         double vpX = posX();
         double vpY = posY();
         double vpZ = posZ();
         boolean renderPathAsFrickinThingy = !settings.renderPathAsLine.value;
 
-        buffer.begin(renderPathAsFrickinThingy ? GL_LINE_STRIP : GL_LINES, DefaultVertexFormats.POSITION);
-        buffer.pos(matrix4f, (float) (x1 + 0.5D - vpX), (float) (y1 + 0.5D - vpY), (float) (z1 + 0.5D - vpZ)).endVertex();
-        buffer.pos(matrix4f, (float) (x2 + 0.5D - vpX), (float) (y2 + 0.5D - vpY), (float) (z2 + 0.5D - vpZ)).endVertex();
+        buffer.begin(renderPathAsFrickinThingy ? GL_LINE_STRIP : GL_LINES, VertexFormats.POSITION);
+        buffer.vertex(matrix4f, (float) (x1 + 0.5D - vpX), (float) (y1 + 0.5D - vpY), (float) (z1 + 0.5D - vpZ)).next();
+        buffer.vertex(matrix4f, (float) (x2 + 0.5D - vpX), (float) (y2 + 0.5D - vpY), (float) (z2 + 0.5D - vpZ)).next();
 
         if (renderPathAsFrickinThingy) {
-            buffer.pos(matrix4f, (float) (x2 + 0.5D - vpX), (float) (y2 + 0.53D - vpY), (float) (z2 + 0.5D - vpZ)).endVertex();
-            buffer.pos(matrix4f, (float) (x1 + 0.5D - vpX), (float) (y1 + 0.53D - vpY), (float) (z1 + 0.5D - vpZ)).endVertex();
-            buffer.pos(matrix4f, (float) (x1 + 0.5D - vpX), (float) (y1 + 0.5D - vpY), (float) (z1 + 0.5D - vpZ)).endVertex();
+            buffer.vertex(matrix4f, (float) (x2 + 0.5D - vpX), (float) (y2 + 0.53D - vpY), (float) (z2 + 0.5D - vpZ)).next();
+            buffer.vertex(matrix4f, (float) (x1 + 0.5D - vpX), (float) (y1 + 0.53D - vpY), (float) (z1 + 0.5D - vpZ)).next();
+            buffer.vertex(matrix4f, (float) (x1 + 0.5D - vpX), (float) (y1 + 0.5D - vpY), (float) (z1 + 0.5D - vpZ)).next();
         }
     }
 
@@ -208,8 +208,8 @@ public final class PathRenderer implements IRenderer, Helper {
 
         positions.forEach(pos -> {
             BlockState state = bsi.get0(pos);
-            VoxelShape shape = state.getShape(player.world, pos);
-            AxisAlignedBB toDraw = shape.isEmpty() ? VoxelShapes.fullCube().getBoundingBox() : shape.getBoundingBox();
+            VoxelShape shape = state.getOutlineShape(player.world, pos);
+            Box toDraw = shape.isEmpty() ? VoxelShapes.fullCube().getBoundingBox() : shape.getBoundingBox();
             toDraw = toDraw.offset(pos);
             IRenderer.drawAABB(stack, toDraw, .002D);
         });
@@ -258,13 +258,13 @@ public final class PathRenderer implements IRenderer, Helper {
                 stack.push(); // push
                 stack.translate(goalPos.getX() - renderPosX, -renderPosY, goalPos.getZ() - renderPosZ); // translate
 
-                BeaconTileEntityRenderer.renderBeamSegment(
+                BeaconBlockEntityRenderer.renderLightBeam(
                         stack,
-                        mc.getRenderTypeBuffers().getBufferSource(),
+                        mc.getBufferBuilders().getEntityVertexConsumers(),
                         TEXTURE_BEACON_BEAM,
                         partialTicks,
                         1.0F,
-                        player.world.getGameTime(),
+                        player.world.getTime(),
                         0,
                         256,
                         color.getColorComponents(null),
@@ -303,10 +303,10 @@ public final class PathRenderer implements IRenderer, Helper {
             return;
         } else if (goal instanceof GoalYLevel) {
             GoalYLevel goalpos = (GoalYLevel) goal;
-            minX = player.getPositionVec().x - settings.yLevelBoxSize.value - renderPosX;
-            minZ = player.getPositionVec().z - settings.yLevelBoxSize.value - renderPosZ;
-            maxX = player.getPositionVec().x + settings.yLevelBoxSize.value - renderPosX;
-            maxZ = player.getPositionVec().z + settings.yLevelBoxSize.value - renderPosZ;
+            minX = player.getX() - settings.yLevelBoxSize.value - renderPosX;
+            minZ = player.getZ() - settings.yLevelBoxSize.value - renderPosZ;
+            maxX = player.getX() + settings.yLevelBoxSize.value - renderPosX;
+            maxZ = player.getZ() + settings.yLevelBoxSize.value - renderPosZ;
             minY = ((GoalYLevel) goal).level - renderPosY;
             maxY = minY + 2;
             y1 = 1 + y + goalpos.level - renderPosY;
@@ -320,16 +320,16 @@ public final class PathRenderer implements IRenderer, Helper {
         renderHorizontalQuad(stack, minX, maxX, minZ, maxZ, y1);
         renderHorizontalQuad(stack, minX, maxX, minZ, maxZ, y2);
 
-        Matrix4f matrix4f = stack.getLast().getMatrix();
-        buffer.begin(GL_LINES, DefaultVertexFormats.POSITION);
-        buffer.pos(matrix4f, (float) minX, (float) minY, (float) minZ).endVertex();
-        buffer.pos(matrix4f, (float) minX, (float) maxY, (float) minZ).endVertex();
-        buffer.pos(matrix4f, (float) maxX, (float) minY, (float) minZ).endVertex();
-        buffer.pos(matrix4f, (float) maxX, (float) maxY, (float) minZ).endVertex();
-        buffer.pos(matrix4f, (float) maxX, (float) minY, (float) maxZ).endVertex();
-        buffer.pos(matrix4f, (float) maxX, (float) maxY, (float) maxZ).endVertex();
-        buffer.pos(matrix4f, (float) minX, (float) minY, (float) maxZ).endVertex();
-        buffer.pos(matrix4f, (float) minX, (float) maxY, (float) maxZ).endVertex();
+        Matrix4f matrix4f = stack.peek().getModel();
+        buffer.begin(GL_LINES, VertexFormats.POSITION);
+        buffer.vertex(matrix4f, (float) minX, (float) minY, (float) minZ).next();
+        buffer.vertex(matrix4f, (float) minX, (float) maxY, (float) minZ).next();
+        buffer.vertex(matrix4f, (float) maxX, (float) minY, (float) minZ).next();
+        buffer.vertex(matrix4f, (float) maxX, (float) maxY, (float) minZ).next();
+        buffer.vertex(matrix4f, (float) maxX, (float) minY, (float) maxZ).next();
+        buffer.vertex(matrix4f, (float) maxX, (float) maxY, (float) maxZ).next();
+        buffer.vertex(matrix4f, (float) minX, (float) minY, (float) maxZ).next();
+        buffer.vertex(matrix4f, (float) minX, (float) maxY, (float) maxZ).next();
         tessellator.draw();
 
         IRenderer.endLines(settings.renderGoalIgnoreDepth.value);
@@ -337,12 +337,12 @@ public final class PathRenderer implements IRenderer, Helper {
 
     private static void renderHorizontalQuad(MatrixStack stack, double minX, double maxX, double minZ, double maxZ, double y) {
         if (y != 0) {
-            Matrix4f matrix4f = stack.getLast().getMatrix();
-            buffer.begin(GL_LINE_LOOP, DefaultVertexFormats.POSITION);
-            buffer.pos(matrix4f, (float) minX, (float) y, (float) minZ).endVertex();
-            buffer.pos(matrix4f, (float) maxX, (float) y, (float) minZ).endVertex();
-            buffer.pos(matrix4f, (float) maxX, (float) y, (float) maxZ).endVertex();
-            buffer.pos(matrix4f, (float) minX, (float) y, (float) maxZ).endVertex();
+            Matrix4f matrix4f = stack.peek().getModel();
+            buffer.begin(GL_LINE_LOOP, VertexFormats.POSITION);
+            buffer.vertex(matrix4f, (float) minX, (float) y, (float) minZ).next();
+            buffer.vertex(matrix4f, (float) maxX, (float) y, (float) minZ).next();
+            buffer.vertex(matrix4f, (float) maxX, (float) y, (float) maxZ).next();
+            buffer.vertex(matrix4f, (float) minX, (float) y, (float) maxZ).next();
             tessellator.draw();
         }
     }

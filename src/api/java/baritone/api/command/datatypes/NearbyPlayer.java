@@ -21,7 +21,7 @@ import baritone.api.IBaritone;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.helpers.TabCompleteHelper;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.text.Text;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -44,7 +44,7 @@ public enum NearbyPlayer implements IDatatypeFor<PlayerEntity> {
     @Override
     public Stream<String> tabComplete(IDatatypeContext ctx) throws CommandException {
         return new TabCompleteHelper()
-                .append(getPlayers(ctx).stream().map(PlayerEntity::getName).map(ITextComponent::getString))
+                .append(getPlayers(ctx).stream().map(PlayerEntity::getName).map(Text::getString))
                 .filterPrefix(ctx.getConsumer().getString())
                 .sortAlphabetically()
                 .stream();

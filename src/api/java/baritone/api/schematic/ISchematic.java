@@ -18,7 +18,7 @@
 package baritone.api.schematic;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 import java.util.List;
 

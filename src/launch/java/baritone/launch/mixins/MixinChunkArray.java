@@ -20,71 +20,72 @@ package baritone.launch.mixins;
 import baritone.utils.accessor.IChunkArray;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
-@Mixin(targets = "net.minecraft.client.multiplayer.ClientChunkProvider$ChunkArray")
+@Mixin(targets = "net.minecraft.client.world.ClientChunkManager$ClientChunkMap")
 public abstract class MixinChunkArray implements IChunkArray {
     @Shadow
-    private AtomicReferenceArray<Chunk> chunks;
+    private AtomicReferenceArray<WorldChunk> chunks;
     @Shadow
-    private int viewDistance;
+    private int radius;
     @Shadow
-    private int sideLength;
+    private int diameter;
     @Shadow
-    private int centerX;
+    private int centerChunkX;
     @Shadow
-    private int centerZ;
+    private int centerChunkZ;
     @Shadow
-    private int loaded;
+    private int loadedChunkCount;
 
     @Shadow
-    protected abstract boolean inView(int x, int z);
+    protected abstract boolean isInRadius(int x, int z);
 
     @Shadow
     protected abstract int getIndex(int x, int z);
 
     @Shadow
-    protected abstract void replace(int index, Chunk chunk);
+    protected abstract void set(int index, WorldChunk chunk);
 
     @Override
     public int centerX() {
-        return centerX;
+        return centerChunkX;
     }
 
     @Override
     public int centerZ() {
-        return centerZ;
+        return centerChunkZ;
     }
 
     @Override
     public int viewDistance() {
-        return viewDistance;
+        return radius;
     }
 
     @Override
-    public AtomicReferenceArray<Chunk> getChunks() {
+    public AtomicReferenceArray<WorldChunk> getChunks() {
         return chunks;
     }
 
     @Override
     public void copyFrom(IChunkArray other) {
-        centerX = other.centerX();
-        centerZ = other.centerZ();
+        centerChunkX = other.centerX();
+        centerChunkZ = other.centerZ();
 
-        AtomicReferenceArray<Chunk> copyingFrom = other.getChunks();
+        AtomicReferenceArray<WorldChunk> copyingFrom = other.getChunks();
         for (int k = 0; k < copyingFrom.length(); ++k) {
-            Chunk chunk = copyingFrom.get(k);
+            WorldChunk chunk = copyingFrom.get(k);
             if (chunk != null) {
                 ChunkPos chunkpos = chunk.getPos();
-                if (inView(chunkpos.x, chunkpos.z)) {
+                if (isInRadius(chunkpos.x, chunkpos.z)) {
                     int index = getIndex(chunkpos.x, chunkpos.z);
                     if (chunks.get(index) != null) {
                         throw new IllegalStateException("Doing this would mutate the client's REAL loaded chunks?!");
                     }
-                    replace(index, chunk);
+                    set(index, chunk);
                 }
             }
         }

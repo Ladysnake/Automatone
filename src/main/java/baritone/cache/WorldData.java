@@ -22,7 +22,7 @@ import baritone.api.cache.ICachedWorld;
 import baritone.api.cache.IContainerMemory;
 import baritone.api.cache.IWaypointCollection;
 import baritone.api.cache.IWorldData;
-import net.minecraft.util.RegistryKey;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.io.IOException;

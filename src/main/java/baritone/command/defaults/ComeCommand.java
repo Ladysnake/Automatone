@@ -38,11 +38,11 @@ public class ComeCommand extends Command {
     @Override
     public void execute(String label, IArgConsumer args) throws CommandException {
         args.requireMax(0);
-        Entity entity = mc.getRenderViewEntity();
+        Entity entity = mc.getCameraEntity();
         if (entity == null) {
             throw new CommandInvalidStateException("render view entity is null");
         }
-        baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(entity.getPosition()));
+        baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(entity.getBlockPos()));
         logDirect("Coming");
     }
 

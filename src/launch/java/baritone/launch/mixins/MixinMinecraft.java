@@ -23,9 +23,9 @@ import baritone.api.event.events.TickEvent;
 import baritone.api.event.events.WorldEvent;
 import baritone.api.event.events.type.EventState;
 import baritone.utils.BaritoneAutoTest;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,7 +41,7 @@ import java.util.function.BiFunction;
  * @author Brady
  * @since 7/31/2018
  */
-@Mixin(Minecraft.class)
+@Mixin(MinecraftClient.class)
 public class MixinMinecraft {
 
     @Shadow
@@ -67,11 +67,11 @@ public class MixinMinecraft {
     }
 
     @Inject(
-            method = "runTick",
+            method = "tick",
             at = @At(
                     value = "FIELD",
                     opcode = Opcodes.GETFIELD,
-                    target = "net/minecraft/client/Minecraft.currentScreen:Lnet/minecraft/client/gui/screen/Screen;",
+                    target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;",
                     ordinal = 5,
                     shift = At.Shift.BY,
                     by = -3
@@ -92,7 +92,7 @@ public class MixinMinecraft {
     }
 
     @Inject(
-            method = "loadWorld(Lnet/minecraft/client/world/ClientWorld;)V",
+            method = "joinWorld",
             at = @At("HEAD")
     )
     private void preLoadWorld(ClientWorld world, CallbackInfo ci) {
@@ -112,7 +112,7 @@ public class MixinMinecraft {
     }
 
     @Inject(
-            method = "loadWorld(Lnet/minecraft/client/world/ClientWorld;)V",
+            method = "joinWorld",
             at = @At("RETURN")
     )
     private void postLoadWorld(ClientWorld world, CallbackInfo ci) {
@@ -128,7 +128,7 @@ public class MixinMinecraft {
     }
 
     @Redirect(
-            method = "runTick",
+            method = "tick",
             at = @At(
                     value = "FIELD",
                     opcode = Opcodes.GETFIELD,

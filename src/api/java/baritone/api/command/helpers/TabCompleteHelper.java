@@ -23,7 +23,7 @@ import baritone.api.event.events.TabCompleteEvent;
 import baritone.api.utils.SettingsUtil;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.manager.ICommandManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 
 import java.util.Comparator;
 import java.util.List;
@@ -207,13 +207,13 @@ public class TabCompleteHelper {
     /**
      * Filter out any element that doesn't start with {@code prefix} and return this object for chaining
      * <p>
-     * Assumes every element in this {@link TabCompleteHelper} is a {@link ResourceLocation}
+     * Assumes every element in this {@link TabCompleteHelper} is a {@link Identifier}
      *
      * @param prefix The prefix to filter for
      * @return This {@link TabCompleteHelper}
      */
     public TabCompleteHelper filterPrefixNamespaced(String prefix) {
-        return filterPrefix(new ResourceLocation(prefix).toString());
+        return filterPrefix(new Identifier(prefix).toString());
     }
 
     /**

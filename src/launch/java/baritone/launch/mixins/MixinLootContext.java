@@ -18,11 +18,11 @@
 package baritone.launch.mixins;
 
 import baritone.api.utils.BlockOptionalMeta;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootPredicateManager;
-import net.minecraft.loot.LootTableManager;
+import net.minecraft.loot.LootManager;
+import net.minecraft.loot.condition.LootConditionManager;
+import net.minecraft.loot.context.LootContext;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.world.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -34,7 +34,7 @@ public class MixinLootContext {
             method = "build",
             at = @At(
                     value = "INVOKE",
-                    target = "net/minecraft/world/server/ServerWorld.getServer()Lnet/minecraft/server/MinecraftServer;"
+                    target = "Lnet/minecraft/server/world/ServerWorld;getServer()Lnet/minecraft/server/MinecraftServer;"
             )
     )
     private MinecraftServer getServer(ServerWorld world) {
@@ -48,27 +48,27 @@ public class MixinLootContext {
             method = "build",
             at = @At(
                     value = "INVOKE",
-                    target = "net/minecraft/server/MinecraftServer.getLootTableManager()Lnet/minecraft/loot/LootTableManager;"
+                    target = "Lnet/minecraft/server/MinecraftServer;getLootManager()Lnet/minecraft/loot/LootManager;"
             )
     )
-    private LootTableManager getLootTableManager(MinecraftServer server) {
+    private LootManager getLootTableManager(MinecraftServer server) {
         if (server == null) {
             return BlockOptionalMeta.getManager();
         }
-        return server.getLootTableManager();
+        return server.getLootManager();
     }
 
     @Redirect(
             method = "build",
             at = @At(
                     value = "INVOKE",
-                    target = "net/minecraft/server/MinecraftServer.func_229736_aP_()Lnet/minecraft/loot/LootPredicateManager;"
+                    target = "Lnet/minecraft/server/MinecraftServer;getPredicateManager()Lnet/minecraft/loot/condition/LootConditionManager;"
             )
     )
-    private LootPredicateManager getLootPredicateManager(MinecraftServer server) {
+    private LootConditionManager getLootPredicateManager(MinecraftServer server) {
         if (server == null) {
             return BlockOptionalMeta.getPredicateManager();
         }
-        return server.func_229736_aP_();
+        return server.getPredicateManager();
     }
 }

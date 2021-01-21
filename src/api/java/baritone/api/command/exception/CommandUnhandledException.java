@@ -19,7 +19,7 @@ package baritone.api.command.exception;
 
 import baritone.api.command.ICommand;
 import baritone.api.command.argument.ICommandArgument;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.Formatting;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class CommandUnhandledException extends RuntimeException implements IComm
     public void handle(ICommand command, List<ICommandArgument> args) {
         HELPER.logDirect("An unhandled exception occurred. " +
                 "The error is in your game's log, please report this at https://github.com/cabaletta/baritone/issues",
-                TextFormatting.RED);
+                Formatting.RED);
 
         this.printStackTrace();
     }

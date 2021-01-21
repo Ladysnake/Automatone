@@ -33,7 +33,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.fluid.WaterFluid;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -68,8 +68,8 @@ public class MovementParkour extends Movement {
             return;
         }
 
-        int xDiff = dir.getXOffset();
-        int zDiff = dir.getZOffset();
+        int xDiff = dir.getOffsetX();
+        int zDiff = dir.getOffsetZ();
         if (!MovementHelper.fullyPassable(context, x + xDiff, y, z + zDiff)) {
             // most common case at the top -- the adjacent block isn't air
             return;
@@ -115,7 +115,7 @@ public class MovementParkour extends Movement {
                 return;
             }
             BlockState destInto = context.bsi.get0(destX, y, destZ);
-            if (!MovementHelper.fullyPassable(context.bsi.access, context.bsi.isPassableBlockPos.setPos(destX, y, destZ), destInto)) {
+            if (!MovementHelper.fullyPassable(context.bsi.access, context.bsi.isPassableBlockPos.set(destX, y, destZ), destInto)) {
                 if (i <= 3 && context.allowParkourAscend && context.canSprint && MovementHelper.canWalkOn(context.bsi, destX, y, destZ, destInto) && checkOvershootSafety(context.bsi, destX + xDiff, y + 1, destZ + zDiff)) {
                     res.x = destX;
                     res.y = y + 1;
@@ -160,9 +160,9 @@ public class MovementParkour extends Movement {
             return;
         }
         for (int i = 0; i < 5; i++) {
-            int againstX = destX + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getXOffset();
-            int againstY = y - 1 + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getYOffset();
-            int againstZ = destZ + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getZOffset();
+            int againstX = destX + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getOffsetX();
+            int againstY = y - 1 + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getOffsetY();
+            int againstZ = destZ + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getOffsetZ();
             if (againstX == x + xDiff * 3 && againstZ == z + zDiff * 3) { // we can't turn around that fast
                 continue;
             }
@@ -246,19 +246,19 @@ public class MovementParkour extends Movement {
                 // but i did it anyway
                 return state.setStatus(MovementStatus.SUCCESS);
             }
-            if (ctx.player().getPositionVec().y - ctx.playerFeet().getY() < 0.094) { // lilypads
+            if (ctx.player().getY() - ctx.playerFeet().getY() < 0.094) { // lilypads
                 state.setStatus(MovementStatus.SUCCESS);
             }
         } else if (!ctx.playerFeet().equals(src)) {
-            if (ctx.playerFeet().equals(src.offset(direction)) || ctx.player().getPositionVec().y - src.y > 0.0001) {
+            if (ctx.playerFeet().equals(src.offset(direction)) || ctx.player().getY() - src.y > 0.0001) {
                 if (!MovementHelper.canWalkOn(ctx, dest.down()) && !ctx.player().isOnGround() && MovementHelper.attemptToPlaceABlock(state, baritone, dest.down(), true, false) == PlaceResult.READY_TO_PLACE) {
                     // go in the opposite order to check DOWN before all horizontals -- down is preferable because you don't have to look to the side while in midair, which could mess up the trajectory
                     state.setInput(Input.CLICK_RIGHT, true);
                 }
                 // prevent jumping too late by checking for ascend
                 if (dist == 3 && !ascend) { // this is a 2 block gap, dest = src + direction * 3
-                    double xDiff = (src.x + 0.5) - ctx.player().getPositionVec().x;
-                    double zDiff = (src.z + 0.5) - ctx.player().getPositionVec().z;
+                    double xDiff = (src.x + 0.5) - ctx.player().getX();
+                    double zDiff = (src.z + 0.5) - ctx.player().getZ();
                     double distFromStart = Math.max(Math.abs(xDiff), Math.abs(zDiff));
                     if (distFromStart < 0.7) {
                         return state;

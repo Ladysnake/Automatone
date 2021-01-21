@@ -1,0 +1,19 @@
+{
+    "schemaVersion": 1,
+    "id": "baritoe",
+    "version": "1.6.1",
+    "name": "Baritone",
+    "description": "A Minecraft pathfinder bot.",
+    "authors": [
+      "leijurv", "Brady"
+    ],
+    "contact": {
+      "sources": "https://github.com/cabaletta/baritone",
+      "issues": "https://github.com/cabaletta/baritone/issues"
+    },
+    "license": "LGPL-3.0-only",
+    "environment": "client",
+    "mixins": [
+      "mixins.baritone.json"
+    ]
+  }

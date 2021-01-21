@@ -17,10 +17,10 @@
 
 package baritone.api.utils;
 
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.util.math.Vec3i;
 
 import javax.annotation.Nonnull;
 
@@ -149,7 +149,7 @@ public final class BetterBlockPos extends BlockPos {
 
     @Override
     public BetterBlockPos offset(Direction dir) {
-        Vector3i vec = dir.getDirectionVec();
+        Vec3i vec = dir.getVector();
         return new BetterBlockPos(x + vec.getX(), y + vec.getY(), z + vec.getZ());
     }
 
@@ -158,7 +158,7 @@ public final class BetterBlockPos extends BlockPos {
         if (dist == 0) {
             return this;
         }
-        Vector3i vec = dir.getDirectionVec();
+        Vec3i vec = dir.getVector();
         return new BetterBlockPos(x + vec.getX() * dist, y + vec.getY() * dist, z + vec.getZ() * dist);
     }
 

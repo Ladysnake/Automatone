@@ -24,7 +24,7 @@ import baritone.api.utils.IPlayerContext;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
 
 import java.io.IOException;
@@ -55,7 +55,7 @@ public class ContainerMemory implements IContainerMemory {
     }
 
     private void read(byte[] bytes) throws IOException {
-        PacketBuffer in = new PacketBuffer(Unpooled.wrappedBuffer(bytes));
+        PacketByteBuf in = new PacketByteBuf(Unpooled.wrappedBuffer(bytes));
         int chests = in.readInt();
         for (int i = 0; i < chests; i++) {
             int x = in.readInt();
@@ -77,12 +77,12 @@ public class ContainerMemory implements IContainerMemory {
             return;
         }
         ByteBuf buf = Unpooled.buffer(0, Integer.MAX_VALUE);
-        PacketBuffer out = new PacketBuffer(buf);
+        PacketByteBuf out = new PacketByteBuf(buf);
         out.writeInt(inventories.size());
         for (Map.Entry<BlockPos, RememberedInventory> entry : inventories.entrySet()) {
-            out = new PacketBuffer(out.writeInt(entry.getKey().getX()));
-            out = new PacketBuffer(out.writeInt(entry.getKey().getY()));
-            out = new PacketBuffer(out.writeInt(entry.getKey().getZ()));
+            out = new PacketByteBuf(out.writeInt(entry.getKey().getX()));
+            out = new PacketByteBuf(out.writeInt(entry.getKey().getY()));
+            out = new PacketByteBuf(out.writeInt(entry.getKey().getZ()));
             out = writeItemStacks(entry.getValue().getContents(), out);
         }
         Files.write(saveTo, out.array());
@@ -110,11 +110,11 @@ public class ContainerMemory implements IContainerMemory {
     }
 
     public static List<ItemStack> readItemStacks(byte[] bytes) throws IOException {
-        PacketBuffer in = new PacketBuffer(Unpooled.wrappedBuffer(bytes));
+        PacketByteBuf in = new PacketByteBuf(Unpooled.wrappedBuffer(bytes));
         return readItemStacks(in);
     }
 
-    public static List<ItemStack> readItemStacks(PacketBuffer in) throws IOException {
+    public static List<ItemStack> readItemStacks(PacketByteBuf in) throws IOException {
         int count = in.readInt();
         List<ItemStack> result = new ArrayList<>();
         for (int i = 0; i < count; i++) {
@@ -125,14 +125,14 @@ public class ContainerMemory implements IContainerMemory {
 
     public static byte[] writeItemStacks(List<ItemStack> write) {
         ByteBuf buf = Unpooled.buffer(0, Integer.MAX_VALUE);
-        PacketBuffer out = new PacketBuffer(buf);
+        PacketByteBuf out = new PacketByteBuf(buf);
         out = writeItemStacks(write, out);
         return out.array();
     }
 
-    public static PacketBuffer writeItemStacks(List<ItemStack> write, PacketBuffer out2) {
-        PacketBuffer out = out2; // avoid reassigning an argument LOL
-        out = new PacketBuffer(out.writeInt(write.size()));
+    public static PacketByteBuf writeItemStacks(List<ItemStack> write, PacketByteBuf out2) {
+        PacketByteBuf out = out2; // avoid reassigning an argument LOL
+        out = new PacketByteBuf(out.writeInt(write.size()));
         for (ItemStack stack : write) {
             out = out.writeItemStack(stack);
         }
@@ -177,7 +177,7 @@ public class ContainerMemory implements IContainerMemory {
 
         public void updateFromOpenWindow(IPlayerContext ctx) {
             items.clear();
-            items.addAll(ctx.player().openContainer.getInventory().subList(0, size));
+            items.addAll(ctx.player().playerScreenHandler.getStacks().subList(0, size));
         }
     }
 }

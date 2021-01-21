@@ -5,8 +5,8 @@ import baritone.api.event.events.RenderEvent;
 import baritone.api.event.listener.AbstractGameEventListener;
 import baritone.api.selection.ISelection;
 import baritone.utils.IRenderer;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.Box;
 
 public class SelectionRenderer implements IRenderer, AbstractGameEventListener {
 
@@ -38,13 +38,13 @@ public class SelectionRenderer implements IRenderer, AbstractGameEventListener {
             IRenderer.glColor(settings.colorSelectionPos1.value, opacity);
 
             for (ISelection selection : selections) {
-                IRenderer.drawAABB(stack, new AxisAlignedBB(selection.pos1(), selection.pos1().add(1, 1, 1)));
+                IRenderer.drawAABB(stack, new Box(selection.pos1(), selection.pos1().add(1, 1, 1)));
             }
 
             IRenderer.glColor(settings.colorSelectionPos2.value, opacity);
 
             for (ISelection selection : selections) {
-                IRenderer.drawAABB(stack, new AxisAlignedBB(selection.pos2(), selection.pos2().add(1, 1, 1)));
+                IRenderer.drawAABB(stack, new Box(selection.pos2(), selection.pos2().add(1, 1, 1)));
             }
         }
 

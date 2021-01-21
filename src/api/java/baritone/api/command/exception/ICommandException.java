@@ -19,7 +19,7 @@ package baritone.api.command.exception;
 
 import baritone.api.command.ICommand;
 import baritone.api.command.argument.ICommandArgument;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.Formatting;
 
 import java.util.List;
 
@@ -50,6 +50,6 @@ public interface ICommandException {
      * @param args    The arguments the command was called with.
      */
     default void handle(ICommand command, List<ICommandArgument> args) {
-        HELPER.logDirect(this.getMessage(), TextFormatting.RED);
+        HELPER.logDirect(this.getMessage(), Formatting.RED);
     }
 }

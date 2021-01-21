@@ -14,42 +14,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Baritone.  If not, see <https://www.gnu.org/licenses/>.
  */
+import net.fabricmc.loom.LoomGradlePlugin
 
 group 'baritone'
 version '1.6.2'
 
 buildscript {
     repositories {
-        maven {
-            name = 'forge'
-            url = 'http://files.minecraftforge.net/maven'
-        }
-        maven {
-            name = 'impactdevelopment-repo'
-            url = 'https://impactdevelopment.github.io/maven/'
-        }
-        maven {
-            url = 'https://www.dogforce-games.com/maven/'
-        }
         jcenter()
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        gradlePluginPortal()
     }
-
     dependencies {
-        classpath group: 'com.github.ImpactDevelopment', name: 'ForgeGradle', version: '3.0.115'
-        classpath group: 'com.github.ImpactDevelopment', name: 'MixinGradle', version: '0.6.2'
+        classpath "net.fabricmc:fabric-loom:0.5-SNAPSHOT"
     }
 }
 
 import baritone.gradle.task.CreateDistTask
 import baritone.gradle.task.ProguardTask
 
-import net.minecraftforge.gradle.userdev.tasks.GenerateSRG
-import net.minecraftforge.gradle.userdev.tasks.RenameJarInPlace
-import org.apache.tools.ant.taskdefs.condition.Os
-
 apply plugin: 'java'
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin'
+apply plugin: LoomGradlePlugin
 
 sourceCompatibility = targetCompatibility = '1.8'
 compileJava {
@@ -88,50 +76,7 @@ task sourceJar(type: Jar, dependsOn: classes) {
 }
 
 minecraft {
-    mappings channel: 'snapshot', version: '20201028-1.16.3'
-
-    if (getProject().hasProperty("baritone.forge_build")) {
-        reobfMappings 'searge'
-    } else {
-        reobfMappings 'notch'
-    }
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-            source sourceSets.launch
-
-            main 'baritone.launch.LaunchTesting'
-
-            environment 'assetIndex', '{asset_index}'
-            environment 'assetDirectory', downloadAssets.output
-            environment 'nativesDirectory', extractNatives.output
-
-            environment 'tweakClass', 'baritone.launch.BaritoneTweaker'
-
-            if (Os.isFamily(Os.FAMILY_MAC)) {
-                jvmArgs "-XstartOnFirstThread"
-            }
-        }
-
-        autoTest {
-            workingDirectory project.file('autotest')
-            source sourceSets.launch
-
-            main 'baritone.launch.LaunchTesting'
-
-            environment 'assetIndex', '{asset_index}'
-            environment 'assetDirectory', downloadAssets.output
-            environment 'nativesDirectory', extractNatives.output
-
-            environment 'tweakClass', 'baritone.launch.BaritoneTweaker'
-            environment 'BARITONE_AUTO_TEST', 'true'
-
-            if (Os.isFamily(Os.FAMILY_MAC)) {
-                jvmArgs "-XstartOnFirstThread"
-            }
-        }
-    }
+    refmapName = 'mixins.baritone.refmap.json'
 }
 
 repositories {
@@ -139,8 +84,9 @@ repositories {
 
     maven {
         name = 'spongepowered-repo'
-        url = 'http://repo.spongepowered.org/maven/'
+        url = 'https://repo.spongepowered.org/maven/'
     }
+
     maven {
         name = 'impactdevelopment-repo'
         url = 'https://impactdevelopment.github.io/maven/'
@@ -151,28 +97,31 @@ repositories {
 }
 
 dependencies {
-    minecraft 'com.github.ImpactDevelopment:Vanilla:1.16.4'
-
-    runtime launchCompile('net.minecraft:launchwrapper:1.12') {
-        exclude module: 'lwjgl'
-    }
-    runtime launchCompile('org.ow2.asm:asm-debug-all:5.2')
-    runtime launchCompile('com.github.ImpactDevelopment:SimpleTweaker:1.2')
-    runtime launchCompile('org.spongepowered:mixin:0.8.+') {
-        // Mixin includes a lot of dependencies that are too up-to-date
-        exclude module: 'launchwrapper'
-        exclude module: 'guava'
-        exclude module: 'gson'
-        exclude module: 'commons-io'
-        exclude module: 'log4j-core'
-    }
+    minecraft "com.mojang:minecraft:1.16.4"
+    mappings "net.fabricmc:yarn:1.16.4+build.9:v2"
+    modImplementation "net.fabricmc:fabric-loader:0.11.1"
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
     testImplementation 'junit:junit:4.12'
+
+    compile 'com.github.ImpactDevelopment:SimpleTweaker:1.2'
+
+    // launchwrapper + dependencies
+    compile ('net.minecraft:launchwrapper:1.12') {
+        transitive = false
+    }
+    compile 'net.sf.jopt-simple:jopt-simple:5.0.3'
 }
 
-mixin {
-    defaultObfuscationEnv searge
-    add sourceSets.launch, 'mixins.baritone.refmap.json'
+processResources {
+    inputs.property "version", project.version
+    from(sourceSets.launch.resources.srcDirs) {
+        include "fabric.mod.json"
+        expand "version": project.version
+    }
+    from(sourceSets.launch.resources.srcDirs) {
+        exclude "fabric.mod.json"
+    }
 }
 
 javadoc {
@@ -197,16 +146,15 @@ jar {
     manifest {
         attributes(
                 'MixinConfigs': 'mixins.baritone.json',
-                "MixinConnector": "baritone.launch.BaritoneMixinConnector",
 
                 'Implementation-Title': 'Baritone',
-                'Implementation-Version': version,
+                'Implementation-Version': version
         )
     }
 }
 
 // skidded from ProguardTask
-File getClientJar() {
+/*File getClientJar() {
     return project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().findByName("launch").getRuntimeClasspath().getFiles()
             .stream()
             .filter({f -> f.toString().endsWith("client-extra.jar")})
@@ -244,4 +192,4 @@ task proguard(type: ProguardTask, dependsOn: createSrgMc) { // TODO: dont need t
 
 task createDist(type: CreateDistTask, dependsOn: proguard)
 
-build.finalizedBy(createDist)
+build.finalizedBy(createDist)*/

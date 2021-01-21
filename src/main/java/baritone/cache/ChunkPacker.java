@@ -21,13 +21,14 @@ import baritone.api.utils.BlockUtils;
 import baritone.pathing.movement.MovementHelper;
 import baritone.utils.pathing.PathingBlockType;
 import net.minecraft.block.*;
-import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.palette.PalettedContainer;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.PalettedContainer;
+import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.*;
 
@@ -41,13 +42,13 @@ public final class ChunkPacker {
 
     private ChunkPacker() {}
 
-    public static CachedChunk pack(Chunk chunk) {
+    public static CachedChunk pack(WorldChunk chunk) {
         //long start = System.nanoTime() / 1000000L;
 
         Map<String, List<BlockPos>> specialBlocks = new HashMap<>();
         BitSet bitSet = new BitSet(CachedChunk.SIZE);
         try {
-            ChunkSection[] chunkInternalStorageArray = chunk.getSections();
+            ChunkSection[] chunkInternalStorageArray = chunk.getSectionArray();
             for (int y0 = 0; y0 < 16; y0++) {
                 ChunkSection extendedblockstorage = chunkInternalStorageArray[y0];
                 if (extendedblockstorage == null) {
@@ -61,7 +62,7 @@ public final class ChunkPacker {
                     // since a bitset is initialized to all zero, and air is saved as zeros
                     continue;
                 }
-                PalettedContainer<BlockState> bsc = extendedblockstorage.getData();
+                PalettedContainer<BlockState> bsc = extendedblockstorage.getContainer();
                 int yReal = y0 << 4;
                 // the mapping of BlockStateContainer.getIndex from xyz to index is y << 8 | z << 4 | x;
                 // for better cache locality, iterate in that order
@@ -108,7 +109,7 @@ public final class ChunkPacker {
         return new CachedChunk(chunk.getPos().x, chunk.getPos().z, bitSet, blocks, specialBlocks, System.currentTimeMillis());
     }
 
-    private static PathingBlockType getPathingBlockType(BlockState state, Chunk chunk, int x, int y, int z) {
+    private static PathingBlockType getPathingBlockType(BlockState state, WorldChunk chunk, int x, int y, int z) {
         Block block = state.getBlock();
         if (MovementHelper.isWater(state)) {
             // only water source blocks are plausibly usable, flowing water should be avoid
@@ -125,7 +126,7 @@ public final class ChunkPacker {
                 return PathingBlockType.AVOID;
             }
             if (x == 0 || x == 15 || z == 0 || z == 15) {
-                Vector3d flow = state.getFluidState().getFlow(chunk.getWorld(), new BlockPos(x + chunk.getPos().x << 4, y, z + chunk.getPos().z << 4));
+                Vec3d flow = state.getFluidState().getVelocity(chunk.getWorld(), new BlockPos(x + chunk.getPos().x << 4, y, z + chunk.getPos().z << 4));
                 if (flow.x != 0.0 || flow.z != 0.0) {
                     return PathingBlockType.WATER;
                 }
@@ -141,7 +142,7 @@ public final class ChunkPacker {
         // however, this failed in the nether when you were near a nether fortress
         // because fences check their adjacent blocks in the world for their fence connection status to determine AABB shape
         // this caused a nullpointerexception when we saved chunks on unload, because they were unable to check their neighbors
-        if (block instanceof AirBlock || block instanceof TallGrassBlock || block instanceof DoublePlantBlock || block instanceof FlowerBlock) {
+        if (block instanceof AirBlock || block instanceof FernBlock || block instanceof TallPlantBlock || block instanceof FlowerBlock) {
             return PathingBlockType.AIR;
         }
 
@@ -161,10 +162,10 @@ public final class ChunkPacker {
                 if (dimension == World.OVERWORLD) {
                     return Blocks.STONE.getDefaultState();
                 }
-                if (dimension == World.THE_NETHER) {
+                if (dimension == World.NETHER) {
                     return Blocks.NETHERRACK.getDefaultState();
                 }
-                if (dimension == World.THE_END) {
+                if (dimension == World.END) {
                     return Blocks.END_STONE.getDefaultState();
                 }
             default:

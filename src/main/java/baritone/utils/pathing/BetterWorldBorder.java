@@ -31,10 +31,10 @@ public class BetterWorldBorder {
     private final double maxZ;
 
     public BetterWorldBorder(WorldBorder border) {
-        this.minX = border.minX();
-        this.maxX = border.maxX();
-        this.minZ = border.minZ();
-        this.maxZ = border.maxZ();
+        this.minX = border.getBoundWest();
+        this.maxX = border.getBoundEast();
+        this.minZ = border.getBoundNorth();
+        this.maxZ = border.getBoundSouth();
     }
 
     public boolean entirelyContains(int x, int z) {

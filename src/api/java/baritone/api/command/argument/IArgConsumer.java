@@ -27,7 +27,7 @@ import baritone.api.command.datatypes.IDatatypePost;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidTypeException;
 import baritone.api.command.exception.CommandNotEnoughArgumentsException;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 import java.util.Deque;
 import java.util.LinkedList;

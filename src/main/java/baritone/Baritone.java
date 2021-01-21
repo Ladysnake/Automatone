@@ -31,7 +31,7 @@ import baritone.selection.SelectionManager;
 import baritone.utils.*;
 import baritone.command.manager.CommandManager;
 import baritone.utils.player.PrimaryPlayerContext;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,7 +53,7 @@ public class Baritone implements IBaritone {
     static {
         threadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
 
-        dir = new File(Minecraft.getInstance().gameDir, "baritone");
+        dir = new File(MinecraftClient.getInstance().runDirectory, "baritone");
         if (!Files.exists(dir.toPath())) {
             try {
                 Files.createDirectories(dir.toPath());
@@ -218,7 +218,7 @@ public class Baritone implements IBaritone {
         new Thread(() -> {
             try {
                 Thread.sleep(100);
-                Helper.mc.execute(() -> Helper.mc.displayGuiScreen(new GuiClick()));
+                Helper.mc.execute(() -> Helper.mc.openScreen(new GuiClick()));
             } catch (Exception ignored) {}
         }).start();
     }

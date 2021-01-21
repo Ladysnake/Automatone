@@ -18,9 +18,8 @@
 package baritone.utils;
 
 import baritone.api.utils.input.Input;
-import net.minecraft.util.MovementInput;
 
-public class PlayerMovementInput extends MovementInput {
+public class PlayerMovementInput extends net.minecraft.client.input.Input {
 
     private final InputOverrideHandler handler;
 
@@ -29,31 +28,31 @@ public class PlayerMovementInput extends MovementInput {
     }
 
     @Override
-    public void tickMovement(boolean p_225607_1_) {
-        this.moveStrafe = 0.0F;
-        this.moveForward = 0.0F;
+    public void tick(boolean p_225607_1_) {
+        this.movementSideways = 0.0F;
+        this.movementForward = 0.0F;
 
-        this.jump = handler.isInputForcedDown(Input.JUMP); // oppa gangnam style
+        this.jumping = handler.isInputForcedDown(Input.JUMP); // oppa gangnam style
 
-        if (this.forwardKeyDown = handler.isInputForcedDown(Input.MOVE_FORWARD)) {
-            this.moveForward++;
+        if (this.pressingForward = handler.isInputForcedDown(Input.MOVE_FORWARD)) {
+            this.movementForward++;
         }
 
-        if (this.backKeyDown = handler.isInputForcedDown(Input.MOVE_BACK)) {
-            this.moveForward--;
+        if (this.pressingBack = handler.isInputForcedDown(Input.MOVE_BACK)) {
+            this.movementForward--;
         }
 
-        if (this.leftKeyDown = handler.isInputForcedDown(Input.MOVE_LEFT)) {
-            this.moveStrafe++;
+        if (this.pressingLeft = handler.isInputForcedDown(Input.MOVE_LEFT)) {
+            this.movementSideways++;
         }
 
-        if (this.rightKeyDown = handler.isInputForcedDown(Input.MOVE_RIGHT)) {
-            this.moveStrafe--;
+        if (this.pressingRight = handler.isInputForcedDown(Input.MOVE_RIGHT)) {
+            this.movementSideways--;
         }
 
         if (this.sneaking = handler.isInputForcedDown(Input.SNEAK)) {
-            this.moveStrafe *= 0.3D;
-            this.moveForward *= 0.3D;
+            this.movementSideways *= 0.3D;
+            this.movementForward *= 0.3D;
         }
     }
 }

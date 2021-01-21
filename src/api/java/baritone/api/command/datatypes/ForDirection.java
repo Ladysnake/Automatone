@@ -19,7 +19,7 @@ package baritone.api.command.datatypes;
 
 import baritone.api.command.helpers.TabCompleteHelper;
 import baritone.api.command.exception.CommandException;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 
 import java.util.Locale;
 import java.util.stream.Stream;
@@ -36,7 +36,7 @@ public enum ForDirection implements IDatatypeFor<Direction> {
     public Stream<String> tabComplete(IDatatypeContext ctx) throws CommandException {
         return new TabCompleteHelper()
                 .append(Stream.of(Direction.values())
-                        .map(Direction::getName2).map(String::toLowerCase))
+                        .map(Direction::getName).map(String::toLowerCase))
                 .filterPrefix(ctx.getConsumer().getString())
                 .stream();
     }

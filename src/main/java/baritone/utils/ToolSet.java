@@ -20,12 +20,12 @@ package baritone.utils;
 import baritone.Baritone;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
-import net.minecraft.potion.Effects;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -85,7 +85,7 @@ public class ToolSet {
     }
 
     public boolean hasSilkTouch(ItemStack stack) {
-        return EnchantmentHelper.getEnchantmentLevel(Enchantments.SILK_TOUCH, stack) > 0;
+        return EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, stack) > 0;
     }
 
     /**
@@ -107,7 +107,7 @@ public class ToolSet {
         possible, this lets us make pathing depend on the actual tool to be used (if auto tool is disabled)
         */
         if (Baritone.settings().disableAutoTool.value && pathingCalculation) {
-            return player.inventory.currentItem;
+            return player.inventory.selectedSlot;
         }
 
         int best = 0;
@@ -116,7 +116,7 @@ public class ToolSet {
         boolean bestSilkTouch = false;
         BlockState blockState = b.getDefaultState();
         for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = player.inventory.getStackInSlot(i);
+            ItemStack itemStack = player.inventory.getStack(i);
             double speed = calculateSpeedVsBlock(itemStack, blockState);
             boolean silkTouch = hasSilkTouch(itemStack);
             if (speed > highestSpeed) {
@@ -145,7 +145,7 @@ public class ToolSet {
      * @return A double containing the destruction ticks with the best tool
      */
     private double getBestDestructionTime(Block b) {
-        ItemStack stack = player.inventory.getStackInSlot(getBestSlot(b, false, true));
+        ItemStack stack = player.inventory.getStack(getBestSlot(b, false, true));
         return calculateSpeedVsBlock(stack, b.getDefaultState()) * avoidanceMultiplier(b);
     }
 
@@ -162,21 +162,21 @@ public class ToolSet {
      * @return how long it would take in ticks
      */
     public static double calculateSpeedVsBlock(ItemStack item, BlockState state) {
-        float hardness = state.getBlockHardness(null, null);
+        float hardness = state.getHardness(null, null);
         if (hardness < 0) {
             return -1;
         }
 
-        float speed = item.getDestroySpeed(state);
+        float speed = item.getMiningSpeedMultiplier(state);
         if (speed > 1) {
-            int effLevel = EnchantmentHelper.getEnchantmentLevel(Enchantments.EFFICIENCY, item);
+            int effLevel = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, item);
             if (effLevel > 0 && !item.isEmpty()) {
                 speed += effLevel * effLevel + 1;
             }
         }
 
         speed /= hardness;
-        if (!state.getRequiresTool() || (!item.isEmpty() && item.canHarvestBlock(state))) {
+        if (!state.isToolRequired() || (!item.isEmpty() && item.isEffectiveOn(state))) {
             return speed / 30;
         } else {
             return speed / 100;
@@ -190,11 +190,11 @@ public class ToolSet {
      */
     private double potionAmplifier() {
         double speed = 1;
-        if (player.isPotionActive(Effects.HASTE)) {
-            speed *= 1 + (player.getActivePotionEffect(Effects.HASTE).getAmplifier() + 1) * 0.2;
+        if (player.hasStatusEffect(StatusEffects.HASTE)) {
+            speed *= 1 + (player.getStatusEffect(StatusEffects.HASTE).getAmplifier() + 1) * 0.2;
         }
-        if (player.isPotionActive(Effects.MINING_FATIGUE)) {
-            switch (player.getActivePotionEffect(Effects.MINING_FATIGUE).getAmplifier()) {
+        if (player.hasStatusEffect(StatusEffects.MINING_FATIGUE)) {
+            switch (player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) {
                 case 0:
                     speed *= 0.3;
                     break;

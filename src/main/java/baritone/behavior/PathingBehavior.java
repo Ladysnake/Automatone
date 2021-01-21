@@ -152,7 +152,7 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
                     queuePathEvent(PathEvent.AT_GOAL);
                     next = null;
                     if (Baritone.settings().disconnectOnArrival.value) {
-                        ctx.world().sendQuittingDisconnectingPacket();
+                        ctx.world().disconnect();
                     }
                     return;
                 }
@@ -233,11 +233,11 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
         if (current != null) {
             switch (event.getState()) {
                 case PRE:
-                    lastAutoJump = mc.gameSettings.autoJump;
-                    mc.gameSettings.autoJump = false;
+                    lastAutoJump = mc.options.autoJump;
+                    mc.options.autoJump = false;
                     break;
                 case POST:
-                    mc.gameSettings.autoJump = lastAutoJump;
+                    mc.options.autoJump = lastAutoJump;
                     break;
                 default:
                     break;
@@ -381,8 +381,8 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
         BetterBlockPos feet = ctx.playerFeet();
         if (!MovementHelper.canWalkOn(ctx, feet.down())) {
             if (ctx.player().isOnGround()) {
-                double playerX = ctx.player().getPositionVec().x;
-                double playerZ = ctx.player().getPositionVec().z;
+                double playerX = ctx.player().getX();
+                double playerZ = ctx.player().getZ();
                 ArrayList<BetterBlockPos> closest = new ArrayList<>();
                 for (int dx = -1; dx <= 1; dx++) {
                     for (int dz = -1; dz <= 1; dz++) {

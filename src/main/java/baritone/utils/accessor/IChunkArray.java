@@ -17,14 +17,14 @@
 
 package baritone.utils.accessor;
 
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 public interface IChunkArray {
     void copyFrom(IChunkArray other);
 
-    AtomicReferenceArray<Chunk> getChunks();
+    AtomicReferenceArray<WorldChunk> getChunks();
 
     int centerX();
 

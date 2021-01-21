@@ -18,10 +18,10 @@
 package baritone.utils;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.BlockView;
 
 import javax.annotation.Nullable;
 
@@ -30,7 +30,7 @@ import javax.annotation.Nullable;
  * @since 11/5/2019
  */
 @SuppressWarnings("NullableProblems")
-public final class BlockStateInterfaceAccessWrapper implements IBlockReader {
+public final class BlockStateInterfaceAccessWrapper implements BlockView {
 
     private final BlockStateInterface bsi;
 
@@ -40,7 +40,7 @@ public final class BlockStateInterfaceAccessWrapper implements IBlockReader {
 
     @Nullable
     @Override
-    public TileEntity getTileEntity(BlockPos pos) {
+    public BlockEntity getBlockEntity(BlockPos pos) {
         return null;
     }
 

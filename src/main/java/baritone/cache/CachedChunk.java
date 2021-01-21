@@ -24,8 +24,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
@@ -202,7 +202,7 @@ public final class CachedChunk {
         }
 
         if (type == PathingBlockType.SOLID) {
-            if (y == 127 && dimension == World.THE_NETHER) {
+            if (y == 127 && dimension == World.NETHER) {
                 // nether roof is always unbreakable
                 return Blocks.BEDROCK.getDefaultState();
             }

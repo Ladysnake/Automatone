@@ -20,10 +20,10 @@ package baritone.api.utils;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FireBlock;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 
 /**
@@ -42,22 +42,22 @@ public final class VecUtils {
      * @return The center of the block's bounding box
      * @see #getBlockPosCenter(BlockPos)
      */
-    public static Vector3d calculateBlockCenter(World world, BlockPos pos) {
+    public static Vec3d calculateBlockCenter(World world, BlockPos pos) {
         BlockState b = world.getBlockState(pos);
         VoxelShape shape = b.getCollisionShape(world, pos);
         if (shape.isEmpty()) {
             return getBlockPosCenter(pos);
         }
-        double xDiff = (shape.getStart(Direction.Axis.X) + shape.getEnd(Direction.Axis.X)) / 2;
-        double yDiff = (shape.getStart(Direction.Axis.Y) + shape.getEnd(Direction.Axis.Y)) / 2;
-        double zDiff = (shape.getStart(Direction.Axis.Z) + shape.getEnd(Direction.Axis.Z)) / 2;
+        double xDiff = (shape.getMin(Direction.Axis.X) + shape.getMax(Direction.Axis.X)) / 2;
+        double yDiff = (shape.getMin(Direction.Axis.Y) + shape.getMax(Direction.Axis.Y)) / 2;
+        double zDiff = (shape.getMin(Direction.Axis.Z) + shape.getMax(Direction.Axis.Z)) / 2;
         if (Double.isNaN(xDiff) || Double.isNaN(yDiff) || Double.isNaN(zDiff)) {
             throw new IllegalStateException(b + " " + pos + " " + shape);
         }
         if (b.getBlock() instanceof FireBlock) {//look at bottom of fire when putting it out
             yDiff = 0;
         }
-        return new Vector3d(
+        return new Vec3d(
                 pos.getX() + xDiff,
                 pos.getY() + yDiff,
                 pos.getZ() + zDiff
@@ -74,8 +74,8 @@ public final class VecUtils {
      * @return The assumed center of the position
      * @see #calculateBlockCenter(World, BlockPos)
      */
-    public static Vector3d getBlockPosCenter(BlockPos pos) {
-        return new Vector3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+    public static Vec3d getBlockPosCenter(BlockPos pos) {
+        return new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }
 
     /**
@@ -105,7 +105,7 @@ public final class VecUtils {
      * @see #getBlockPosCenter(BlockPos)
      */
     public static double entityDistanceToCenter(Entity entity, BlockPos pos) {
-        return distanceToCenter(pos, entity.getPositionVec().x, entity.getPositionVec().y, entity.getPositionVec().z);
+        return distanceToCenter(pos, entity.getX(), entity.getY(), entity.getZ());
     }
 
     /**
@@ -118,6 +118,6 @@ public final class VecUtils {
      * @see #getBlockPosCenter(BlockPos)
      */
     public static double entityFlatDistanceToCenter(Entity entity, BlockPos pos) {
-        return distanceToCenter(pos, entity.getPositionVec().x, pos.getY() + 0.5, entity.getPositionVec().z);
+        return distanceToCenter(pos, entity.getX(), pos.getY() + 0.5, entity.getZ());
     }
 }

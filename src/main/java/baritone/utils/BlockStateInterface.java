@@ -25,14 +25,15 @@ import baritone.utils.accessor.IClientChunkProvider;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientChunkProvider;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientChunkManager;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.WorldChunk;
 
 /**
  * Wraps get for chuck caching capability
@@ -41,13 +42,13 @@ import net.minecraft.world.chunk.ChunkStatus;
  */
 public class BlockStateInterface {
 
-    private final ClientChunkProvider provider;
+    private final ClientChunkManager provider;
     private final WorldData worldData;
-    protected final IBlockReader world;
+    protected final BlockView world;
     public final BlockPos.Mutable isPassableBlockPos;
-    public final IBlockReader access;
+    public final BlockView access;
 
-    private Chunk prev = null;
+    private WorldChunk prev = null;
     private CachedRegion prevCached = null;
 
     private final boolean useTheRealWorld;
@@ -66,12 +67,12 @@ public class BlockStateInterface {
         this.world = world;
         this.worldData = worldData;
         if (copyLoadedChunks) {
-            this.provider = ((IClientChunkProvider) world.getChunkProvider()).createThreadSafeCopy();
+            this.provider = ((IClientChunkProvider) world.getChunkManager()).createThreadSafeCopy();
         } else {
-            this.provider = (ClientChunkProvider) world.getChunkProvider();
+            this.provider = (ClientChunkManager) world.getChunkManager();
         }
         this.useTheRealWorld = !Baritone.settings().pathThroughCachedOnly.value;
-        if (!Minecraft.getInstance().isOnExecutionThread()) {
+        if (!MinecraftClient.getInstance().isOnThread()) {
             throw new IllegalStateException();
         }
         this.isPassableBlockPos = new BlockPos.Mutable();
@@ -79,7 +80,7 @@ public class BlockStateInterface {
     }
 
     public boolean worldContainsLoadedChunk(int blockX, int blockZ) {
-        return provider.chunkExists(blockX >> 4, blockZ >> 4);
+        return provider.isChunkLoaded(blockX >> 4, blockZ >> 4);
     }
 
     public static Block getBlock(IPlayerContext ctx, BlockPos pos) { // won't be called from the pathing thread because the pathing thread doesn't make a single blockpos pog
@@ -104,7 +105,7 @@ public class BlockStateInterface {
         }
 
         if (useTheRealWorld) {
-            Chunk cached = prev;
+            WorldChunk cached = prev;
             // there's great cache locality in block state lookups
             // generally it's within each movement
             // if it's the same chunk as last time
@@ -114,7 +115,7 @@ public class BlockStateInterface {
             if (cached != null && cached.getPos().x == x >> 4 && cached.getPos().z == z >> 4) {
                 return getFromChunk(cached, x, y, z);
             }
-            Chunk chunk = provider.getChunk(x >> 4, z >> 4, ChunkStatus.FULL, false);
+            WorldChunk chunk = provider.getChunk(x >> 4, z >> 4, ChunkStatus.FULL, false);
             if (chunk != null && !chunk.isEmpty()) {
                 prev = chunk;
                 return getFromChunk(chunk, x, y, z);
@@ -142,7 +143,7 @@ public class BlockStateInterface {
     }
 
     public boolean isLoaded(int x, int z) {
-        Chunk prevChunk = prev;
+        WorldChunk prevChunk = prev;
         if (prevChunk != null && prevChunk.getPos().x == x >> 4 && prevChunk.getPos().z == z >> 4) {
             return true;
         }
@@ -168,7 +169,7 @@ public class BlockStateInterface {
 
     // get the block at x,y,z from this chunk WITHOUT creating a single blockpos object
     public static BlockState getFromChunk(Chunk chunk, int x, int y, int z) {
-        ChunkSection section = chunk.getSections()[y >> 4];
+        ChunkSection section = chunk.getSectionArray()[y >> 4];
         if (ChunkSection.isEmpty(section)) {
             return AIR;
         }

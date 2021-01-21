@@ -23,14 +23,14 @@ import baritone.utils.ToolSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.inventory.container.ClickType;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.util.Direction;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 import java.util.OptionalInt;
@@ -51,7 +51,7 @@ public final class InventoryBehavior extends Behavior {
         if (event.getType() == TickEvent.Type.OUT) {
             return;
         }
-        if (ctx.player().openContainer != ctx.player().container) {
+        if (ctx.player().playerScreenHandler != ctx.player().currentScreenHandler) {
             // we have a crafting table or a chest or something open
             return;
         }
@@ -75,7 +75,7 @@ public final class InventoryBehavior extends Behavior {
         // we're using 0 and 8 for pickaxe and throwaway
         ArrayList<Integer> candidates = new ArrayList<>();
         for (int i = 1; i < 8; i++) {
-            if (ctx.player().inventory.mainInventory.get(i).isEmpty() && !disallowedHotbar.test(i)) {
+            if (ctx.player().inventory.main.get(i).isEmpty() && !disallowedHotbar.test(i)) {
                 candidates.add(i);
             }
         }
@@ -93,11 +93,11 @@ public final class InventoryBehavior extends Behavior {
     }
 
     private void swapWithHotBar(int inInventory, int inHotbar) {
-        ctx.playerController().windowClick(ctx.player().container.windowId, inInventory < 9 ? inInventory + 36 : inInventory, inHotbar, ClickType.SWAP, ctx.player());
+        ctx.playerController().windowClick(ctx.player().currentScreenHandler.syncId, inInventory < 9 ? inInventory + 36 : inInventory, inHotbar, SlotActionType.SWAP, ctx.player());
     }
 
     private int firstValidThrowaway() { // TODO offhand idk
-        NonNullList<ItemStack> invy = ctx.player().inventory.mainInventory;
+        DefaultedList<ItemStack> invy = ctx.player().inventory.main;
         for (int i = 0; i < invy.size(); i++) {
             if (Baritone.settings().acceptableThrowawayItems.value.contains(invy.get(i).getItem())) {
                 return i;
@@ -107,7 +107,7 @@ public final class InventoryBehavior extends Behavior {
     }
 
     private int bestToolAgainst(Block against, Class<? extends ToolItem> cla$$) {
-        NonNullList<ItemStack> invy = ctx.player().inventory.mainInventory;
+        DefaultedList<ItemStack> invy = ctx.player().inventory.main;
         int bestInd = -1;
         double bestSpeed = -1;
         for (int i = 0; i < invy.size(); i++) {
@@ -137,7 +137,7 @@ public final class InventoryBehavior extends Behavior {
 
     public boolean selectThrowawayForLocation(boolean select, int x, int y, int z) {
         BlockState maybe = baritone.getBuilderProcess().placeAt(x, y, z, baritone.bsi.get0(x, y, z));
-        if (maybe != null && throwaway(select, stack -> stack.getItem() instanceof BlockItem && maybe.equals(((BlockItem) stack.getItem()).getBlock().getStateForPlacement(new BlockItemUseContext(new ItemUseContext(ctx.world(), ctx.player(), Hand.MAIN_HAND, stack, new BlockRayTraceResult(new Vector3d(ctx.player().getPositionVec().x, ctx.player().getPositionVec().y, ctx.player().getPositionVec().z), Direction.UP, ctx.playerFeet(), false)) {}))))) {
+        if (maybe != null && throwaway(select, stack -> stack.getItem() instanceof BlockItem && maybe.equals(((BlockItem) stack.getItem()).getBlock().getPlacementState(new ItemPlacementContext(new ItemUsageContext(ctx.world(), ctx.player(), Hand.MAIN_HAND, stack, new BlockHitResult(new Vec3d(ctx.player().getX(), ctx.player().getY(), ctx.player().getZ()), Direction.UP, ctx.playerFeet(), false)) {}))))) {
             return true; // gotem
         }
         if (maybe != null && throwaway(select, stack -> stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock().equals(maybe.getBlock()))) {
@@ -153,7 +153,7 @@ public final class InventoryBehavior extends Behavior {
 
     public boolean throwaway(boolean select, Predicate<? super ItemStack> desired) {
         ClientPlayerEntity p = ctx.player();
-        NonNullList<ItemStack> inv = p.inventory.mainInventory;
+        DefaultedList<ItemStack> inv = p.inventory.main;
         for (int i = 0; i < 9; i++) {
             ItemStack item = inv.get(i);
             // this usage of settings() is okay because it's only called once during pathing
@@ -163,12 +163,12 @@ public final class InventoryBehavior extends Behavior {
             // acceptableThrowawayItems to the CalculationContext
             if (desired.test(item)) {
                 if (select) {
-                    p.inventory.currentItem = i;
+                    p.inventory.selectedSlot = i;
                 }
                 return true;
             }
         }
-        if (desired.test(p.inventory.offHandInventory.get(0))) {
+        if (desired.test(p.inventory.offHand.get(0))) {
             // main hand takes precedence over off hand
             // that means that if we have block A selected in main hand and block B in off hand, right clicking places block B
             // we've already checked above ^ and the main hand can't possible have an acceptablethrowawayitem
@@ -178,7 +178,7 @@ public final class InventoryBehavior extends Behavior {
                 ItemStack item = inv.get(i);
                 if (item.isEmpty() || item.getItem() instanceof PickaxeItem) {
                     if (select) {
-                        p.inventory.currentItem = i;
+                        p.inventory.selectedSlot = i;
                     }
                     return true;
                 }

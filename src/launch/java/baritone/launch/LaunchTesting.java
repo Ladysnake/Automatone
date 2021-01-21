@@ -47,7 +47,7 @@ public class LaunchTesting {
 
         hackNatives();
         arguments.put("version", "BaritownedDeveloperEnvironment");
-        arguments.put("assetIndex", System.getenv("assetIndex"));
+        //arguments.put("assetIndex", System.getenv("assetIndex"));
         arguments.put("assetsDir", System.getenv().getOrDefault("assetDirectory", "assets"));
         arguments.put("accessToken", "FML");
         arguments.put("userProperties", "{}");

@@ -32,8 +32,8 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -63,9 +63,9 @@ public class MovementDiagonal extends Movement {
         //return MovementHelper.canWalkOn(ctx, ctx.playerFeet().down());
         ClientPlayerEntity player = ctx.player();
         double offset = 0.25;
-        double x = player.getPosX();
-        double y = player.getPosY() - 1;
-        double z = player.getPosZ();
+        double x = player.getX();
+        double y = player.getY() - 1;
+        double z = player.getZ();
         //standard
         if (ctx.playerFeet().equals(src)){
             return true;
@@ -256,7 +256,7 @@ public class MovementDiagonal extends Movement {
         } else if (!playerInValidPosition() && !(MovementHelper.isLiquid(ctx, src) && getValidPositions().contains(ctx.playerFeet().up()))) {
             return state.setStatus(MovementStatus.UNREACHABLE);
         }
-        if (dest.y > src.y && ctx.player().getPositionVec().y < src.y + 0.1 && ctx.player().collidedHorizontally) {
+        if (dest.y > src.y && ctx.player().getY() < src.y + 0.1 && ctx.player().horizontalCollision) {
             state.setInput(Input.JUMP, true);
         }
         if (sprint()) {

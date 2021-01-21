@@ -34,9 +34,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.Set;
 
@@ -212,7 +212,7 @@ public class MovementDescend extends Movement {
 
         BlockPos playerFeet = ctx.playerFeet();
         BlockPos fakeDest = new BlockPos(dest.getX() * 2 - src.getX(), dest.getY(), dest.getZ() * 2 - src.getZ());
-        if ((playerFeet.equals(dest) || playerFeet.equals(fakeDest)) && (MovementHelper.isLiquid(ctx, dest) || ctx.player().getPositionVec().y - dest.getY() < 0.5)) { // lilypads
+        if ((playerFeet.equals(dest) || playerFeet.equals(fakeDest)) && (MovementHelper.isLiquid(ctx, dest) || ctx.player().getY() - dest.getY() < 0.5)) { // lilypads
             // Wait until we're actually on the ground before saying we're done because sometimes we continue to fall if the next action starts immediately
             return state.setStatus(MovementStatus.SUCCESS);
             /* else {
@@ -225,17 +225,17 @@ public class MovementDescend extends Movement {
             ClientPlayerEntity player = ctx.player();
             state.setTarget(new MovementState.MovementTarget(
                     new Rotation(RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
-                            new Vector3d(destX, dest.getY(), destZ),
-                            new Rotation(player.rotationYaw, player.rotationPitch)).getYaw(), player.rotationPitch),
+                            new Vec3d(destX, dest.getY(), destZ),
+                            new Rotation(player.yaw, player.pitch)).getYaw(), player.pitch),
                     false
             )).setInput(Input.MOVE_FORWARD, true);
             return state;
         }
-        double diffX = ctx.player().getPositionVec().x - (dest.getX() + 0.5);
-        double diffZ = ctx.player().getPositionVec().z - (dest.getZ() + 0.5);
+        double diffX = ctx.player().getX() - (dest.getX() + 0.5);
+        double diffZ = ctx.player().getZ() - (dest.getZ() + 0.5);
         double ab = Math.sqrt(diffX * diffX + diffZ * diffZ);
-        double x = ctx.player().getPositionVec().x - (src.getX() + 0.5);
-        double z = ctx.player().getPositionVec().z - (src.getZ() + 0.5);
+        double x = ctx.player().getX() - (src.getX() + 0.5);
+        double z = ctx.player().getZ() - (src.getZ() + 0.5);
         double fromStart = Math.sqrt(x * x + z * z);
         if (!playerFeet.equals(dest) || ab > 0.25) {
             if (numTicks++ < 20 && fromStart < 1.25) {

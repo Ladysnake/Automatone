@@ -24,8 +24,8 @@ import baritone.api.event.events.PlayerUpdateEvent;
 import baritone.api.event.events.SprintStateEvent;
 import baritone.api.event.events.type.EventState;
 import baritone.behavior.LookBehavior;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.options.KeyBinding;
 import net.minecraft.entity.player.PlayerAbilities;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -61,7 +61,7 @@ public class MixinClientPlayerEntity {
             method = "tick",
             at = @At(
                     value = "INVOKE",
-                    target = "net/minecraft/client/entity/player/ClientPlayerEntity.isPassenger()Z",
+                    target = "Lnet/minecraft/client/network/ClientPlayerEntity;hasVehicle()Z",
                     shift = At.Shift.BY,
                     by = -3
             )
@@ -77,7 +77,7 @@ public class MixinClientPlayerEntity {
             method = "tick",
             at = @At(
                     value = "INVOKE",
-                    target = "net/minecraft/client/entity/player/ClientPlayerEntity.onUpdateWalkingPlayer()V",
+                    target = "Lnet/minecraft/client/network/ClientPlayerEntity;sendMovementPackets()V",
                     shift = At.Shift.BY,
                     by = 2
             )
@@ -90,7 +90,7 @@ public class MixinClientPlayerEntity {
     }
 
     @Redirect(
-            method = "livingTick",
+            method = "tickMovement",
             at = @At(
                     value = "FIELD",
                     target = "net/minecraft/entity/player/PlayerAbilities.allowFlying:Z"
@@ -105,16 +105,16 @@ public class MixinClientPlayerEntity {
     }
 
     @Redirect(
-            method = "livingTick",
+            method = "tickMovement",
             at = @At(
                     value = "INVOKE",
-                    target = "net/minecraft/client/settings/KeyBinding.isKeyDown()Z"
+                    target = "Lnet/minecraft/client/options/KeyBinding;isPressed()Z"
             )
     )
     private boolean isKeyDown(KeyBinding keyBinding) {
         IBaritone baritone = BaritoneAPI.getProvider().getBaritoneForPlayer((ClientPlayerEntity) (Object) this);
         if (baritone == null) {
-            return keyBinding.isKeyDown();
+            return keyBinding.isPressed();
         }
         SprintStateEvent event = new SprintStateEvent();
         baritone.getGameEventHandler().onPlayerSprintState(event);
@@ -125,11 +125,11 @@ public class MixinClientPlayerEntity {
             // hitting control shouldn't make all bots sprint
             return false;
         }
-        return keyBinding.isKeyDown();
+        return keyBinding.isPressed();
     }
 
     @Inject(
-            method = "updateRidden",
+            method = "tickRiding",
             at = @At(
                     value = "HEAD"
             )

@@ -18,7 +18,7 @@
 package baritone.utils.pathing;
 
 import baritone.api.utils.BetterBlockPos;
-import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.BlockPos;
 import org.junit.Test;
 
@@ -74,7 +74,7 @@ public class BetterBlockPosTest {
             assertEquals(pos.east(i), better.east(i));
             assertEquals(pos.west(i), better.west(i));
         }
-        assertTrue(better.offset(null, 0) == better);
+        assertTrue(better.offset((Direction)null, 0) == better);
     }
 
     public void benchOne() {

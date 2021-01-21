@@ -28,16 +28,16 @@ import baritone.pathing.movement.MovementState.MovementTarget;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.ToolSet;
 import net.minecraft.block.*;
+import net.minecraft.block.enums.SlabType;
+import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.fluid.*;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.properties.SlabType;
-import net.minecraft.util.Direction;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.BlockView;
 
 import java.util.Optional;
 
@@ -53,7 +53,7 @@ public interface MovementHelper extends ActionCosts, Helper {
     static boolean avoidBreaking(BlockStateInterface bsi, int x, int y, int z, BlockState state) {
         Block b = state.getBlock();
         return b == Blocks.ICE // ice becomes water, and water can mess up the path
-                || b instanceof SilverfishBlock // obvious reasons
+                || b instanceof InfestedBlock // obvious reasons
                 // call context.get directly with x,y,z. no need to make 5 new BlockPos for no reason
                 || avoidAdjacentBreaking(bsi, x, y + 1, z, true)
                 || avoidAdjacentBreaking(bsi, x + 1, y, z, false)
@@ -91,7 +91,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         if (block instanceof AirBlock) { // early return for most common case
             return true;
         }
-        if (block == Blocks.FIRE || block == Blocks.TRIPWIRE || block == Blocks.COBWEB || block == Blocks.END_PORTAL || block == Blocks.COCOA || block instanceof AbstractSkullBlock || block == Blocks.BUBBLE_COLUMN || block instanceof ShulkerBoxBlock || block instanceof SlabBlock || block instanceof TrapDoorBlock || block == Blocks.HONEY_BLOCK || block == Blocks.END_ROD) {
+        if (block == Blocks.FIRE || block == Blocks.TRIPWIRE || block == Blocks.COBWEB || block == Blocks.END_PORTAL || block == Blocks.COCOA || block instanceof AbstractSkullBlock || block == Blocks.BUBBLE_COLUMN || block instanceof ShulkerBoxBlock || block instanceof SlabBlock || block instanceof TrapdoorBlock || block == Blocks.HONEY_BLOCK || block == Blocks.END_ROD) {
             return false;
         }
         if (Baritone.settings().blocksToAvoid.value.contains(block)) {
@@ -139,7 +139,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         // every block that overrides isPassable with anything more complicated than a "return true;" or "return false;"
         // has already been accounted for above
         // therefore it's safe to not construct a blockpos from our x, y, z ints and instead just pass null
-        return state.allowsMovement(bsi.access, BlockPos.ZERO, PathType.LAND); // workaround for future compatibility =P
+        return state.canPathfindThrough(bsi.access, BlockPos.ORIGIN, NavigationType.LAND); // workaround for future compatibility =P
     }
 
     /**
@@ -155,7 +155,7 @@ public interface MovementHelper extends ActionCosts, Helper {
     static boolean fullyPassable(CalculationContext context, int x, int y, int z) {
         return fullyPassable(
                 context.bsi.access,
-                context.bsi.isPassableBlockPos.setPos(x, y, z),
+                context.bsi.isPassableBlockPos.set(x, y, z),
                 context.bsi.get0(x, y, z)
         );
     }
@@ -164,7 +164,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         return fullyPassable(ctx.world(), pos, ctx.world().getBlockState(pos));
     }
 
-    static boolean fullyPassable(IBlockReader access, BlockPos pos, BlockState state) {
+    static boolean fullyPassable(BlockView access, BlockPos pos, BlockState state) {
         Block block = state.getBlock();
         if (block instanceof AirBlock) { // early return for most common case
             return true;
@@ -180,14 +180,14 @@ public interface MovementHelper extends ActionCosts, Helper {
                 || block instanceof FenceGateBlock
                 || block instanceof SnowBlock
                 || !state.getFluidState().isEmpty()
-                || block instanceof TrapDoorBlock
+                || block instanceof TrapdoorBlock
                 || block instanceof EndPortalBlock
                 || block instanceof SkullBlock
                 || block instanceof ShulkerBoxBlock) {
             return false;
         }
         // door, fence gate, liquid, trapdoor have been accounted for, nothing else uses the world or pos parameters
-        return state.allowsMovement(access, pos, PathType.LAND);
+        return state.canPathfindThrough(access, pos, NavigationType.LAND);
     }
 
     static boolean isReplaceable(int x, int y, int z, BlockState state, BlockStateInterface bsi) {
@@ -255,7 +255,7 @@ public interface MovementHelper extends ActionCosts, Helper {
             return false;
         }
 
-        Direction.Axis facing = blockState.get(HorizontalBlock.HORIZONTAL_FACING).getAxis();
+        Direction.Axis facing = blockState.get(HorizontalFacingBlock.FACING).getAxis();
         boolean open = blockState.get(propertyOpen);
 
         Direction.Axis playerFacing;
@@ -437,7 +437,7 @@ public interface MovementHelper extends ActionCosts, Helper {
      */
     static void switchToBestToolFor(IPlayerContext ctx, BlockState b, ToolSet ts, boolean preferSilkTouch) {
         if (!Baritone.settings().disableAutoTool.value && !Baritone.settings().assumeExternalAutoTool.value) {
-            ctx.player().inventory.currentItem = ts.getBestSlot(b.getBlock(), preferSilkTouch);
+            ctx.player().inventory.selectedSlot = ts.getBestSlot(b.getBlock(), preferSilkTouch);
         }
     }
 
@@ -445,7 +445,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         state.setTarget(new MovementTarget(
                 new Rotation(RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
                         VecUtils.getBlockPosCenter(pos),
-                        ctx.playerRotations()).getYaw(), ctx.player().rotationPitch),
+                        ctx.playerRotations()).getYaw(), ctx.player().pitch),
                 false
         )).setInput(Input.MOVE_FORWARD, true);
     }
@@ -496,13 +496,13 @@ public interface MovementHelper extends ActionCosts, Helper {
 
     static boolean possiblyFlowing(BlockState state) {
         FluidState fluidState = state.getFluidState();
-        return fluidState.getFluid() instanceof FlowingFluid
+        return fluidState.getFluid() instanceof FlowableFluid
                 && fluidState.getFluid().getLevel(fluidState) != 8;
     }
 
     static boolean isFlowing(int x, int y, int z, BlockState state, BlockStateInterface bsi) {
         FluidState fluidState = state.getFluidState();
-        if (!(fluidState.getFluid() instanceof FlowingFluid)) {
+        if (!(fluidState.getFluid() instanceof FlowableFluid)) {
             return false;
         }
         if (fluidState.getFluid().getLevel(fluidState) != 8) {
@@ -517,12 +517,12 @@ public interface MovementHelper extends ActionCosts, Helper {
     static boolean isBlockNormalCube(BlockState state) {
         Block block = state.getBlock();
         if (block instanceof BambooBlock
-                || block instanceof MovingPistonBlock
+                || block instanceof PistonExtensionBlock
                 || block instanceof ScaffoldingBlock
                 || block instanceof ShulkerBoxBlock) {
             return false;
         }
-        return Block.isOpaque(state.getCollisionShape(null, null));
+        return Block.isShapeFullCube(state.getCollisionShape(null, null));
     }
 
     static PlaceResult attemptToPlaceABlock(MovementState state, IBaritone baritone, BlockPos placeAt, boolean preferDown, boolean wouldSneak) {
@@ -544,9 +544,9 @@ public interface MovementHelper extends ActionCosts, Helper {
                 double faceX = (placeAt.getX() + against1.getX() + 1.0D) * 0.5D;
                 double faceY = (placeAt.getY() + against1.getY() + 0.5D) * 0.5D;
                 double faceZ = (placeAt.getZ() + against1.getZ() + 1.0D) * 0.5D;
-                Rotation place = RotationUtils.calcRotationFromVec3d(wouldSneak ? RayTraceUtils.inferSneakingEyePosition(ctx.player()) : ctx.playerHead(), new Vector3d(faceX, faceY, faceZ), ctx.playerRotations());
-                RayTraceResult res = RayTraceUtils.rayTraceTowards(ctx.player(), place, ctx.playerController().getBlockReachDistance(), wouldSneak);
-                if (res != null && res.getType() == RayTraceResult.Type.BLOCK && ((BlockRayTraceResult) res).getPos().equals(against1) && ((BlockRayTraceResult) res).getPos().offset(((BlockRayTraceResult) res).getFace()).equals(placeAt)) {
+                Rotation place = RotationUtils.calcRotationFromVec3d(wouldSneak ? RayTraceUtils.inferSneakingEyePosition(ctx.player()) : ctx.playerHead(), new Vec3d(faceX, faceY, faceZ), ctx.playerRotations());
+                HitResult res = RayTraceUtils.rayTraceTowards(ctx.player(), place, ctx.playerController().getBlockReachDistance(), wouldSneak);
+                if (res != null && res.getType() == HitResult.Type.BLOCK && ((BlockHitResult) res).getBlockPos().equals(against1) && ((BlockHitResult) res).getBlockPos().offset(((BlockHitResult) res).getSide()).equals(placeAt)) {
                     state.setTarget(new MovementState.MovementTarget(place, true));
                     found = true;
 
@@ -560,7 +560,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         }
         if (ctx.getSelectedBlock().isPresent()) {
             BlockPos selectedBlock = ctx.getSelectedBlock().get();
-            Direction side = ((BlockRayTraceResult) ctx.objectMouseOver()).getFace();
+            Direction side = ((BlockHitResult) ctx.objectMouseOver()).getSide();
             // only way for selectedBlock.equals(placeAt) to be true is if it's replacable
             if (selectedBlock.equals(placeAt) || (MovementHelper.canPlaceAgainst(ctx, selectedBlock) && selectedBlock.offset(side).equals(placeAt))) {
                 if (wouldSneak) {

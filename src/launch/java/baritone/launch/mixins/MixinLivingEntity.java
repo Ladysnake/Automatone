@@ -20,7 +20,7 @@ package baritone.launch.mixins;
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.event.events.RotationMoveEvent;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -58,7 +58,7 @@ public abstract class MixinLivingEntity extends Entity {
         if (ClientPlayerEntity.class.isInstance(this)) {
             IBaritone baritone = BaritoneAPI.getProvider().getBaritoneForPlayer((ClientPlayerEntity) (Object) this);
             if (baritone != null) {
-                this.jumpRotationEvent = new RotationMoveEvent(RotationMoveEvent.Type.JUMP, this.rotationYaw);
+                this.jumpRotationEvent = new RotationMoveEvent(RotationMoveEvent.Type.JUMP, this.yaw);
                 baritone.getGameEventHandler().onPlayerRotationMove(this.jumpRotationEvent);
             }
         }
@@ -69,14 +69,14 @@ public abstract class MixinLivingEntity extends Entity {
             at = @At(
                     value = "FIELD",
                     opcode = GETFIELD,
-                    target = "net/minecraft/entity/LivingEntity.rotationYaw:F"
+                    target = "net/minecraft/entity/LivingEntity.yaw:F"
             )
     )
     private float overrideYaw(LivingEntity self) {
         if (self instanceof ClientPlayerEntity && BaritoneAPI.getProvider().getBaritoneForPlayer((ClientPlayerEntity) (Object) this) != null) {
             return this.jumpRotationEvent.getYaw();
         }
-        return self.rotationYaw;
+        return self.yaw;
     }
 
 

@@ -20,10 +20,11 @@ package baritone.utils;
 import baritone.Baritone;
 import baritone.api.utils.Helper;
 import baritone.api.utils.IPlayerContext;
-import net.minecraft.util.ActionResultType;
+import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 
 public class BlockPlaceHelper implements Helper {
 
@@ -39,17 +40,18 @@ public class BlockPlaceHelper implements Helper {
             rightClickTimer--;
             return;
         }
-        RayTraceResult mouseOver = ctx.objectMouseOver();
-        if (!rightClickRequested || ctx.player().isRowingBoat() || mouseOver == null || mouseOver.getType() != RayTraceResult.Type.BLOCK) {
+        HitResult mouseOver = ctx.objectMouseOver();
+        boolean isRowingBoat = ctx.player().getVehicle() != null && ctx.player().getVehicle() instanceof BoatEntity;
+        if (!rightClickRequested || isRowingBoat || mouseOver == null || mouseOver.getType() != HitResult.Type.BLOCK) {
             return;
         }
         rightClickTimer = Baritone.settings().rightClickSpeed.value;
         for (Hand hand : Hand.values()) {
-            if (ctx.playerController().processRightClickBlock(ctx.player(), ctx.world(), hand, (BlockRayTraceResult) mouseOver) == ActionResultType.SUCCESS) {
-                ctx.player().swingArm(hand);
+            if (ctx.playerController().processRightClickBlock(ctx.player(), ctx.world(), hand, (BlockHitResult) mouseOver) == ActionResult.SUCCESS) {
+                ctx.player().swingHand(hand);
                 return;
             }
-            if (!ctx.player().getHeldItem(hand).isEmpty() && ctx.playerController().processRightClick(ctx.player(), ctx.world(), hand) == ActionResultType.SUCCESS) {
+            if (!ctx.player().getStackInHand(hand).isEmpty() && ctx.playerController().processRightClick(ctx.player(), ctx.world(), hand) == ActionResult.SUCCESS) {
                 return;
             }
         }

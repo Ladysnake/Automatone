@@ -32,9 +32,9 @@ import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.*;
-import net.minecraft.state.properties.SlabType;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.Set;
 
@@ -171,8 +171,8 @@ public class MovementPillar extends Movement {
         if (MovementHelper.isWater(fromDown) && MovementHelper.isWater(ctx, dest)) {
             // stay centered while swimming up a water column
             state.setTarget(new MovementState.MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.playerHead(), VecUtils.getBlockPosCenter(dest), ctx.playerRotations()), false));
-            Vector3d destCenter = VecUtils.getBlockPosCenter(dest);
-            if (Math.abs(ctx.player().getPositionVec().x - destCenter.x) > 0.2 || Math.abs(ctx.player().getPositionVec().z - destCenter.z) > 0.2) {
+            Vec3d destCenter = VecUtils.getBlockPosCenter(dest);
+            if (Math.abs(ctx.player().getX() - destCenter.x) > 0.2 || Math.abs(ctx.player().getZ() - destCenter.z) > 0.2) {
                 state.setInput(Input.MOVE_FORWARD, true);
             }
             if (ctx.playerFeet().equals(dest)) {
@@ -184,9 +184,9 @@ public class MovementPillar extends Movement {
         boolean vine = fromDown.getBlock() == Blocks.VINE;
         Rotation rotation = RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
                 VecUtils.getBlockPosCenter(positionToPlace),
-                new Rotation(ctx.player().rotationYaw, ctx.player().rotationPitch));
+                new Rotation(ctx.player().yaw, ctx.player().pitch));
         if (!ladder) {
-            state.setTarget(new MovementState.MovementTarget(new Rotation(ctx.player().rotationYaw, rotation.getPitch()), true));
+            state.setTarget(new MovementState.MovementTarget(new Rotation(ctx.player().yaw, rotation.getPitch()), true));
         }
 
         boolean blockIsThere = MovementHelper.canWalkOn(ctx, src) || ladder;
@@ -218,13 +218,13 @@ public class MovementPillar extends Movement {
             }
 
 
-            state.setInput(Input.SNEAK, ctx.player().getPositionVec().y > dest.getY() || ctx.player().getPositionVec().y < src.getY() + 0.2D); // delay placement by 1 tick for ncp compatibility
+            state.setInput(Input.SNEAK, ctx.player().getY() > dest.getY() || ctx.player().getY() < src.getY() + 0.2D); // delay placement by 1 tick for ncp compatibility
             // since (lower down) we only right click once player.isSneaking, and that happens the tick after we request to sneak
 
-            double diffX = ctx.player().getPositionVec().x - (dest.getX() + 0.5);
-            double diffZ = ctx.player().getPositionVec().z - (dest.getZ() + 0.5);
+            double diffX = ctx.player().getX() - (dest.getX() + 0.5);
+            double diffZ = ctx.player().getZ() - (dest.getZ() + 0.5);
             double dist = Math.sqrt(diffX * diffX + diffZ * diffZ);
-            double flatMotion = Math.sqrt(ctx.player().getMotion().x * ctx.player().getMotion().x + ctx.player().getMotion().z * ctx.player().getMotion().z);
+            double flatMotion = Math.sqrt(ctx.player().getVelocity().x * ctx.player().getVelocity().x + ctx.player().getVelocity().z * ctx.player().getVelocity().z);
             if (dist > 0.17) {//why 0.17? because it seemed like a good number, that's why
                 //[explanation added after baritone port lol] also because it needs to be less than 0.2 because of the 0.3 sneak limit
                 //and 0.17 is reasonably less than 0.2
@@ -236,7 +236,7 @@ public class MovementPillar extends Movement {
                 state.setTarget(new MovementState.MovementTarget(rotation, true));
             } else if (flatMotion < 0.05) {
                 // If our Y coordinate is above our goal, stop jumping
-                state.setInput(Input.JUMP, ctx.player().getPositionVec().y < dest.getY());
+                state.setInput(Input.JUMP, ctx.player().getY() < dest.getY());
             }
 
 
@@ -251,7 +251,7 @@ public class MovementPillar extends Movement {
                     state.setInput(Input.JUMP, false); // breaking is like 5x slower when you're jumping
                     state.setInput(Input.CLICK_LEFT, true);
                     blockIsThere = false;
-                } else if (ctx.player().isCrouching() && (ctx.isLookingAt(src.down()) || ctx.isLookingAt(src)) && ctx.player().getPositionVec().y > dest.getY() + 0.1) {
+                } else if (ctx.player().isSneaking() && (ctx.isLookingAt(src.down()) || ctx.isLookingAt(src)) && ctx.player().getY() > dest.getY() + 0.1) {
                     state.setInput(Input.CLICK_RIGHT, true);
                 }
             }
