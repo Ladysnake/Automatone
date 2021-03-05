@@ -35,8 +35,7 @@ public class ReloadAllCommand extends Command {
     @Override
     public void execute(String label, IArgConsumer args) throws CommandException {
         args.requireMax(0);
-        ctx.worldData().getCachedWorld().reloadAllFromDisk();
-        logDirect("Reloaded");
+        throw new UnsupportedOperationException();
     }
 
     @Override

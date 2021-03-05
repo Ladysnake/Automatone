@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinEntity {
 
     @Shadow
-    private float yaw;
+    public float yaw;
 
     float yawRestore;
 

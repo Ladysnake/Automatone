@@ -38,7 +38,6 @@ public class PathCommand extends Command {
     public void execute(String label, IArgConsumer args) throws CommandException {
         ICustomGoalProcess customGoalProcess = baritone.getCustomGoalProcess();
         args.requireMax(0);
-        WorldScanner.INSTANCE.repack(ctx);
         customGoalProcess.path();
         logDirect("Now pathing");
     }

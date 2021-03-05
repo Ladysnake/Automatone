@@ -106,10 +106,9 @@ public class WorldProvider implements IWorldProvider, Helper {
     public final void closeWorld() {
         WorldData world = this.currentWorld;
         this.currentWorld = null;
-        if (world == null) {
-            return;
+        if (world != null) {
+            world.onClose();
         }
-        world.onClose();
     }
 
     public final void ifWorldLoaded(Consumer<WorldData> currentWorldConsumer) {

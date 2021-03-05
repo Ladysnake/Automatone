@@ -25,9 +25,6 @@ import baritone.api.event.listener.IGameEventListener;
 import baritone.api.utils.Helper;
 import baritone.cache.WorldProvider;
 import baritone.utils.BlockStateInterface;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -50,7 +47,7 @@ public final class GameEventHandler implements IEventBus, Helper {
     public final void onTick(TickEvent event) {
         if (event.getType() == TickEvent.Type.IN) {
             try {
-                baritone.bsi = new BlockStateInterface(baritone.getPlayerContext(), true);
+                baritone.bsi = new BlockStateInterface(baritone.getPlayerContext());
             } catch (Exception ex) {
                 ex.printStackTrace();
                 baritone.bsi = null;
@@ -77,34 +74,6 @@ public final class GameEventHandler implements IEventBus, Helper {
     }
 
     @Override
-    public final void onChunkEvent(ChunkEvent event) {
-        EventState state = event.getState();
-        ChunkEvent.Type type = event.getType();
-
-        boolean isPostPopulate = state == EventState.POST
-                && (type == ChunkEvent.Type.POPULATE_FULL || type == ChunkEvent.Type.POPULATE_PARTIAL);
-
-        World world = baritone.getPlayerContext().world();
-
-        // Whenever the server sends us to another dimension, chunks are unloaded
-        // technically after the new world has been loaded, so we perform a check
-        // to make sure the chunk being unloaded is already loaded.
-        boolean isPreUnload = state == EventState.PRE
-                && type == ChunkEvent.Type.UNLOAD
-                && world.getChunkManager().getChunk(event.getX(), event.getZ(), null, false) != null;
-
-        if (isPostPopulate || isPreUnload) {
-            baritone.getWorldProvider().ifWorldLoaded(worldData -> {
-                WorldChunk chunk = world.getChunk(event.getX(), event.getZ());
-                worldData.getCachedWorld().queueForPacking(chunk);
-            });
-        }
-
-
-        listeners.forEach(l -> l.onChunkEvent(event));
-    }
-
-    @Override
     public final void onRenderPass(RenderEvent event) {
         listeners.forEach(l -> l.onRenderPass(event));
     }
@@ -124,16 +93,6 @@ public final class GameEventHandler implements IEventBus, Helper {
     }
 
     @Override
-    public final void onSendPacket(PacketEvent event) {
-        listeners.forEach(l -> l.onSendPacket(event));
-    }
-
-    @Override
-    public final void onReceivePacket(PacketEvent event) {
-        listeners.forEach(l -> l.onReceivePacket(event));
-    }
-
-    @Override
     public void onPlayerRotationMove(RotationMoveEvent event) {
         listeners.forEach(l -> l.onPlayerRotationMove(event));
     }
@@ -146,11 +105,6 @@ public final class GameEventHandler implements IEventBus, Helper {
     @Override
     public void onBlockInteract(BlockInteractEvent event) {
         listeners.forEach(l -> l.onBlockInteract(event));
-    }
-
-    @Override
-    public void onPlayerDeath() {
-        listeners.forEach(IGameEventListener::onPlayerDeath);
     }
 
     @Override

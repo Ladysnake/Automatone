@@ -17,21 +17,21 @@
 
 package baritone.command;
 
+import baritone.Baritone;
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
-import baritone.utils.accessor.IGuiScreen;
+import baritone.api.command.argument.ICommandArgument;
+import baritone.api.command.exception.CommandNotEnoughArgumentsException;
+import baritone.api.command.exception.CommandNotFoundException;
+import baritone.api.command.helpers.TabCompleteHelper;
+import baritone.api.command.manager.ICommandManager;
 import baritone.api.event.events.ChatEvent;
 import baritone.api.event.events.TabCompleteEvent;
 import baritone.api.event.listener.AbstractGameEventListener;
 import baritone.api.utils.Helper;
 import baritone.api.utils.SettingsUtil;
-import baritone.api.command.argument.ICommandArgument;
-import baritone.api.command.exception.CommandNotEnoughArgumentsException;
-import baritone.api.command.exception.CommandNotFoundException;
 import baritone.command.argument.ArgConsumer;
-import baritone.api.command.helpers.TabCompleteHelper;
-import baritone.api.command.manager.ICommandManager;
 import baritone.command.argument.CommandArguments;
 import baritone.command.manager.CommandManager;
 import net.minecraft.text.BaseText;
@@ -41,8 +41,6 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
@@ -56,7 +54,6 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
 
     public ExampleBaritoneControl(IBaritone baritone) {
         this.manager = baritone.getCommandManager();
-        baritone.getGameEventHandler().registerEventListener(this);
     }
 
     @Override
@@ -99,9 +96,7 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
             logDirect("daniel");
             return false;
         } else if (msg.trim().equalsIgnoreCase("orderpizza")) {
-            try {
-                ((IGuiScreen) mc.currentScreen).openLinkInvoker(new URI("https://www.dominos.com/en/pages/order/"));
-            } catch (NullPointerException | URISyntaxException ignored) {}
+            Baritone.LOGGER.fatal("No pizza :(");
             return false;
         }
         if (msg.isEmpty()) {

@@ -17,7 +17,7 @@
 
 package baritone.launch.mixins;
 
-import baritone.utils.accessor.IPlayerControllerMP;
+import baritone.utils.accessor.IPlayerController;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ClientPlayerInteractionManager.class)
-public abstract class MixinPlayerController implements IPlayerControllerMP {
+public abstract class MixinPlayerController implements IPlayerController {
 
     @Accessor
     @Override

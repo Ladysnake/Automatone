@@ -17,18 +17,13 @@
 
 package baritone.utils.accessor;
 
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.util.math.BlockPos;
 
-import java.util.concurrent.atomic.AtomicReferenceArray;
+public interface IPlayerController {
 
-public interface IChunkArray {
-    void copyFrom(IChunkArray other);
+    void setBreakingBlock(boolean isHittingBlock);
 
-    AtomicReferenceArray<WorldChunk> getChunks();
+    BlockPos getCurrentBreakingPos();
 
-    int centerX();
-
-    int centerZ();
-
-    int viewDistance();
+    void callSyncSelectedSlot();
 }

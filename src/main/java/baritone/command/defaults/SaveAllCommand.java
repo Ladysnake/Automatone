@@ -35,8 +35,7 @@ public class SaveAllCommand extends Command {
     @Override
     public void execute(String label, IArgConsumer args) throws CommandException {
         args.requireMax(0);
-        ctx.worldData().getCachedWorld().save();
-        logDirect("Saved");
+        throw new UnsupportedOperationException();
     }
 
     @Override

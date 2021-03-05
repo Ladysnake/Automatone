@@ -18,8 +18,7 @@
 package baritone.utils.player;
 
 import baritone.api.utils.Helper;
-import baritone.api.utils.IPlayerController;
-import baritone.utils.accessor.IPlayerControllerMP;
+import baritone.utils.accessor.IPlayerController;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
@@ -35,23 +34,23 @@ import net.minecraft.world.World;
 
 
 /**
- * Implementation of {@link IPlayerController} that chains to the primary player controller's methods
+ * Implementation of {@link baritone.api.utils.IPlayerController} that chains to the primary player controller's methods
  *
  * @author Brady
  * @since 12/14/2018
  */
-public enum PrimaryPlayerController implements IPlayerController, Helper {
+public enum PrimaryPlayerController implements baritone.api.utils.IPlayerController, Helper {
 
     INSTANCE;
 
     @Override
     public void syncHeldItem() {
-        ((IPlayerControllerMP) mc.interactionManager).callSyncSelectedSlot();
+        ((IPlayerController) mc.interactionManager).callSyncSelectedSlot();
     }
 
     @Override
     public boolean hasBrokenBlock() {
-        return ((IPlayerControllerMP) mc.interactionManager).getCurrentBreakingPos().getY() == -1;
+        return ((IPlayerController) mc.interactionManager).getCurrentBreakingPos().getY() == -1;
     }
 
     @Override
@@ -92,6 +91,6 @@ public enum PrimaryPlayerController implements IPlayerController, Helper {
 
     @Override
     public void setHittingBlock(boolean hittingBlock) {
-        ((IPlayerControllerMP) mc.interactionManager).setBreakingBlock(hittingBlock);
+        ((IPlayerController) mc.interactionManager).setBreakingBlock(hittingBlock);
     }
 }

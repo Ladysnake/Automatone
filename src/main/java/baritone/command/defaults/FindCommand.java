@@ -39,24 +39,7 @@ public class FindCommand extends Command {
 
     @Override
     public void execute(String label, IArgConsumer args) throws CommandException {
-        List<Block> toFind = new ArrayList<>();
-        while (args.hasAny()) {
-            toFind.add(args.getDatatypeFor(BlockById.INSTANCE));
-        }
-        BetterBlockPos origin = ctx.playerFeet();
-        toFind.stream()
-                .flatMap(block ->
-                        ctx.worldData().getCachedWorld().getLocationsOf(
-                                Registry.BLOCK.getId(block).getPath(),
-                                Integer.MAX_VALUE,
-                                origin.x,
-                                origin.y,
-                                4
-                        ).stream()
-                )
-                .map(BetterBlockPos::new)
-                .map(BetterBlockPos::toString)
-                .forEach(this::logDirect);
+        throw new UnsupportedOperationException();
     }
 
     @Override

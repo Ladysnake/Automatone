@@ -115,7 +115,6 @@ public enum WorldScanner implements IWorldScanner {
     @Override
     public int repack(IPlayerContext ctx, int range) {
         ChunkManager chunkProvider = ctx.world().getChunkManager();
-        ICachedWorld cachedWorld = ctx.worldData().getCachedWorld();
 
         BetterBlockPos playerPos = ctx.playerFeet();
 
@@ -134,7 +133,6 @@ public enum WorldScanner implements IWorldScanner {
 
                 if (chunk != null && !chunk.isEmpty()) {
                     queued++;
-                    cachedWorld.queueForPacking(chunk);
                 }
             }
         }

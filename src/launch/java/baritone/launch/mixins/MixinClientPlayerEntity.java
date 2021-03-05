@@ -21,11 +21,9 @@ import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.event.events.ChatEvent;
 import baritone.api.event.events.PlayerUpdateEvent;
-import baritone.api.event.events.SprintStateEvent;
 import baritone.api.event.events.type.EventState;
 import baritone.behavior.LookBehavior;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.options.KeyBinding;
 import net.minecraft.entity.player.PlayerAbilities;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -102,30 +100,6 @@ public class MixinClientPlayerEntity {
             return capabilities.allowFlying;
         }
         return !baritone.getPathingBehavior().isPathing() && capabilities.allowFlying;
-    }
-
-    @Redirect(
-            method = "tickMovement",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/client/options/KeyBinding;isPressed()Z"
-            )
-    )
-    private boolean isKeyDown(KeyBinding keyBinding) {
-        IBaritone baritone = BaritoneAPI.getProvider().getBaritoneForPlayer((ClientPlayerEntity) (Object) this);
-        if (baritone == null) {
-            return keyBinding.isPressed();
-        }
-        SprintStateEvent event = new SprintStateEvent();
-        baritone.getGameEventHandler().onPlayerSprintState(event);
-        if (event.getState() != null) {
-            return event.getState();
-        }
-        if (baritone != BaritoneAPI.getProvider().getPrimaryBaritone()) {
-            // hitting control shouldn't make all bots sprint
-            return false;
-        }
-        return keyBinding.isPressed();
     }
 
     @Inject(

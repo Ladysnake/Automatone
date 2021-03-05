@@ -32,6 +32,8 @@ import baritone.utils.*;
 import baritone.command.manager.CommandManager;
 import baritone.utils.player.PrimaryPlayerContext;
 import net.minecraft.client.MinecraftClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +49,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Baritone implements IBaritone {
 
+    public static final Logger LOGGER = LogManager.getLogger("Automatone");
     private static ThreadPoolExecutor threadPool;
     private static File dir;
 

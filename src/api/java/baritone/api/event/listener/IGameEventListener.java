@@ -23,6 +23,7 @@ import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.Packet;
 import net.minecraft.util.math.Vec3d;
 
@@ -44,7 +45,7 @@ public interface IGameEventListener {
      * Run once per game tick from before and after the player rotation is sent to the server.
      *
      * @param event The event
-     * @see ClientPlayerEntity#tick()
+     * @see PlayerEntity#tick()
      */
     void onPlayerUpdate(PlayerUpdateEvent event);
 
@@ -64,13 +65,6 @@ public interface IGameEventListener {
     void onPreTabComplete(TabCompleteEvent event);
 
     /**
-     * Runs before and after whenever a chunk is either loaded, unloaded, or populated.
-     *
-     * @param event The event
-     */
-    void onChunkEvent(ChunkEvent event);
-
-    /**
      * Runs once per world render pass.
      *
      * @param event The event
@@ -84,22 +78,6 @@ public interface IGameEventListener {
      * @see MinecraftClient#joinWorld(ClientWorld)
      */
     void onWorldEvent(WorldEvent event);
-
-    /**
-     * Runs before a outbound packet is sent
-     *
-     * @param event The event
-     * @see Packet
-     */
-    void onSendPacket(PacketEvent event);
-
-    /**
-     * Runs before an inbound packet is processed
-     *
-     * @param event The event
-     * @see Packet
-     */
-    void onReceivePacket(PacketEvent event);
 
     /**
      * Run once per game tick from before and after the player's moveRelative method is called
@@ -124,13 +102,6 @@ public interface IGameEventListener {
      * @param event The event
      */
     void onBlockInteract(BlockInteractEvent event);
-
-    /**
-     * Called when the local player dies, as indicated by the creation of the {@link DeathScreen} screen.
-     *
-     * @see DeathScreen
-     */
-    void onPlayerDeath();
 
     /**
      * When the pathfinder's state changes

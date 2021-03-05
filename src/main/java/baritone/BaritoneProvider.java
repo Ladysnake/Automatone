@@ -26,9 +26,10 @@ import baritone.command.ExampleBaritoneControl;
 import baritone.cache.WorldScanner;
 import baritone.command.CommandSystem;
 import baritone.utils.schematic.SchematicSystem;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.LivingEntity;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Brady
@@ -44,7 +45,13 @@ public final class BaritoneProvider implements IBaritoneProvider {
         this.all = Collections.singletonList(this.primary);
 
         // Setup chat control, just for the primary instance
-        new ExampleBaritoneControl(this.primary);
+        this.primary.getGameEventHandler().registerEventListener(new ExampleBaritoneControl(this.primary));
+    }
+
+    @Override
+    public IBaritone getBaritoneForPlayer(LivingEntity player) {
+        if (player == MinecraftClient.getInstance().player) return primary;
+        return null;
     }
 
     @Override

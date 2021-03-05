@@ -27,7 +27,6 @@ import baritone.api.process.IExploreProcess;
 import baritone.api.process.PathingCommand;
 import baritone.api.process.PathingCommandType;
 import baritone.api.utils.MyChunkPos;
-import baritone.cache.CachedWorld;
 import baritone.utils.BaritoneProcessHelper;
 import baritone.utils.NotificationHelper;
 import com.google.gson.Gson;
@@ -196,12 +195,6 @@ public final class ExploreProcess extends BaritoneProcessHelper implements IExpl
             int centerZ = chunkZ << 4;
             if (cache.isCached(centerX, centerZ)) {
                 return Status.EXPLORED;
-            }
-            if (!((CachedWorld) cache).regionLoaded(centerX, centerZ)) {
-                Baritone.getExecutor().execute(() -> {
-                    ((CachedWorld) cache).tryLoadFromDisk(centerX >> 9, centerZ >> 9);
-                });
-                return Status.UNKNOWN; // we still need to load regions from disk in order to decide properly
             }
             return Status.NOT_EXPLORED;
         }

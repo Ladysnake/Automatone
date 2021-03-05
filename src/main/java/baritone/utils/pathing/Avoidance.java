@@ -64,13 +64,10 @@ public class Avoidance {
         if (!Baritone.settings().avoidance.value) {
             return Collections.emptyList();
         }
+
         List<Avoidance> res = new ArrayList<>();
-        double mobSpawnerCoeff = Baritone.settings().mobSpawnerAvoidanceCoefficient.value;
         double mobCoeff = Baritone.settings().mobAvoidanceCoefficient.value;
-        if (mobSpawnerCoeff != 1.0D) {
-            ctx.worldData().getCachedWorld().getLocationsOf("mob_spawner", 1, ctx.playerFeet().x, ctx.playerFeet().z, 2)
-                    .forEach(mobspawner -> res.add(new Avoidance(mobspawner, mobSpawnerCoeff, Baritone.settings().mobSpawnerAvoidanceRadius.value)));
-        }
+
         if (mobCoeff != 1.0D) {
             ctx.entitiesStream()
                     .filter(entity -> entity instanceof MobEntity)
@@ -79,6 +76,7 @@ public class Avoidance {
                     .filter(entity -> !(entity instanceof EndermanEntity) || ((EndermanEntity) entity).isAngry())
                     .forEach(entity -> res.add(new Avoidance(entity.getBlockPos(), mobCoeff, Baritone.settings().mobAvoidanceRadius.value)));
         }
+
         return res;
     }
 

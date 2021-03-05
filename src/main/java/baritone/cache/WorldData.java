@@ -35,7 +35,6 @@ import java.nio.file.Path;
  */
 public class WorldData implements IWorldData {
 
-    public final CachedWorld cache;
     private final WaypointCollection waypoints;
     private final ContainerMemory containerMemory;
     //public final MapData map;
@@ -44,17 +43,12 @@ public class WorldData implements IWorldData {
 
     WorldData(Path directory, RegistryKey<World> dimension) {
         this.directory = directory;
-        this.cache = new CachedWorld(directory.resolve("cache"), dimension);
         this.waypoints = new WaypointCollection(directory.resolve("waypoints"));
         this.containerMemory = new ContainerMemory(directory.resolve("containers"));
         this.dimension = dimension;
     }
 
     public void onClose() {
-        Baritone.getExecutor().execute(() -> {
-            System.out.println("Started saving the world in a new thread");
-            cache.save();
-        });
         Baritone.getExecutor().execute(() -> {
             System.out.println("Started saving saved containers in a new thread");
             try {
@@ -68,7 +62,7 @@ public class WorldData implements IWorldData {
 
     @Override
     public ICachedWorld getCachedWorld() {
-        return this.cache;
+        throw new UnsupportedOperationException();
     }
 
     @Override

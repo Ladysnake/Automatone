@@ -30,24 +30,6 @@ import java.util.ArrayList;
 public interface ICachedWorld {
 
     /**
-     * Returns the region at the specified region coordinates
-     *
-     * @param regionX The region X coordinate
-     * @param regionZ The region Z coordinate
-     * @return The region located at the specified coordinates
-     */
-    ICachedRegion getRegion(int regionX, int regionZ);
-
-    /**
-     * Queues the specified chunk for packing. This entails reading the contents
-     * of the chunk, then packing the data into the 2-bit format, and storing that
-     * in this cached world.
-     *
-     * @param chunk The chunk to pack and store
-     */
-    void queueForPacking(WorldChunk chunk);
-
-    /**
      * Returns whether or not the block at the specified X and Z coordinates
      * is cached in this world.
      *
@@ -71,15 +53,4 @@ public interface ICachedWorld {
      */
     ArrayList<BlockPos> getLocationsOf(String block, int maximum, int centerX, int centerZ, int maxRegionDistanceSq);
 
-    /**
-     * Reloads all of the cached regions in this world from disk. Anything that is not saved
-     * will be lost. This operation does not execute in a new thread by default.
-     */
-    void reloadAllFromDisk();
-
-    /**
-     * Saves all of the cached regions in this world to disk. This operation does not execute
-     * in a new thread by default.
-     */
-    void save();
 }

@@ -54,11 +54,6 @@ public final class MemoryBehavior extends Behavior {
         }
     }
 
-    @Override
-    public void onPlayerDeath() {
-        baritone.getWorldProvider().getCurrentWorld().getWaypoints().addWaypoint(new Waypoint("death", Waypoint.Tag.DEATH, ctx.playerFeet()));
-    }
-
     public EnderChestMemory getCurrent() {
         Path path = baritone.getWorldProvider().getCurrentWorld().directory;
         return EnderChestMemory.getByServerAndPlayer(path.getParent(), ctx.player().getUuid());

@@ -23,6 +23,7 @@ import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.path.IPathExecutor;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 /**
  * @author Brady
@@ -37,7 +38,7 @@ public interface IPathingBehavior extends IBehavior {
      *
      * @return The estimated remaining ticks in the current segment.
      */
-    default Optional<Double> ticksRemainingInSegment() {
+    default OptionalDouble ticksRemainingInSegment() {
         return ticksRemainingInSegment(true);
     }
 
@@ -49,13 +50,13 @@ public interface IPathingBehavior extends IBehavior {
      * @param includeCurrentMovement whether or not to include the entirety of the cost of the currently executing movement in the total
      * @return The estimated remaining ticks in the current segment.
      */
-    default Optional<Double> ticksRemainingInSegment(boolean includeCurrentMovement) {
+    default OptionalDouble ticksRemainingInSegment(boolean includeCurrentMovement) {
         IPathExecutor current = getCurrent();
         if (current == null) {
-            return Optional.empty();
+            return OptionalDouble.empty();
         }
         int start = includeCurrentMovement ? current.getPosition() : current.getPosition() + 1;
-        return Optional.of(current.getPath().ticksRemainingFrom(start));
+        return OptionalDouble.of(current.getPath().ticksRemainingFrom(start));
     }
 
     /**

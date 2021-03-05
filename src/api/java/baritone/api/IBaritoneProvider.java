@@ -21,10 +21,9 @@ import baritone.api.cache.IWorldScanner;
 import baritone.api.command.ICommand;
 import baritone.api.command.ICommandSystem;
 import baritone.api.schematic.ISchematicSystem;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.LivingEntity;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.Collection;
 
 /**
  * Provides the present {@link IBaritone} instances, as well as non-baritone instance related APIs.
@@ -47,26 +46,17 @@ public interface IBaritoneProvider {
      * returned by {@link #getPrimaryBaritone()}.
      *
      * @return All active {@link IBaritone} instances.
-     * @see #getBaritoneForPlayer(ClientPlayerEntity)
+     * @see #getBaritoneForPlayer(LivingEntity)
      */
-    List<IBaritone> getAllBaritones();
+    Collection<IBaritone> getAllBaritones();
 
     /**
-     * Provides the {@link IBaritone} instance for a given {@link ClientPlayerEntity}. This will likely be
-     * replaced with or be overloaded in addition to {@code #getBaritoneForUser(IBaritoneUser)} when
-     * {@code bot-system} is merged into {@code master}.
+     * Provides the {@link IBaritone} instance for a given {@link LivingEntity}.
      *
      * @param player The player
      * @return The {@link IBaritone} instance.
      */
-    default IBaritone getBaritoneForPlayer(ClientPlayerEntity player) {
-        for (IBaritone baritone : getAllBaritones()) {
-            if (Objects.equals(player, baritone.getPlayerContext().player())) {
-                return baritone;
-            }
-        }
-        return null;
-    }
+    IBaritone getBaritoneForPlayer(LivingEntity player);
 
     /**
      * Returns the {@link IWorldScanner} instance. This is not a type returned by
