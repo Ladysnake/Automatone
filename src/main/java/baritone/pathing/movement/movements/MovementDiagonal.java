@@ -32,9 +32,9 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.util.math.Direction;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +61,7 @@ public class MovementDiagonal extends Movement {
     protected boolean safeToCancel(MovementState state) {
         //too simple. backfill does not work after cornering with this
         //return MovementHelper.canWalkOn(ctx, ctx.playerFeet().down());
-        ClientPlayerEntity player = ctx.player();
+        PlayerEntity player = ctx.player();
         double offset = 0.25;
         double x = player.getX();
         double y = player.getY() - 1;

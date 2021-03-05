@@ -19,6 +19,7 @@ package baritone.api.event.events;
 
 import baritone.api.event.events.type.EventState;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.world.World;
 
 /**
  * @author Brady
@@ -29,7 +30,7 @@ public final class WorldEvent {
     /**
      * The new world that is being loaded. {@code null} if being unloaded.
      */
-    private final ClientWorld world;
+    private final World world;
 
     /**
      * The state of the event
@@ -44,7 +45,7 @@ public final class WorldEvent {
     /**
      * @return The new world that is being loaded. {@code null} if being unloaded.
      */
-    public final ClientWorld getWorld() {
+    public final World getWorld() {
         return this.world;
     }
 

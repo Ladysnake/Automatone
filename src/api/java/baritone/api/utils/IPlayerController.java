@@ -17,7 +17,6 @@
 
 package baritone.api.utils;
 
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import baritone.api.BaritoneAPI;
 import net.minecraft.item.ItemStack;
@@ -48,9 +47,9 @@ public interface IPlayerController {
 
     GameMode getGameType();
 
-    ActionResult processRightClickBlock(ClientPlayerEntity player, World world, Hand hand, BlockHitResult result);
+    ActionResult processRightClickBlock(PlayerEntity player, World world, Hand hand, BlockHitResult result);
 
-    ActionResult processRightClick(ClientPlayerEntity player, World world, Hand hand);
+    ActionResult processRightClick(PlayerEntity player, World world, Hand hand);
 
     boolean clickBlock(BlockPos loc, Direction face);
 

@@ -20,10 +20,10 @@ package baritone.utils;
 import baritone.Baritone;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
 
@@ -49,9 +49,9 @@ public class ToolSet {
      */
     private final Function<Block, Double> backendCalculation;
 
-    private final ClientPlayerEntity player;
+    private final PlayerEntity player;
 
-    public ToolSet(ClientPlayerEntity player) {
+    public ToolSet(PlayerEntity player) {
         breakStrengthCache = new HashMap<>();
         this.player = player;
 

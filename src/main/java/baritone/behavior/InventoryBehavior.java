@@ -23,7 +23,7 @@ import baritone.utils.ToolSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
@@ -152,7 +152,7 @@ public final class InventoryBehavior extends Behavior {
     }
 
     public boolean throwaway(boolean select, Predicate<? super ItemStack> desired) {
-        ClientPlayerEntity p = ctx.player();
+        PlayerEntity p = ctx.player();
         DefaultedList<ItemStack> inv = p.inventory.main;
         for (int i = 0; i < 9; i++) {
             ItemStack item = inv.get(i);

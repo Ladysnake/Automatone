@@ -17,23 +17,8 @@
 
 package baritone.launch.mixins;
 
-import baritone.Baritone;
-import baritone.api.BaritoneAPI;
-import baritone.api.IBaritone;
-import baritone.api.event.events.ChunkEvent;
-import baritone.api.event.events.type.EventState;
-import baritone.cache.CachedChunk;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
-import net.minecraft.network.packet.s2c.play.ChunkDeltaUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.play.CombatEventS2CPacket;
-import net.minecraft.util.math.ChunkPos;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * @author Brady

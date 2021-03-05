@@ -21,11 +21,14 @@ import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FireBlock;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 
@@ -138,7 +141,7 @@ public final class RotationUtils {
      * @param ctx Context for the viewing entity
      * @param pos The target block position
      * @return The optional rotation
-     * @see #reachable(ClientPlayerEntity, BlockPos, double)
+     * @see #reachable(PlayerEntity, BlockPos, double)
      */
     public static Optional<Rotation> reachable(IPlayerContext ctx, BlockPos pos) {
         return reachable(ctx.player(), pos, ctx.playerController().getBlockReachDistance());
@@ -160,11 +163,11 @@ public final class RotationUtils {
      * @param blockReachDistance The block reach distance of the entity
      * @return The optional rotation
      */
-    public static Optional<Rotation> reachable(ClientPlayerEntity entity, BlockPos pos, double blockReachDistance) {
+    public static Optional<Rotation> reachable(PlayerEntity entity, BlockPos pos, double blockReachDistance) {
         return reachable(entity, pos, blockReachDistance, false);
     }
 
-    public static Optional<Rotation> reachable(ClientPlayerEntity entity, BlockPos pos, double blockReachDistance, boolean wouldSneak) {
+    public static Optional<Rotation> reachable(PlayerEntity entity, BlockPos pos, double blockReachDistance, boolean wouldSneak) {
         IBaritone baritone = BaritoneAPI.getProvider().getBaritoneForPlayer(entity);
         if (baritone.getPlayerContext().isLookingAt(pos)) {
             /*

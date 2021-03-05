@@ -74,13 +74,13 @@ public enum PrimaryPlayerController implements baritone.api.utils.IPlayerControl
     }
 
     @Override
-    public ActionResult processRightClickBlock(ClientPlayerEntity player, World world, Hand hand, BlockHitResult result) {
+    public ActionResult processRightClickBlock(PlayerEntity player, World world, Hand hand, BlockHitResult result) {
         // primaryplayercontroller is always in a ClientWorld so this is ok
-        return mc.interactionManager.interactBlock(player, (ClientWorld) world, hand, result);
+        return mc.interactionManager.interactBlock((ClientPlayerEntity) player, (ClientWorld) world, hand, result);
     }
 
     @Override
-    public ActionResult processRightClick(ClientPlayerEntity player, World world, Hand hand) {
+    public ActionResult processRightClick(PlayerEntity player, World world, Hand hand) {
         return mc.interactionManager.interactItem(player, world, hand);
     }
 

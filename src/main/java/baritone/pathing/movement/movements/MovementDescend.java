@@ -34,7 +34,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -222,7 +222,7 @@ public class MovementDescend extends Movement {
         if (safeMode()) {
             double destX = (src.getX() + 0.5) * 0.17 + (dest.getX() + 0.5) * 0.83;
             double destZ = (src.getZ() + 0.5) * 0.17 + (dest.getZ() + 0.5) * 0.83;
-            ClientPlayerEntity player = ctx.player();
+            PlayerEntity player = ctx.player();
             state.setTarget(new MovementState.MovementTarget(
                     new Rotation(RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
                             new Vec3d(destX, dest.getY(), destZ),

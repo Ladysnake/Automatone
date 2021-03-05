@@ -25,6 +25,8 @@ import baritone.api.utils.input.Input;
 import baritone.behavior.Behavior;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.KeyboardInput;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +63,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
      */
     @Override
     public final boolean isInputForcedDown(Input input) {
-        return input == null ? false : this.inputForceStateMap.getOrDefault(input, false);
+        return input != null && this.inputForceStateMap.getOrDefault(input, false);
     }
 
     /**
@@ -94,13 +96,15 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
         blockBreakHelper.tick(isInputForcedDown(Input.CLICK_LEFT));
         blockPlaceHelper.tick(isInputForcedDown(Input.CLICK_RIGHT));
 
+        ClientPlayerEntity player = (ClientPlayerEntity) ctx.player();
+
         if (inControl()) {
-            if (ctx.player().input.getClass() != PlayerMovementInput.class) {
-                ctx.player().input = new PlayerMovementInput(this);
+            if (player.input.getClass() != PlayerMovementInput.class) {
+                player.input = new PlayerMovementInput(this);
             }
         } else {
-            if (ctx.player().input.getClass() == PlayerMovementInput.class) { // allow other movement inputs that aren't this one, e.g. for a freecam
-                ctx.player().input = new KeyboardInput(MinecraftClient.getInstance().options);
+            if (player.input.getClass() == PlayerMovementInput.class) { // allow other movement inputs that aren't this one, e.g. for a freecam
+                player.input = new KeyboardInput(MinecraftClient.getInstance().options);
             }
         }
         // only set it if it was previously incorrect

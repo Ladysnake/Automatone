@@ -26,8 +26,8 @@ import baritone.utils.ToolSet;
 import baritone.utils.pathing.BetterWorldBorder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -79,7 +79,7 @@ public class CalculationContext {
     public CalculationContext(IBaritone baritone, boolean forUseOnAnotherThread) {
         this.safeForThreadedUse = forUseOnAnotherThread;
         this.baritone = baritone;
-        ClientPlayerEntity player = baritone.getPlayerContext().player();
+        PlayerEntity player = baritone.getPlayerContext().player();
         this.world = baritone.getPlayerContext().world();
         this.worldData = (WorldData) baritone.getWorldProvider().getCurrentWorld();
         this.bsi = new BlockStateInterface(world);

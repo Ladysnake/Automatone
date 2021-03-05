@@ -53,7 +53,7 @@ public class PathExecutor implements IPathExecutor, Helper {
     private static final double MAX_DIST_FROM_PATH = 2;
 
     /**
-     * Default value is equal to 10 seconds. It's find to decrease it, but it must be at least 5.5s (110 ticks).
+     * Default value is equal to 10 seconds. It's fine to decrease it, but it must be at least 5.5s (110 ticks).
      * For more information, see issue #102.
      *
      * @see <a href="https://github.com/cabaletta/baritone/issues/102">Issue #102</a>
@@ -73,8 +73,8 @@ public class PathExecutor implements IPathExecutor, Helper {
     private HashSet<BlockPos> toPlace = new HashSet<>();
     private HashSet<BlockPos> toWalkInto = new HashSet<>();
 
-    private PathingBehavior behavior;
-    private IPlayerContext ctx;
+    private final PathingBehavior behavior;
+    private final IPlayerContext ctx;
 
     private boolean sprintNextTick;
 

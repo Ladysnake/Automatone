@@ -19,11 +19,10 @@ package baritone.api.utils;
 
 import baritone.api.cache.IWorldData;
 import net.minecraft.block.SlabBlock;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
@@ -38,7 +37,7 @@ import java.util.stream.StreamSupport;
  */
 public interface IPlayerContext {
 
-    ClientPlayerEntity player();
+    PlayerEntity player();
 
     IPlayerController playerController();
 

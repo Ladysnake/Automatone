@@ -24,17 +24,20 @@ import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.Helper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector4f;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
 import java.awt.*;
@@ -73,10 +76,10 @@ public class GuiClick extends Screen implements Helper {
         if (near != null && far != null) {
             ///
             Vec3d viewerPos = new Vec3d(PathRenderer.posX(), PathRenderer.posY(), PathRenderer.posZ());
-            ClientPlayerEntity player = BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext().player();
-            HitResult result = player.world.raycast(new RaycastContext(near.add(viewerPos), far.add(viewerPos), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, player));
+            PlayerEntity player = BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext().player();
+            BlockHitResult result = player.world.raycast(new RaycastContext(near.add(viewerPos), far.add(viewerPos), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, player));
             if (result != null && result.getType() == HitResult.Type.BLOCK) {
-                currentMouseOver = ((BlockHitResult) result).getBlockPos();
+                currentMouseOver = result.getBlockPos();
             }
         }
     }
