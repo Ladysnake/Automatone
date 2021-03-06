@@ -19,12 +19,9 @@ package baritone.api.event.listener;
 
 import baritone.api.event.events.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.Packet;
 import net.minecraft.util.math.Vec3d;
 
 /**
@@ -39,7 +36,14 @@ public interface IGameEventListener {
      * @param event The event
      * @see MinecraftClient#tick()
      */
-    void onTick(TickEvent event);
+    void onTickClient(TickEvent event);
+
+    /**
+     * Run once per game tick.
+     *
+     * @see net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents#END_SERVER_TICK
+     */
+    void onTickServer();
 
     /**
      * Run once per game tick from before and after the player rotation is sent to the server.
@@ -63,21 +67,6 @@ public interface IGameEventListener {
      * @param event The event
      */
     void onPreTabComplete(TabCompleteEvent event);
-
-    /**
-     * Runs once per world render pass.
-     *
-     * @param event The event
-     */
-    void onRenderPass(RenderEvent event);
-
-    /**
-     * Runs before and after whenever a new world is loaded
-     *
-     * @param event The event
-     * @see MinecraftClient#joinWorld(ClientWorld)
-     */
-    void onWorldEvent(WorldEvent event);
 
     /**
      * Run once per game tick from before and after the player's moveRelative method is called

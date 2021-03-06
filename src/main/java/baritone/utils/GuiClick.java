@@ -18,12 +18,15 @@
 package baritone.utils;
 
 import baritone.Baritone;
+import baritone.BaritoneProvider;
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalBlock;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.Helper;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.Window;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector4f;
 import net.minecraft.entity.Entity;
@@ -42,6 +45,7 @@ import net.minecraft.world.RaycastContext;
 
 import java.awt.*;
 import java.util.Collections;
+import java.util.Objects;
 
 import static baritone.api.command.IBaritoneChatControl.FORCE_COMMAND_PREFIX;
 import static org.lwjgl.opengl.GL11.*;
@@ -64,6 +68,7 @@ public class GuiClick extends Screen implements Helper {
 
     @Override
     public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+        MinecraftClient mc = MinecraftClient.getInstance();
         double mx = mc.mouse.getX();
         double my = mc.mouse.getY();
 
@@ -76,7 +81,7 @@ public class GuiClick extends Screen implements Helper {
         if (near != null && far != null) {
             ///
             Vec3d viewerPos = new Vec3d(PathRenderer.posX(), PathRenderer.posY(), PathRenderer.posZ());
-            PlayerEntity player = BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext().player();
+            PlayerEntity player = Objects.requireNonNull(MinecraftClient.getInstance().player);
             BlockHitResult result = player.world.raycast(new RaycastContext(near.add(viewerPos), far.add(viewerPos), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, player));
             if (result != null && result.getType() == HitResult.Type.BLOCK) {
                 currentMouseOver = result.getBlockPos();
@@ -89,8 +94,8 @@ public class GuiClick extends Screen implements Helper {
         if (currentMouseOver != null) { //Catch this, or else a click into void will result in a crash
             if (mouseButton == 0) {
                 if (clickStart != null && !clickStart.equals(currentMouseOver)) {
-                    BaritoneAPI.getProvider().getPrimaryBaritone().getSelectionManager().removeAllSelections();
-                    BaritoneAPI.getProvider().getPrimaryBaritone().getSelectionManager().addSelection(BetterBlockPos.from(clickStart), BetterBlockPos.from(currentMouseOver));
+                    BaritoneProvider.getSelectionManager().removeAllSelections();
+                    BaritoneProvider.getSelectionManager().addSelection(BetterBlockPos.from(clickStart), BetterBlockPos.from(currentMouseOver));
                     BaseText component = new LiteralText("Selection made! For usage: " + Baritone.settings().prefix.value + "help sel");
                     component.setStyle(component.getStyle()
                             .withFormatting(Formatting.WHITE)
@@ -101,10 +106,10 @@ public class GuiClick extends Screen implements Helper {
                     Helper.HELPER.logDirect(component);
                     clickStart = null;
                 } else {
-                    BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(currentMouseOver));
+                    MinecraftClient.getInstance().player.sendChatMessage(String.format("#goto %d %d %d", currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));
                 }
             } else if (mouseButton == 1) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(currentMouseOver.up()));
+                MinecraftClient.getInstance().player.sendChatMessage(String.format("#goto %d %d %d", currentMouseOver.getX(), currentMouseOver.getY() + 1, currentMouseOver.getZ()));
             }
         }
         clickStart = null;
@@ -123,7 +128,7 @@ public class GuiClick extends Screen implements Helper {
         this.projectionViewMatrix.invert();
 
         if (currentMouseOver != null) {
-            Entity e = mc.getCameraEntity();
+            Entity e = MinecraftClient.getInstance().getCameraEntity();
             // drawSingleSelectionBox WHEN?
             PathRenderer.drawManySelectionBoxes(modelViewStack, e, Collections.singletonList(currentMouseOver), Color.CYAN);
             if (clickStart != null && !clickStart.equals(currentMouseOver)) {
@@ -151,8 +156,9 @@ public class GuiClick extends Screen implements Helper {
             return null;
         }
 
-        x /= mc.getWindow().getFramebufferWidth();
-        y /= mc.getWindow().getFramebufferHeight();
+        Window window = MinecraftClient.getInstance().getWindow();
+        x /= window.getFramebufferWidth();
+        y /= window.getFramebufferHeight();
         x = x * 2 - 1;
         y = y * 2 - 1;
 

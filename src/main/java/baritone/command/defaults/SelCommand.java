@@ -18,27 +18,27 @@
 package baritone.command.defaults;
 
 import baritone.Baritone;
+import baritone.BaritoneProvider;
 import baritone.api.IBaritone;
-import baritone.api.event.events.RenderEvent;
-import baritone.api.event.listener.AbstractGameEventListener;
-import baritone.api.schematic.*;
-import baritone.api.selection.ISelection;
-import baritone.api.selection.ISelectionManager;
-import baritone.api.utils.BetterBlockPos;
-import baritone.api.utils.BlockOptionalMeta;
-import baritone.api.utils.BlockOptionalMetaLookup;
-import baritone.api.schematic.ISchematic;
 import baritone.api.command.Command;
+import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.datatypes.ForBlockOptionalMeta;
 import baritone.api.command.datatypes.ForDirection;
 import baritone.api.command.datatypes.RelativeBlockPos;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidStateException;
 import baritone.api.command.exception.CommandInvalidTypeException;
-import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.helpers.TabCompleteHelper;
+import baritone.api.event.events.RenderEvent;
+import baritone.api.schematic.*;
+import baritone.api.selection.ISelection;
+import baritone.api.selection.ISelectionManager;
+import baritone.api.utils.BetterBlockPos;
+import baritone.api.utils.BlockOptionalMeta;
+import baritone.api.utils.BlockOptionalMetaLookup;
 import baritone.utils.IRenderer;
 import net.minecraft.block.Blocks;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
@@ -46,30 +46,28 @@ import net.minecraft.util.math.Vec3i;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class SelCommand extends Command {
 
-    private ISelectionManager manager = baritone.getSelectionManager();
+    private ISelectionManager manager = BaritoneProvider.getSelectionManager();
     private BetterBlockPos pos1 = null;
 
     public SelCommand(IBaritone baritone) {
         super(baritone, "sel", "selection", "s");
-        baritone.getGameEventHandler().registerEventListener(new AbstractGameEventListener() {
-            @Override
-            public void onRenderPass(RenderEvent event) {
-                if (!Baritone.settings().renderSelectionCorners.value || pos1 == null) {
-                    return;
-                }
-                Color color = Baritone.settings().colorSelectionPos1.value;
-                float opacity = Baritone.settings().selectionOpacity.value;
-                float lineWidth = Baritone.settings().selectionLineWidth.value;
-                boolean ignoreDepth = Baritone.settings().renderSelectionIgnoreDepth.value;
-                IRenderer.startLines(color, opacity, lineWidth, ignoreDepth);
-                IRenderer.drawAABB(event.getModelViewStack(), new Box(pos1, pos1.add(1, 1, 1)));
-                IRenderer.endLines(ignoreDepth);
+        BaritoneProvider.extraRenderers.add(event -> {
+            if (!Baritone.settings().renderSelectionCorners.value || pos1 == null) {
+                return;
             }
+            Color color = Baritone.settings().colorSelectionPos1.value;
+            float opacity = Baritone.settings().selectionOpacity.value;
+            float lineWidth = Baritone.settings().selectionLineWidth.value;
+            boolean ignoreDepth = Baritone.settings().renderSelectionIgnoreDepth.value;
+            IRenderer.startLines(color, opacity, lineWidth, ignoreDepth);
+            IRenderer.drawAABB(event.getModelViewStack(), new Box(pos1, pos1.add(1, 1, 1)));
+            IRenderer.endLines(ignoreDepth);
         });
     }
 
@@ -83,7 +81,7 @@ public class SelCommand extends Command {
             if (action == Action.POS2 && pos1 == null) {
                 throw new CommandInvalidStateException("Set pos1 first before using pos2");
             }
-            BetterBlockPos playerPos = mc.getCameraEntity() != null ? BetterBlockPos.from(mc.getCameraEntity().getBlockPos()) : ctx.playerFeet();
+            BetterBlockPos playerPos = ((ServerPlayerEntity) ctx.player()).getCameraEntity() != null ? BetterBlockPos.from(((ServerPlayerEntity) ctx.player()).getCameraEntity().getBlockPos()) : ctx.playerFeet();
             BetterBlockPos pos = args.hasAny() ? args.getDatatypePost(RelativeBlockPos.INSTANCE, playerPos) : playerPos;
             args.requireMax(0);
             if (action == Action.POS1) {

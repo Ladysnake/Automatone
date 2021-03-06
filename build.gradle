@@ -101,10 +101,9 @@ dependencies {
     mappings "net.fabricmc:yarn:1.16.5+build.5:v2"
     modImplementation "net.fabricmc:fabric-loader:0.11.1"
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    modImplementation "net.fabricmc.fabric-api:fabric-api:0.31.0+1.16"
 
     testImplementation 'junit:junit:4.12'
-
-    compile 'com.github.ImpactDevelopment:SimpleTweaker:1.2'
 
     // launchwrapper + dependencies
     compile ('net.minecraft:launchwrapper:1.12') {

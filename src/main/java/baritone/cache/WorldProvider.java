@@ -20,7 +20,10 @@ package baritone.cache;
 import baritone.Baritone;
 import baritone.api.cache.IWorldProvider;
 import baritone.api.utils.Helper;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
@@ -54,34 +57,25 @@ public class WorldProvider implements IWorldProvider, Helper {
     /**
      * Called when a new world is initialized to discover the
      *
-     * @param world The world's Registry Data
+     * @param world The world being loaded
      */
-    public final void initWorld(RegistryKey<World> world) {
+    public final void initWorld(ServerWorld world) {
         File directory;
         File readme;
 
-        IntegratedServer integratedServer = mc.getServer();
+        MinecraftServer integratedServer = world.getServer();
 
         // If there is an integrated server running (Aka Singleplayer) then do magic to find the world save file
-        if (mc.isInSingleplayer()) {
-            directory = DimensionType.getSaveDirectory(world, integratedServer.getSavePath(WorldSavePath.ROOT).toFile());
+        directory = DimensionType.getSaveDirectory(world.getRegistryKey(), integratedServer.getSavePath(WorldSavePath.ROOT).toFile());
 
-            // Gets the "depth" of this directory relative the the game's run directory, 2 is the location of the world
-            if (directory.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
-                // subdirectory of the main save directory for this world
-                directory = directory.getParentFile();
-            }
-
-            directory = new File(directory, "baritone");
-            readme = directory;
-        } else { // Otherwise, the server must be remote...
-            String folderName = mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
-            if (SystemUtils.IS_OS_WINDOWS) {
-                folderName = folderName.replace(":", "_");
-            }
-            directory = new File(Baritone.getDir(), folderName);
-            readme = Baritone.getDir();
+        // Gets the "depth" of this directory relative the the game's run directory, 2 is the location of the world
+        if (directory.toPath().relativize(FabricLoader.getInstance().getGameDir()).getNameCount() != 2) {
+            // subdirectory of the main save directory for this world
+            directory = directory.getParentFile();
         }
+
+        directory = new File(directory, "baritone");
+        readme = directory;
 
         // lol wtf is this baritone folder in my minecraft save?
         try (FileOutputStream out = new FileOutputStream(new File(readme, "readme.txt"))) {
@@ -90,7 +84,7 @@ public class WorldProvider implements IWorldProvider, Helper {
         } catch (IOException ignored) {}
 
         // We will actually store the world data in a subfolder: "DIM<id>"
-        Path dir = DimensionType.getSaveDirectory(world, directory).toPath();
+        Path dir = DimensionType.getSaveDirectory(world.getRegistryKey(), directory).toPath();
         if (!Files.exists(dir)) {
             try {
                 Files.createDirectories(dir);
@@ -99,7 +93,7 @@ public class WorldProvider implements IWorldProvider, Helper {
 
         System.out.println("Baritone world data dir: " + dir);
         synchronized (worldCache) {
-            this.currentWorld = worldCache.computeIfAbsent(dir, d -> new WorldData(d, world));
+            this.currentWorld = worldCache.computeIfAbsent(dir, d -> new WorldData(d, world.getRegistryKey()));
         }
     }
 
@@ -108,12 +102,6 @@ public class WorldProvider implements IWorldProvider, Helper {
         this.currentWorld = null;
         if (world != null) {
             world.onClose();
-        }
-    }
-
-    public final void ifWorldLoaded(Consumer<WorldData> currentWorldConsumer) {
-        if (this.currentWorld != null) {
-            currentWorldConsumer.accept(this.currentWorld);
         }
     }
 }

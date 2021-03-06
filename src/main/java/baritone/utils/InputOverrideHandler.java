@@ -62,7 +62,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
      * @return Whether or not it is being forced down
      */
     @Override
-    public final boolean isInputForcedDown(Input input) {
+    public final synchronized boolean isInputForcedDown(Input input) {
         return input != null && this.inputForceStateMap.getOrDefault(input, false);
     }
 
@@ -73,7 +73,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
      * @param forced Whether or not the state is being forced
      */
     @Override
-    public final void setInputForceState(Input input, boolean forced) {
+    public final synchronized void setInputForceState(Input input, boolean forced) {
         this.inputForceStateMap.put(input, forced);
     }
 
@@ -81,13 +81,13 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
      * Clears the override state for all keys
      */
     @Override
-    public final void clearAllKeys() {
+    public final synchronized void clearAllKeys() {
         this.inputForceStateMap.clear();
     }
 
     @Override
-    public final void onTick(TickEvent event) {
-        if (event.getType() == TickEvent.Type.OUT) {
+    public final void onTickClient(TickEvent event) {
+        if (true) { // TODO fix that maybe
             return;
         }
         if (isInputForcedDown(Input.CLICK_LEFT)) {

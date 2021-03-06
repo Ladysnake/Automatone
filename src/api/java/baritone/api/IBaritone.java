@@ -122,12 +122,6 @@ public interface IBaritone {
     IEventBus getGameEventHandler();
 
     /**
-     * @return The {@link ISelectionManager} instance
-     * @see ISelectionManager
-     */
-    ISelectionManager getSelectionManager();
-
-    /**
      * @return The {@link ICommandManager} instance
      * @see ICommandManager
      */

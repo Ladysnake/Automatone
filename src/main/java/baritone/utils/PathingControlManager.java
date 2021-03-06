@@ -44,12 +44,11 @@ public class PathingControlManager implements IPathingControlManager {
         this.baritone = baritone;
         this.processes = new HashSet<>();
         this.active = new ArrayList<>();
+
         baritone.getGameEventHandler().registerEventListener(new AbstractGameEventListener() { // needs to be after all behavior ticks
             @Override
-            public void onTick(TickEvent event) {
-                if (event.getType() == TickEvent.Type.IN) {
-                    postTick();
-                }
+            public void onTickServer() {
+                postTick();
             }
         });
     }

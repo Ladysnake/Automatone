@@ -64,8 +64,6 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
 
     private final Object pathPlanLock = new Object();
 
-    private boolean lastAutoJump;
-
     private BetterBlockPos expectedSegmentStart;
 
     private final LinkedBlockingQueue<PathEvent> toDispatch = new LinkedBlockingQueue<>();
@@ -88,17 +86,17 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
     }
 
     @Override
-    public void onTick(TickEvent event) {
+    public void onTickServer() {
         dispatchEvents();
-        if (event.getType() == TickEvent.Type.OUT) {
-            secretInternalSegmentCancel();
-            baritone.getPathingControlManager().cancelEverything();
-            return;
-        }
         expectedSegmentStart = pathStart();
         baritone.getPathingControlManager().preTick();
         tickPath();
         dispatchEvents();
+    }
+
+    public void shutdown() {
+        secretInternalSegmentCancel();
+        baritone.getPathingControlManager().cancelEverything();
     }
 
     @Override
@@ -224,23 +222,6 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
                     queuePathEvent(PathEvent.NEXT_SEGMENT_CALC_STARTED);
                     findPathInNewThread(current.getPath().getDest(), false, context);
                 }
-            }
-        }
-    }
-
-    @Override
-    public void onPlayerUpdate(PlayerUpdateEvent event) {
-        if (current != null) {
-            switch (event.getState()) {
-                case PRE:
-                    lastAutoJump = mc.options.autoJump;
-                    mc.options.autoJump = false;
-                    break;
-                case POST:
-                    mc.options.autoJump = lastAutoJump;
-                    break;
-                default:
-                    break;
             }
         }
     }
@@ -519,10 +500,5 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
         }
         Favoring favoring = new Favoring(context.getBaritone().getPlayerContext(), previous, context);
         return new AStarPathFinder(start.getX(), start.getY(), start.getZ(), transformed, favoring, context);
-    }
-
-    @Override
-    public void onRenderPass(RenderEvent event) {
-        PathRenderer.render(event, this);
     }
 }

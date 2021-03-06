@@ -19,7 +19,6 @@ package baritone.command;
 
 import baritone.Baritone;
 import baritone.api.BaritoneAPI;
-import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.command.argument.ICommandArgument;
 import baritone.api.command.exception.CommandNotEnoughArgumentsException;
@@ -52,8 +51,8 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
     private static final Settings settings = BaritoneAPI.getSettings();
     private final ICommandManager manager;
 
-    public ExampleBaritoneControl(IBaritone baritone) {
-        this.manager = baritone.getCommandManager();
+    public ExampleBaritoneControl(ICommandManager commandManager) {
+        this.manager = commandManager;
     }
 
     @Override
@@ -107,7 +106,7 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
         String rest = msg.substring(pair.getLeft().length());
         ArgConsumer argc = new ArgConsumer(this.manager, pair.getRight());
         if (!argc.hasAny()) {
-            Settings.Setting setting = settings.byLowerName.get(command.toLowerCase(Locale.US));
+            Settings.Setting<?> setting = settings.byLowerName.get(command.toLowerCase(Locale.US));
             if (setting != null) {
                 logRanCommand(command, rest);
                 if (setting.getValueClass() == Boolean.class) {
@@ -118,7 +117,7 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
                 return true;
             }
         } else if (argc.hasExactlyOne()) {
-            for (Settings.Setting setting : settings.allSettings) {
+            for (Settings.Setting<?> setting : settings.allSettings) {
                 if (setting.getName().equals("logger")) {
                     continue;
                 }
@@ -171,7 +170,7 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
                             .filterPrefix(argc.getString())
                             .stream();
                 }
-                Settings.Setting setting = settings.byLowerName.get(argc.getString().toLowerCase(Locale.US));
+                Settings.Setting<?> setting = settings.byLowerName.get(argc.getString().toLowerCase(Locale.US));
                 if (setting != null) {
                     if (setting.getValueClass() == Boolean.class) {
                         TabCompleteHelper helper = new TabCompleteHelper();

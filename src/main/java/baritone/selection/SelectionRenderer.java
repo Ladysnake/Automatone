@@ -1,23 +1,13 @@
 package baritone.selection;
 
-import baritone.Baritone;
-import baritone.api.event.events.RenderEvent;
-import baritone.api.event.listener.AbstractGameEventListener;
 import baritone.api.selection.ISelection;
 import baritone.utils.IRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
 
-public class SelectionRenderer implements IRenderer, AbstractGameEventListener {
+public class SelectionRenderer implements IRenderer {
 
     public static final double SELECTION_BOX_EXPANSION = .005D;
-
-    private final SelectionManager manager;
-
-    SelectionRenderer(Baritone baritone, SelectionManager manager) {
-        this.manager = manager;
-        baritone.getGameEventHandler().registerEventListener(this);
-    }
 
     public static void renderSelections(MatrixStack stack, ISelection[] selections) {
         float opacity = settings.selectionOpacity.value;
@@ -51,8 +41,4 @@ public class SelectionRenderer implements IRenderer, AbstractGameEventListener {
         IRenderer.endLines(ignoreDepth);
     }
 
-    @Override
-    public void onRenderPass(RenderEvent event) {
-        renderSelections(event.getModelViewStack(), manager.getSelections());
-    }
 }

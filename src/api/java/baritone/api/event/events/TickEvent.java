@@ -20,17 +20,16 @@ package baritone.api.event.events;
 import baritone.api.event.events.type.EventState;
 
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public final class TickEvent {
 
     private static int overallTickCount;
 
-    private final EventState state;
     private final Type type;
     private final int count;
 
-    public TickEvent(EventState state, Type type, int count) {
-        this.state = state;
+    public TickEvent(Type type, int count) {
         this.type = type;
         this.count = count;
     }
@@ -43,13 +42,9 @@ public final class TickEvent {
         return type;
     }
 
-    public EventState getState() {
-        return state;
-    }
-
-    public static synchronized BiFunction<EventState, Type, TickEvent> createNextProvider() {
+    public static synchronized Function<Type, TickEvent> createNextProvider() {
         final int count = overallTickCount++;
-        return (state, type) -> new TickEvent(state, type, count);
+        return (type) -> new TickEvent(type, count);
     }
 
     public enum Type {

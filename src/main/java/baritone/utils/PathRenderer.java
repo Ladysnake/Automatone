@@ -26,8 +26,10 @@ import baritone.api.utils.Helper;
 import baritone.api.utils.interfaces.IGoalRenderPos;
 import baritone.behavior.PathingBehavior;
 import baritone.pathing.path.PathExecutor;
+import baritone.utils.player.PrimaryPlayerContext;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.block.entity.BeaconBlockEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -39,12 +41,14 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 
 import java.awt.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -74,21 +78,23 @@ public final class PathRenderer implements IRenderer, Helper {
     public static void render(RenderEvent event, PathingBehavior behavior) {
         float partialTicks = event.getPartialTicks();
         Goal goal = behavior.getGoal();
-        if (Helper.mc.currentScreen instanceof GuiClick) {
-            ((GuiClick) Helper.mc.currentScreen).onRender(event.getModelViewStack(), event.getProjectionMatrix());
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.currentScreen instanceof GuiClick) {
+            ((GuiClick) mc.currentScreen).onRender(event.getModelViewStack(), event.getProjectionMatrix());
         }
 
         DimensionType thisPlayerDimension = behavior.baritone.getPlayerContext().world().getDimension();
-        DimensionType currentRenderViewDimension = BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext().world().getDimension();
+        World world = Objects.requireNonNull(MinecraftClient.getInstance().world);
+        DimensionType currentRenderViewDimension = world.getDimension();
 
         if (thisPlayerDimension != currentRenderViewDimension) {
             // this is a path for a bot in a different dimension, don't render it
             return;
         }
 
-        Entity renderView = Helper.mc.getCameraEntity();
+        Entity renderView = mc.getCameraEntity();
 
-        if (renderView.world != BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext().world()) {
+        if (renderView.world != world) {
             System.out.println("I have no idea what's going on");
             System.out.println("The primary baritone is in a different world than the render view entity");
             System.out.println("Not rendering the path");
@@ -125,9 +131,7 @@ public final class PathRenderer implements IRenderer, Helper {
 
         // If there is a path calculation currently running, render the path calculation process
         behavior.getInProgress().ifPresent(currentlyRunning -> {
-            currentlyRunning.bestPathSoFar().ifPresent(p -> {
-                drawPath(event.getModelViewStack(), p, 0, settings.colorBestPathSoFar.value, settings.fadePath.value, 10, 20);
-            });
+            currentlyRunning.bestPathSoFar().ifPresent(p -> drawPath(event.getModelViewStack(), p, 0, settings.colorBestPathSoFar.value, settings.fadePath.value, 10, 20));
 
             currentlyRunning.pathToMostRecentNodeConsidered().ifPresent(mr -> {
                 drawPath(event.getModelViewStack(), mr, 0, settings.colorMostRecentConsidered.value, settings.fadePath.value, 10, 20);
@@ -204,7 +208,8 @@ public final class PathRenderer implements IRenderer, Helper {
         IRenderer.startLines(color, settings.pathRenderLineWidthPixels.value, settings.renderSelectionBoxesIgnoreDepth.value);
 
         //BlockPos blockpos = movingObjectPositionIn.getBlockPos();
-        BlockStateInterface bsi = new BlockStateInterface(BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext()); // TODO this assumes same dimension between primary baritone and render view? is this safe?
+        // TODO this assumes same dimension between primary baritone and render view? is this safe?
+        BlockStateInterface bsi = new BlockStateInterface(Objects.requireNonNull(MinecraftClient.getInstance().world));
 
         positions.forEach(pos -> {
             BlockState state = bsi.get0(pos);
@@ -250,7 +255,7 @@ public final class PathRenderer implements IRenderer, Helper {
             if (settings.renderGoalXZBeacon.value) {
                 glPushAttrib(GL_LIGHTING_BIT);
 
-                Helper.mc.getTextureManager().bindTexture(TEXTURE_BEACON_BEAM);
+                MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE_BEACON_BEAM);
                 if (settings.renderGoalIgnoreDepth.value) {
                     RenderSystem.disableDepthTest();
                 }
@@ -260,7 +265,7 @@ public final class PathRenderer implements IRenderer, Helper {
 
                 BeaconBlockEntityRenderer.renderLightBeam(
                         stack,
-                        mc.getBufferBuilders().getEntityVertexConsumers(),
+                        MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers(),
                         TEXTURE_BEACON_BEAM,
                         partialTicks,
                         1.0F,

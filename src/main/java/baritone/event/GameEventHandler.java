@@ -25,6 +25,8 @@ import baritone.api.event.listener.IGameEventListener;
 import baritone.api.utils.Helper;
 import baritone.cache.WorldProvider;
 import baritone.utils.BlockStateInterface;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.World;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -44,18 +46,19 @@ public final class GameEventHandler implements IEventBus, Helper {
     }
 
     @Override
-    public final void onTick(TickEvent event) {
-        if (event.getType() == TickEvent.Type.IN) {
-            try {
-                baritone.bsi = new BlockStateInterface(baritone.getPlayerContext());
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                baritone.bsi = null;
-            }
-        } else {
+    public final void onTickClient(TickEvent event) {
+        listeners.forEach(l -> l.onTickClient(event));
+    }
+
+    @Override
+    public void onTickServer() {
+        try {
+            baritone.bsi = new BlockStateInterface(baritone.getPlayerContext());
+        } catch (Exception ex) {
+            ex.printStackTrace();
             baritone.bsi = null;
         }
-        listeners.forEach(l -> l.onTick(event));
+        listeners.forEach(IGameEventListener::onTickServer);
     }
 
     @Override
@@ -71,25 +74,6 @@ public final class GameEventHandler implements IEventBus, Helper {
     @Override
     public void onPreTabComplete(TabCompleteEvent event) {
         listeners.forEach(l -> l.onPreTabComplete(event));
-    }
-
-    @Override
-    public final void onRenderPass(RenderEvent event) {
-        listeners.forEach(l -> l.onRenderPass(event));
-    }
-
-    @Override
-    public final void onWorldEvent(WorldEvent event) {
-        WorldProvider cache = baritone.getWorldProvider();
-
-        if (event.getState() == EventState.POST) {
-            cache.closeWorld();
-            if (event.getWorld() != null) {
-                cache.initWorld(event.getWorld().getRegistryKey());
-            }
-        }
-
-        listeners.forEach(l -> l.onWorldEvent(event));
     }
 
     @Override

@@ -17,11 +17,13 @@
 
 package baritone.launch.mixins;
 
+import baritone.BaritoneProvider;
 import baritone.api.BaritoneAPI;
 import baritone.api.event.events.TabCompleteEvent;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.CommandSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import org.spongepowered.asm.mixin.Final;
@@ -54,6 +56,8 @@ public class MixinCommandSuggestionHelper {
     @Shadow
     private CompletableFuture<Suggestions> pendingSuggestions;
 
+    @Shadow @Final private MinecraftClient client;
+
     @Inject(
             method = "refresh",
             at = @At("HEAD"),
@@ -64,7 +68,7 @@ public class MixinCommandSuggestionHelper {
         String prefix = this.textField.getText().substring(0, Math.min(this.textField.getText().length(), this.textField.getCursor()));
 
         TabCompleteEvent event = new TabCompleteEvent(prefix);
-        BaritoneAPI.getProvider().getPrimaryBaritone().getGameEventHandler().onPreTabComplete(event);
+        BaritoneProvider.INSTANCE.autocompleteHandler.onPreTabComplete(event);
 
         if (event.isCancelled()) {
             ci.cancel();

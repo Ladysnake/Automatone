@@ -21,7 +21,6 @@ import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.event.listener.IEventBus;
-import baritone.api.utils.Helper;
 import baritone.api.utils.IPlayerContext;
 import baritone.behavior.*;
 import baritone.cache.WorldProvider;
@@ -31,7 +30,10 @@ import baritone.selection.SelectionManager;
 import baritone.utils.*;
 import baritone.command.manager.CommandManager;
 import baritone.utils.player.PrimaryPlayerContext;
+import baritone.utils.player.ServerPlayerContext;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,7 +58,7 @@ public class Baritone implements IBaritone {
     static {
         threadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
 
-        dir = new File(MinecraftClient.getInstance().runDirectory, "baritone");
+        dir = FabricLoader.getInstance().getGameDir().resolve("baritone").toFile();
         if (!Files.exists(dir.toPath())) {
             try {
                 Files.createDirectories(dir.toPath());
@@ -82,7 +84,6 @@ public class Baritone implements IBaritone {
     private FarmProcess farmProcess;
 
     private PathingControlManager pathingControlManager;
-    private SelectionManager selectionManager;
     private CommandManager commandManager;
 
     private IPlayerContext playerContext;
@@ -90,11 +91,11 @@ public class Baritone implements IBaritone {
 
     public BlockStateInterface bsi;
 
-    Baritone() {
+    Baritone(IPlayerContext player, WorldProvider worldProvider) {
         this.gameEventHandler = new GameEventHandler(this);
 
         // Define this before behaviors try and get it, or else it will be null and the builds will fail!
-        this.playerContext = PrimaryPlayerContext.INSTANCE;
+        this.playerContext = player;
 
         {
             // the Behavior constructor calls baritone.registerBehavior(this) so this populates the behaviors arraylist
@@ -117,8 +118,7 @@ public class Baritone implements IBaritone {
             this.pathingControlManager.registerProcess(farmProcess = new FarmProcess(this));
         }
 
-        this.worldProvider = new WorldProvider();
-        this.selectionManager = new SelectionManager(this);
+        this.worldProvider = worldProvider;
         this.commandManager = new CommandManager(this);
 
         if (BaritoneAutoTest.ENABLE_AUTO_TEST) {
@@ -197,11 +197,6 @@ public class Baritone implements IBaritone {
     }
 
     @Override
-    public SelectionManager getSelectionManager() {
-        return selectionManager;
-    }
-
-    @Override
     public WorldProvider getWorldProvider() {
         return this.worldProvider;
     }
@@ -221,7 +216,7 @@ public class Baritone implements IBaritone {
         new Thread(() -> {
             try {
                 Thread.sleep(100);
-                Helper.mc.execute(() -> Helper.mc.openScreen(new GuiClick()));
+                MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().openScreen(new GuiClick()));
             } catch (Exception ignored) {}
         }).start();
     }

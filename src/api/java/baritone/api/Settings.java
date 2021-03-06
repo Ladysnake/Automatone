@@ -1023,7 +1023,7 @@ public final class Settings {
      * via {@link Consumer#andThen(Consumer)} or it can completely be overriden via setting
      * {@link Setting#value};
      */
-    public final Setting<Consumer<Text>> logger = new Setting<>(MinecraftClient.getInstance().inGameHud.getChatHud()::addMessage);
+    public final Setting<Consumer<Text>> logger = new Setting<>(message -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message));
 
     /**
      * Print out ALL command exceptions as a stack trace to stdout, even simple syntax errors
@@ -1168,7 +1168,6 @@ public final class Settings {
         public final T defaultValue;
         private String name;
 
-        @SuppressWarnings("unchecked")
         private Setting(T value) {
             if (value == null) {
                 throw new IllegalArgumentException("Cannot determine value type class from null");

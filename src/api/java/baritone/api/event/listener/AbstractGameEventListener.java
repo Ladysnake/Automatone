@@ -31,7 +31,10 @@ import baritone.api.event.events.*;
 public interface AbstractGameEventListener extends IGameEventListener {
 
     @Override
-    default void onTick(TickEvent event) {}
+    default void onTickClient(TickEvent event) {}
+
+    @Override
+    default void onTickServer() {}
 
     @Override
     default void onPlayerUpdate(PlayerUpdateEvent event) {}
@@ -41,12 +44,6 @@ public interface AbstractGameEventListener extends IGameEventListener {
 
     @Override
     default void onPreTabComplete(TabCompleteEvent event) {}
-
-    @Override
-    default void onRenderPass(RenderEvent event) {}
-
-    @Override
-    default void onWorldEvent(WorldEvent event) {}
 
     @Override
     default void onPlayerRotationMove(RotationMoveEvent event) {}

@@ -71,7 +71,7 @@ public class BaritoneAutoTest implements AbstractGameEventListener, Helper {
         }
         System.out.println("Optimizing Game Settings");
 
-        GameOptions s = mc.options;
+        GameOptions s = MinecraftClient.getInstance().options;
         s.maxFps = 20;
         s.mipmapLevels = 0;
         s.particles = ParticlesMode.MINIMAL;
@@ -89,9 +89,10 @@ public class BaritoneAutoTest implements AbstractGameEventListener, Helper {
     }
 
     @Override
-    public void onTick(TickEvent event) {
+    public void onTickClient(TickEvent event) {
         IPlayerContext ctx = BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext();
         // If we're on the main menu then create the test world and launch the integrated server
+        MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.currentScreen instanceof TitleScreen) {
             System.out.println("Beginning Baritone automatic test routine");
             mc.openScreen(null);

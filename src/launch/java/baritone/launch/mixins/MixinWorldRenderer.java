@@ -17,6 +17,7 @@
 
 package baritone.launch.mixins;
 
+import baritone.BaritoneProvider;
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.event.events.RenderEvent;
@@ -45,8 +46,6 @@ public class MixinWorldRenderer {
             locals = LocalCapture.CAPTURE_FAILSOFT
     )
     private void onStartHand(MatrixStack matrixStackIn, float partialTicks, long finishTimeNano, boolean drawBlockOutline, Camera activeRenderInfoIn, GameRenderer gameRendererIn, LightmapTextureManager lightmapIn, Matrix4f projectionIn, CallbackInfo ci) {
-        for (IBaritone ibaritone : BaritoneAPI.getProvider().getAllBaritones()) {
-            ibaritone.getGameEventHandler().onRenderPass(new RenderEvent(partialTicks, matrixStackIn, projectionIn));
-        }
+        BaritoneProvider.INSTANCE.onRenderPass(new RenderEvent(partialTicks, matrixStackIn, projectionIn));
     }
 }

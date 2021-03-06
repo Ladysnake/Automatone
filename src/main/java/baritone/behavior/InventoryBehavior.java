@@ -24,6 +24,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.*;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
@@ -44,11 +45,8 @@ public final class InventoryBehavior extends Behavior {
     }
 
     @Override
-    public void onTick(TickEvent event) {
+    public void onTickServer() {
         if (!Baritone.settings().allowInventory.value) {
-            return;
-        }
-        if (event.getType() == TickEvent.Type.OUT) {
             return;
         }
         if (ctx.player().playerScreenHandler != ctx.player().currentScreenHandler) {
@@ -93,7 +91,10 @@ public final class InventoryBehavior extends Behavior {
     }
 
     private void swapWithHotBar(int inInventory, int inHotbar) {
-        ctx.playerController().windowClick(ctx.player().currentScreenHandler.syncId, inInventory < 9 ? inInventory + 36 : inInventory, inHotbar, SlotActionType.SWAP, ctx.player());
+        PlayerInventory inventory = ctx.player().inventory;
+        ItemStack h = inventory.getStack(inHotbar);
+        inventory.setStack(inHotbar, inventory.getStack(inInventory));
+        inventory.setStack(inInventory, h);
     }
 
     private int firstValidThrowaway() { // TODO offhand idk

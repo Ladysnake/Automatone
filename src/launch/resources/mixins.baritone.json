@@ -8,16 +8,17 @@
     "maxShiftBy": 2
   },
   "client": [
-    "MixinClientPlayerEntity",
+    "MixinServerPlayerEntity",
     "MixinClientPlayNetHandler",
     "MixinCommandSuggestionHelper",
-    "MixinEntity",
     "MixinEntityRenderManager",
     "MixinItemStack",
-    "MixinLivingEntity",
     "MixinLootContext",
-    "MixinMinecraft",
+    "MixinMinecraftClient",
     "MixinPlayerController",
     "MixinWorldRenderer"
+  ],
+  "mixins": [
+    "MixinServerPlayNetworkHandler"
   ]
 }

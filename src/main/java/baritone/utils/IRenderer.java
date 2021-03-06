@@ -22,6 +22,7 @@ import baritone.api.Settings;
 import baritone.api.utils.Helper;
 import baritone.utils.accessor.IEntityRenderManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
@@ -37,7 +38,7 @@ public interface IRenderer {
 
     Tessellator tessellator = Tessellator.getInstance();
     BufferBuilder buffer = tessellator.getBuffer();
-    IEntityRenderManager renderManager = (IEntityRenderManager) Helper.mc.getEntityRenderDispatcher();
+    IEntityRenderManager renderManager = (IEntityRenderManager) MinecraftClient.getInstance().getEntityRenderDispatcher();
     Settings settings = BaritoneAPI.getSettings();
 
     static void glColor(Color color, float alpha) {
