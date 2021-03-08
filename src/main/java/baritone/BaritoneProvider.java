@@ -85,7 +85,7 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
     @Override
     public boolean isPathing(LivingEntity entity) {
         IBaritone b = this.all.get(entity);
-        return b != null && b.getGetToBlockProcess().isActive();
+        return b != null && b.getCustomGoalProcess().isActive();
     }
 
     @Override
