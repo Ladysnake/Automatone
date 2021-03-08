@@ -21,19 +21,15 @@ import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.event.listener.IEventBus;
-import baritone.api.utils.IPlayerContext;
+import baritone.api.utils.IEntityContext;
 import baritone.behavior.*;
 import baritone.cache.WorldProvider;
 import baritone.event.GameEventHandler;
 import baritone.process.*;
-import baritone.selection.SelectionManager;
 import baritone.utils.*;
 import baritone.command.manager.CommandManager;
-import baritone.utils.player.PrimaryPlayerContext;
-import baritone.utils.player.ServerPlayerContext;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.network.ServerPlayerEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -86,12 +82,12 @@ public class Baritone implements IBaritone {
     private PathingControlManager pathingControlManager;
     private CommandManager commandManager;
 
-    private IPlayerContext playerContext;
+    private IEntityContext playerContext;
     private WorldProvider worldProvider;
 
     public BlockStateInterface bsi;
 
-    Baritone(IPlayerContext player, WorldProvider worldProvider) {
+    Baritone(IEntityContext player, WorldProvider worldProvider) {
         this.gameEventHandler = new GameEventHandler(this);
 
         // Define this before behaviors try and get it, or else it will be null and the builds will fail!
@@ -151,7 +147,7 @@ public class Baritone implements IBaritone {
     }
 
     @Override
-    public IPlayerContext getPlayerContext() {
+    public IEntityContext getPlayerContext() {
         return this.playerContext;
     }
 

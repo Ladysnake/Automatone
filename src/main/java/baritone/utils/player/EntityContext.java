@@ -19,7 +19,7 @@ package baritone.utils.player;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.cache.IWorldData;
-import baritone.api.utils.IPlayerContext;
+import baritone.api.utils.IEntityContext;
 import baritone.api.utils.IPlayerController;
 import baritone.api.utils.RayTraceUtils;
 import net.minecraft.entity.LivingEntity;
@@ -30,11 +30,11 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-public class ServerPlayerContext implements IPlayerContext {
+public class EntityContext implements IEntityContext {
 
     private LivingEntity entity;
 
-    public ServerPlayerContext(ServerPlayerEntity entity) {
+    public EntityContext(ServerPlayerEntity entity) {
         this.entity = entity;
     }
 
@@ -65,6 +65,6 @@ public class ServerPlayerContext implements IPlayerContext {
 
     @Override
     public HitResult objectMouseOver() {
-        return RayTraceUtils.rayTraceTowards(entity(), playerRotations(), playerController().getBlockReachDistance());
+        return RayTraceUtils.rayTraceTowards(entity(), entityRotations(), playerController().getBlockReachDistance());
     }
 }

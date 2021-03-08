@@ -23,9 +23,8 @@ import baritone.api.cache.IWorldProvider;
 import baritone.api.event.listener.IEventBus;
 import baritone.api.pathing.calc.IPathingControlManager;
 import baritone.api.process.*;
-import baritone.api.selection.ISelectionManager;
+import baritone.api.utils.IEntityContext;
 import baritone.api.utils.IInputOverrideHandler;
-import baritone.api.utils.IPlayerContext;
 import baritone.api.command.manager.ICommandManager;
 
 /**
@@ -110,10 +109,10 @@ public interface IBaritone {
     IInputOverrideHandler getInputOverrideHandler();
 
     /**
-     * @return The {@link IPlayerContext} instance
-     * @see IPlayerContext
+     * @return The {@link IEntityContext} instance
+     * @see IEntityContext
      */
-    IPlayerContext getPlayerContext();
+    IEntityContext getPlayerContext();
 
     /**
      * @return The {@link IEventBus} instance

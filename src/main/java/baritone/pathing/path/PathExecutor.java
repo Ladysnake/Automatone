@@ -73,7 +73,7 @@ public class PathExecutor implements IPathExecutor, Helper {
     private HashSet<BlockPos> toWalkInto = new HashSet<>();
 
     private final PathingBehavior behavior;
-    private final IPlayerContext ctx;
+    private final IEntityContext ctx;
 
     private boolean sprintNextTick;
 
@@ -98,7 +98,7 @@ public class PathExecutor implements IPathExecutor, Helper {
             return true; // stop bugging me, I'm done
         }
         Movement movement = (Movement) path.movements().get(pathPosition);
-        BetterBlockPos whereAmI = ctx.playerFeet();
+        BetterBlockPos whereAmI = ctx.feetPos();
         if (!movement.getValidPositions().contains(whereAmI)) {
             for (int i = 0; i < pathPosition && i < path.length(); i++) {//this happens for example when you lag out and get teleported back a couple blocks
                 if (((Movement) path.movements().get(i)).getValidPositions().contains(whereAmI)) {
@@ -276,11 +276,11 @@ public class PathExecutor implements IPathExecutor, Helper {
         if (!ctx.entity().isOnGround()) {
             return false;
         }
-        if (!MovementHelper.canWalkOn(ctx, ctx.playerFeet().down())) {
+        if (!MovementHelper.canWalkOn(ctx, ctx.feetPos().down())) {
             // we're in some kind of sketchy situation, maybe parkouring
             return false;
         }
-        if (!MovementHelper.canWalkThrough(ctx, ctx.playerFeet()) || !MovementHelper.canWalkThrough(ctx, ctx.playerFeet().up())) {
+        if (!MovementHelper.canWalkThrough(ctx, ctx.feetPos()) || !MovementHelper.canWalkThrough(ctx, ctx.feetPos().up())) {
             // suffocating?
             return false;
         }
@@ -298,7 +298,7 @@ public class PathExecutor implements IPathExecutor, Helper {
         // the first block of the next path will always overlap
         // no need to pause our very last movement when it would have otherwise cleanly exited with MovementStatus SUCCESS
         positions = positions.subList(1, positions.size());
-        return positions.contains(ctx.playerFeet());
+        return positions.contains(ctx.feetPos());
     }
 
     private boolean possiblyOffPath(Pair<Double, BlockPos> status, double leniency) {
@@ -322,7 +322,7 @@ public class PathExecutor implements IPathExecutor, Helper {
      * @return Whether or not it was possible to snap to the current player feet
      */
     public boolean snipsnapifpossible() {
-        if (!ctx.entity().isOnGround() && ctx.world().getFluidState(ctx.playerFeet()).isEmpty()) {
+        if (!ctx.entity().isOnGround() && ctx.world().getFluidState(ctx.feetPos()).isEmpty()) {
             // if we're falling in the air, and not in water, don't splice
             return false;
         } else {
@@ -333,7 +333,7 @@ public class PathExecutor implements IPathExecutor, Helper {
                 return false; // so don't
             }
         }
-        int index = path.positions().indexOf(ctx.playerFeet());
+        int index = path.positions().indexOf(ctx.feetPos());
         if (index == -1) {
             return false;
         }
@@ -396,7 +396,7 @@ public class PathExecutor implements IPathExecutor, Helper {
                     return true;
                 }
                 if (canSprintFromDescendInto(ctx, current, next)) {
-                    if (ctx.playerFeet().equals(current.getDest())) {
+                    if (ctx.feetPos().equals(current.getDest())) {
                         pathPosition++;
                         onChangeInPathPosition();
                         onTick();
@@ -429,14 +429,14 @@ public class PathExecutor implements IPathExecutor, Helper {
                 if (!path.positions().contains(fallDest)) {
                     throw new IllegalStateException();
                 }
-                if (ctx.playerFeet().equals(fallDest)) {
+                if (ctx.feetPos().equals(fallDest)) {
                     pathPosition = path.positions().indexOf(fallDest);
                     onChangeInPathPosition();
                     onTick();
                     return true;
                 }
                 clearKeys();
-                behavior.baritone.getLookBehavior().updateTarget(RotationUtils.calcRotationFromVec3d(ctx.playerHead(), data.getLeft(), ctx.playerRotations()), false);
+                behavior.baritone.getLookBehavior().updateTarget(RotationUtils.calcRotationFromVec3d(ctx.headPos(), data.getLeft(), ctx.entityRotations()), false);
                 behavior.baritone.getInputOverrideHandler().setInputForceState(Input.MOVE_FORWARD, true);
                 return true;
             }
@@ -483,7 +483,7 @@ public class PathExecutor implements IPathExecutor, Helper {
                 movement.getDest().add(flatDir.getX() * (i - pathPosition), 0, flatDir.getZ() * (i - pathPosition)));
     }
 
-    private static boolean skipNow(IPlayerContext ctx, IMovement current) {
+    private static boolean skipNow(IEntityContext ctx, IMovement current) {
         double offTarget = Math.abs(current.getDirection().getX() * (current.getSrc().z + 0.5D - ctx.entity().getZ())) + Math.abs(current.getDirection().getZ() * (current.getSrc().x + 0.5D - ctx.entity().getX()));
         if (offTarget > 0.1) {
             return false;
@@ -498,7 +498,7 @@ public class PathExecutor implements IPathExecutor, Helper {
         return flatDist > 0.8;
     }
 
-    private static boolean sprintableAscend(IPlayerContext ctx, MovementTraverse current, MovementAscend next, IMovement nextnext) {
+    private static boolean sprintableAscend(IEntityContext ctx, MovementTraverse current, MovementAscend next, IMovement nextnext) {
         if (!Baritone.settings().sprintAscends.value) {
             return false;
         }
@@ -534,7 +534,7 @@ public class PathExecutor implements IPathExecutor, Helper {
         return !MovementHelper.avoidWalkingInto(ctx.world().getBlockState(next.getDest().up(2))); // codacy smh my head
     }
 
-    private static boolean canSprintFromDescendInto(IPlayerContext ctx, IMovement current, IMovement next) {
+    private static boolean canSprintFromDescendInto(IEntityContext ctx, IMovement current, IMovement next) {
         if (next instanceof MovementDescend && next.getDirection().equals(current.getDirection())) {
             return true;
         }

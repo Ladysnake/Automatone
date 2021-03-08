@@ -19,10 +19,10 @@ package baritone.api.utils;
 
 import baritone.api.cache.IWorldData;
 import net.minecraft.block.SlabBlock;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
@@ -37,7 +37,7 @@ import java.util.stream.StreamSupport;
  * @author Brady
  * @since 11/12/2018
  */
-public interface IPlayerContext {
+public interface IEntityContext {
 
     LivingEntity entity();
 
@@ -47,12 +47,12 @@ public interface IPlayerContext {
 
     World world();
 
-    default Iterable<Entity> entities() {
-        return ((ClientWorld) world()).getEntities();
+    default Iterable<Entity> worldEntities() {
+        return ((ServerWorld) world()).iterateEntities();
     }
 
-    default Stream<Entity> entitiesStream() {
-        return StreamSupport.stream(entities().spliterator(), false);
+    default Stream<Entity> worldEntitiesStream() {
+        return StreamSupport.stream(worldEntities().spliterator(), false);
     }
 
 
@@ -60,7 +60,7 @@ public interface IPlayerContext {
 
     HitResult objectMouseOver();
 
-    default BetterBlockPos playerFeet() {
+    default BetterBlockPos feetPos() {
         // TODO find a better way to deal with soul sand!!!!!
         BetterBlockPos feet = new BetterBlockPos(entity().getX(), entity().getY() + 0.1251, entity().getZ());
 
@@ -81,15 +81,15 @@ public interface IPlayerContext {
         return feet;
     }
 
-    default Vec3d playerFeetAsVec() {
+    default Vec3d feetPosAsVec() {
         return new Vec3d(entity().getX(), entity().getY(), entity().getZ());
     }
 
-    default Vec3d playerHead() {
+    default Vec3d headPos() {
         return new Vec3d(entity().getX(), entity().getY() + entity().getStandingEyeHeight(), entity().getZ());
     }
 
-    default Rotation playerRotations() {
+    default Rotation entityRotations() {
         return new Rotation(entity().yaw, entity().pitch);
     }
 

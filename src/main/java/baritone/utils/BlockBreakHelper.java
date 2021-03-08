@@ -18,7 +18,7 @@
 package baritone.utils;
 
 import baritone.api.utils.Helper;
-import baritone.api.utils.IPlayerContext;
+import baritone.api.utils.IEntityContext;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -29,10 +29,10 @@ import net.minecraft.util.hit.HitResult;
  */
 public final class BlockBreakHelper implements Helper {
 
-    private final IPlayerContext ctx;
+    private final IEntityContext ctx;
     private boolean didBreakLastTick;
 
-    BlockBreakHelper(IPlayerContext ctx) {
+    BlockBreakHelper(IEntityContext ctx) {
         this.ctx = ctx;
     }
 

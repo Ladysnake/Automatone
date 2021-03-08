@@ -20,7 +20,7 @@ package baritone.utils.player;
 import baritone.api.BaritoneAPI;
 import baritone.api.cache.IWorldData;
 import baritone.api.utils.Helper;
-import baritone.api.utils.IPlayerContext;
+import baritone.api.utils.IEntityContext;
 import baritone.api.utils.IPlayerController;
 import baritone.api.utils.RayTraceUtils;
 import net.minecraft.entity.LivingEntity;
@@ -30,12 +30,12 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Implementation of {@link IPlayerContext} that provides information about the primary player.
+ * Implementation of {@link IEntityContext} that provides information about the primary player.
  *
  * @author Brady
  * @since 11/12/2018
  */
-public enum PrimaryPlayerContext implements IPlayerContext, Helper {
+public enum PrimaryPlayerContext implements IEntityContext, Helper {
 
     INSTANCE;
 
@@ -67,6 +67,6 @@ public enum PrimaryPlayerContext implements IPlayerContext, Helper {
 
     @Override
     public HitResult objectMouseOver() {
-        return RayTraceUtils.rayTraceTowards(entity(), playerRotations(), playerController().getBlockReachDistance());
+        return RayTraceUtils.rayTraceTowards(entity(), entityRotations(), playerController().getBlockReachDistance());
     }
 }

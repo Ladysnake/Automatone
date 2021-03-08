@@ -18,7 +18,7 @@
 package baritone.api.command;
 
 import baritone.api.IBaritone;
-import baritone.api.utils.IPlayerContext;
+import baritone.api.utils.IEntityContext;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 /**
  * A default implementation of {@link ICommand} which provides easy access to the
- * command's bound {@link IBaritone} instance, {@link IPlayerContext} and an easy
+ * command's bound {@link IBaritone} instance, {@link IEntityContext} and an easy
  * way to provide multiple valid command execution names through the default constructor.
  * <p>
  * So basically, you should use it because it provides a small amount of boilerplate,
@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 public abstract class Command implements ICommand {
 
     protected IBaritone baritone;
-    protected IPlayerContext ctx;
+    protected IEntityContext ctx;
 
     /**
      * The names of this command. This is what you put after the command prefix.

@@ -32,8 +32,8 @@ import baritone.command.ExampleBaritoneControl;
 import baritone.selection.SelectionManager;
 import baritone.selection.SelectionRenderer;
 import baritone.utils.PathRenderer;
+import baritone.utils.player.EntityContext;
 import baritone.utils.player.PrimaryPlayerContext;
-import baritone.utils.player.ServerPlayerContext;
 import baritone.utils.schematic.SchematicSystem;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -87,7 +87,7 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
         if (!(entity instanceof ServerPlayerEntity)) throw new IllegalStateException("Lol we only support servers now");
         ServerPlayerEntity player = (ServerPlayerEntity) entity;
         return all.computeIfAbsent(player, p -> {
-            Baritone baritone = new Baritone(new ServerPlayerContext(p), this.worldProviders.get(entity.world.getRegistryKey()));
+            Baritone baritone = new Baritone(new EntityContext(p), this.worldProviders.get(entity.world.getRegistryKey()));
             baritone.getGameEventHandler().registerEventListener(new ExampleBaritoneControl(baritone.getCommandManager()));
             return baritone;
         });

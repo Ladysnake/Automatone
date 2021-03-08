@@ -20,12 +20,12 @@ package baritone.utils;
 import baritone.Baritone;
 import baritone.api.process.IBaritoneProcess;
 import baritone.api.utils.Helper;
-import baritone.api.utils.IPlayerContext;
+import baritone.api.utils.IEntityContext;
 
 public abstract class BaritoneProcessHelper implements IBaritoneProcess, Helper {
 
     protected final Baritone baritone;
-    protected final IPlayerContext ctx;
+    protected final IEntityContext ctx;
 
     public BaritoneProcessHelper(Baritone baritone) {
         this.baritone = baritone;

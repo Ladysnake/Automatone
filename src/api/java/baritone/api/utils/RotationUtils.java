@@ -143,11 +143,11 @@ public final class RotationUtils {
      * @return The optional rotation
      * @see #reachable(LivingEntity, BlockPos, double)
      */
-    public static Optional<Rotation> reachable(IPlayerContext ctx, BlockPos pos) {
+    public static Optional<Rotation> reachable(IEntityContext ctx, BlockPos pos) {
         return reachable(ctx.entity(), pos, ctx.playerController().getBlockReachDistance());
     }
 
-    public static Optional<Rotation> reachable(IPlayerContext ctx, BlockPos pos, boolean wouldSneak) {
+    public static Optional<Rotation> reachable(IEntityContext ctx, BlockPos pos, boolean wouldSneak) {
         return reachable(ctx.entity(), pos, ctx.playerController().getBlockReachDistance(), wouldSneak);
     }
 

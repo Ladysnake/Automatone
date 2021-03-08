@@ -19,7 +19,7 @@ package baritone.utils;
 
 import baritone.Baritone;
 import baritone.api.utils.Helper;
-import baritone.api.utils.IPlayerContext;
+import baritone.api.utils.IEntityContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.util.ActionResult;
@@ -29,10 +29,10 @@ import net.minecraft.util.hit.HitResult;
 
 public class BlockPlaceHelper implements Helper {
 
-    private final IPlayerContext ctx;
+    private final IEntityContext ctx;
     private int rightClickTimer;
 
-    BlockPlaceHelper(IPlayerContext playerContext) {
+    BlockPlaceHelper(IEntityContext playerContext) {
         this.ctx = playerContext;
     }
 

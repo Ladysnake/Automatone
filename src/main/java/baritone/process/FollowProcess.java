@@ -76,11 +76,11 @@ public final class FollowProcess extends BaritoneProcessHelper implements IFollo
         if (entity.equals(ctx.entity())) {
             return false;
         }
-        return ctx.entitiesStream().anyMatch(entity::equals);
+        return entity.equals(ctx.world().getEntityById(entity.getEntityId()));
     }
 
     private void scanWorld() {
-        cache = ctx.entitiesStream()
+        cache = ctx.worldEntitiesStream()
                 .filter(this::followable)
                 .filter(this.filter)
                 .distinct()

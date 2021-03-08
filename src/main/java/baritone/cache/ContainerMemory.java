@@ -20,7 +20,6 @@ package baritone.cache;
 import baritone.Baritone;
 import baritone.api.cache.IContainerMemory;
 import baritone.api.cache.IRememberedInventory;
-import baritone.api.utils.IPlayerContext;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.item.ItemStack;

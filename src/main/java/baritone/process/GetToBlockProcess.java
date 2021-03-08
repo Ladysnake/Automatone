@@ -56,7 +56,7 @@ public final class GetToBlockProcess extends BaritoneProcessHelper implements IG
     public void getToBlock(BlockOptionalMeta block) {
         onLostControl();
         gettingTo = block;
-        start = ctx.playerFeet();
+        start = ctx.feetPos();
         blacklist = new ArrayList<>();
         arrivalTickCount = 0;
         rescan(new ArrayList<>(), new CalculationContext(baritone));
@@ -107,7 +107,7 @@ public final class GetToBlockProcess extends BaritoneProcessHelper implements IG
             CalculationContext context = new CalculationContext(baritone, true);
             Baritone.getExecutor().execute(() -> rescan(current, context));
         }
-        if (goal.isInGoal(ctx.playerFeet()) && goal.isInGoal(baritone.getPathingBehavior().pathStart()) && isSafeToCancel) {
+        if (goal.isInGoal(ctx.feetPos()) && goal.isInGoal(baritone.getPathingBehavior().pathStart()) && isSafeToCancel) {
             // we're there
             if (rightClickOnArrival(gettingTo.getBlock())) {
                 if (rightClick()) {
@@ -125,7 +125,7 @@ public final class GetToBlockProcess extends BaritoneProcessHelper implements IG
     // blacklist the closest block and its adjacent blocks
     public synchronized boolean blacklistClosest() {
         List<BlockPos> newBlacklist = new ArrayList<>();
-        knownLocations.stream().min(Comparator.comparingDouble(ctx.playerFeet()::getSquaredDistance)).ifPresent(newBlacklist::add);
+        knownLocations.stream().min(Comparator.comparingDouble(ctx.feetPos()::getSquaredDistance)).ifPresent(newBlacklist::add);
         outer:
         while (true) {
             for (BlockPos known : knownLocations) {

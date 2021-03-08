@@ -79,7 +79,7 @@ public class SelCommand extends Command {
             if (action == Action.POS2 && pos1 == null) {
                 throw new CommandInvalidStateException("Set pos1 first before using pos2");
             }
-            BetterBlockPos playerPos = ((ServerPlayerEntity) ctx.entity()).getCameraEntity() != null ? BetterBlockPos.from(((ServerPlayerEntity) ctx.entity()).getCameraEntity().getBlockPos()) : ctx.playerFeet();
+            BetterBlockPos playerPos = ((ServerPlayerEntity) ctx.entity()).getCameraEntity() != null ? BetterBlockPos.from(((ServerPlayerEntity) ctx.entity()).getCameraEntity().getBlockPos()) : ctx.feetPos();
             BetterBlockPos pos = args.hasAny() ? args.getDatatypePost(RelativeBlockPos.INSTANCE, playerPos) : playerPos;
             args.requireMax(0);
             if (action == Action.POS1) {

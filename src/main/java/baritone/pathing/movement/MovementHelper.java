@@ -81,7 +81,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         return !state.getFluidState().isEmpty();
     }
 
-    static boolean canWalkThrough(IPlayerContext ctx, BetterBlockPos pos) {
+    static boolean canWalkThrough(IEntityContext ctx, BetterBlockPos pos) {
         return canWalkThrough(new BlockStateInterface(ctx), pos.x, pos.y, pos.z);
     }
 
@@ -163,7 +163,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         );
     }
 
-    static boolean fullyPassable(IPlayerContext ctx, BlockPos pos) {
+    static boolean fullyPassable(IEntityContext ctx, BlockPos pos) {
         return fullyPassable(ctx.world(), pos, ctx.world().getBlockState(pos));
     }
 
@@ -227,7 +227,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         return isReplaceable(x, y, z, state, bsi);
     }
 
-    static boolean isDoorPassable(IPlayerContext ctx, BlockPos doorPos, BlockPos playerPos) {
+    static boolean isDoorPassable(IEntityContext ctx, BlockPos doorPos, BlockPos playerPos) {
         if (playerPos.equals(doorPos)) {
             return false;
         }
@@ -240,7 +240,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         return isHorizontalBlockPassable(doorPos, state, playerPos, DoorBlock.OPEN);
     }
 
-    static boolean isGatePassable(IPlayerContext ctx, BlockPos gatePos, BlockPos playerPos) {
+    static boolean isGatePassable(IEntityContext ctx, BlockPos gatePos, BlockPos playerPos) {
         if (playerPos.equals(gatePos)) {
             return false;
         }
@@ -346,15 +346,15 @@ public interface MovementHelper extends ActionCosts, Helper {
         return block instanceof StairsBlock;
     }
 
-    static boolean canWalkOn(IPlayerContext ctx, BetterBlockPos pos, BlockState state) {
+    static boolean canWalkOn(IEntityContext ctx, BetterBlockPos pos, BlockState state) {
         return canWalkOn(new BlockStateInterface(ctx), pos.x, pos.y, pos.z, state);
     }
 
-    static boolean canWalkOn(IPlayerContext ctx, BlockPos pos) {
+    static boolean canWalkOn(IEntityContext ctx, BlockPos pos) {
         return canWalkOn(new BlockStateInterface(ctx), pos.getX(), pos.getY(), pos.getZ());
     }
 
-    static boolean canWalkOn(IPlayerContext ctx, BetterBlockPos pos) {
+    static boolean canWalkOn(IEntityContext ctx, BetterBlockPos pos) {
         return canWalkOn(new BlockStateInterface(ctx), pos.x, pos.y, pos.z);
     }
 
@@ -370,7 +370,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         return canPlaceAgainst(bsi, pos.getX(), pos.getY(), pos.getZ());
     }
 
-    static boolean canPlaceAgainst(IPlayerContext ctx, BlockPos pos) {
+    static boolean canPlaceAgainst(IEntityContext ctx, BlockPos pos) {
         return canPlaceAgainst(new BlockStateInterface(ctx), pos);
     }
 
@@ -430,7 +430,7 @@ public interface MovementHelper extends ActionCosts, Helper {
      * @param ctx The player context
      * @param b   the blockstate to mine
      */
-    static void switchToBestToolFor(IPlayerContext ctx, BlockState b) {
+    static void switchToBestToolFor(IEntityContext ctx, BlockState b) {
         LivingEntity entity = ctx.entity();
         if (entity instanceof PlayerEntity) {
             switchToBestToolFor(ctx, b, new ToolSet((PlayerEntity) entity), BaritoneAPI.getSettings().preferSilkTouch.value);
@@ -444,7 +444,7 @@ public interface MovementHelper extends ActionCosts, Helper {
      * @param b   the blockstate to mine
      * @param ts  previously calculated ToolSet
      */
-    static void switchToBestToolFor(IPlayerContext ctx, BlockState b, ToolSet ts, boolean preferSilkTouch) {
+    static void switchToBestToolFor(IEntityContext ctx, BlockState b, ToolSet ts, boolean preferSilkTouch) {
         PlayerInventory inventory = ctx.inventory();
 
         if (inventory != null && !Baritone.settings().disableAutoTool.value && !Baritone.settings().assumeExternalAutoTool.value) {
@@ -452,11 +452,11 @@ public interface MovementHelper extends ActionCosts, Helper {
         }
     }
 
-    static void moveTowards(IPlayerContext ctx, MovementState state, BlockPos pos) {
+    static void moveTowards(IEntityContext ctx, MovementState state, BlockPos pos) {
         state.setTarget(new MovementTarget(
-                new Rotation(RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
+                new Rotation(RotationUtils.calcRotationFromVec3d(ctx.headPos(),
                         VecUtils.getBlockPosCenter(pos),
-                        ctx.playerRotations()).getYaw(), ctx.entity().pitch),
+                        ctx.entityRotations()).getYaw(), ctx.entity().pitch),
                 false
         )).setInput(Input.MOVE_FORWARD, true);
     }
@@ -481,7 +481,7 @@ public interface MovementHelper extends ActionCosts, Helper {
      * @param bp  The block pos
      * @return Whether or not the block is water
      */
-    static boolean isWater(IPlayerContext ctx, BlockPos bp) {
+    static boolean isWater(IEntityContext ctx, BlockPos bp) {
         return isWater(BlockStateInterface.get(ctx, bp));
     }
 
@@ -497,7 +497,7 @@ public interface MovementHelper extends ActionCosts, Helper {
      * @param p   The pos
      * @return Whether or not the block is a liquid
      */
-    static boolean isLiquid(IPlayerContext ctx, BlockPos p) {
+    static boolean isLiquid(IEntityContext ctx, BlockPos p) {
         return isLiquid(BlockStateInterface.get(ctx, p));
     }
 
@@ -537,7 +537,7 @@ public interface MovementHelper extends ActionCosts, Helper {
     }
 
     static PlaceResult attemptToPlaceABlock(MovementState state, IBaritone baritone, BlockPos placeAt, boolean preferDown, boolean wouldSneak) {
-        IPlayerContext ctx = baritone.getPlayerContext();
+        IEntityContext ctx = baritone.getPlayerContext();
         Optional<Rotation> direct = RotationUtils.reachable(ctx, placeAt, wouldSneak); // we assume that if there is a block there, it must be replacable
         boolean found = false;
         if (direct.isPresent()) {
@@ -555,7 +555,7 @@ public interface MovementHelper extends ActionCosts, Helper {
                 double faceX = (placeAt.getX() + against1.getX() + 1.0D) * 0.5D;
                 double faceY = (placeAt.getY() + against1.getY() + 0.5D) * 0.5D;
                 double faceZ = (placeAt.getZ() + against1.getZ() + 1.0D) * 0.5D;
-                Rotation place = RotationUtils.calcRotationFromVec3d(wouldSneak ? RayTraceUtils.inferSneakingEyePosition(ctx.entity()) : ctx.playerHead(), new Vec3d(faceX, faceY, faceZ), ctx.playerRotations());
+                Rotation place = RotationUtils.calcRotationFromVec3d(wouldSneak ? RayTraceUtils.inferSneakingEyePosition(ctx.entity()) : ctx.headPos(), new Vec3d(faceX, faceY, faceZ), ctx.entityRotations());
                 HitResult res = RayTraceUtils.rayTraceTowards(ctx.entity(), place, ctx.playerController().getBlockReachDistance(), wouldSneak);
                 if (res != null && res.getType() == HitResult.Type.BLOCK && ((BlockHitResult) res).getBlockPos().equals(against1) && ((BlockHitResult) res).getBlockPos().offset(((BlockHitResult) res).getSide()).equals(placeAt)) {
                     state.setTarget(new MovementState.MovementTarget(place, true));

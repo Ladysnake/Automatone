@@ -198,7 +198,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
     }
 
     private Optional<Pair<BetterBlockPos, Rotation>> toBreakNearPlayer(BuilderCalculationContext bcc) {
-        BetterBlockPos center = ctx.playerFeet();
+        BetterBlockPos center = ctx.feetPos();
         BetterBlockPos pathStart = baritone.getPathingBehavior().pathStart();
         for (int dx = -5; dx <= 5; dx++) {
             for (int dy = Baritone.settings().breakFromAbove.value ? -1 : 0; dy <= 5; dy++) {
@@ -243,7 +243,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
     }
 
     private Optional<Placement> searchForPlacables(BuilderCalculationContext bcc, List<BlockState> desirableOnHotbar) {
-        BetterBlockPos center = ctx.playerFeet();
+        BetterBlockPos center = ctx.feetPos();
         for (int dx = -5; dx <= 5; dx++) {
             for (int dy = -5; dy <= 1; dy++) {
                 for (int dz = -5; dz <= 5; dz++) {
@@ -294,7 +294,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
                 double placeX = placeAgainstPos.x + aabb.minX * placementMultiplier.x + aabb.maxX * (1 - placementMultiplier.x);
                 double placeY = placeAgainstPos.y + aabb.minY * placementMultiplier.y + aabb.maxY * (1 - placementMultiplier.y);
                 double placeZ = placeAgainstPos.z + aabb.minZ * placementMultiplier.z + aabb.maxZ * (1 - placementMultiplier.z);
-                Rotation rot = RotationUtils.calcRotationFromVec3d(RayTraceUtils.inferSneakingEyePosition(ctx.entity()), new Vec3d(placeX, placeY, placeZ), ctx.playerRotations());
+                Rotation rot = RotationUtils.calcRotationFromVec3d(RayTraceUtils.inferSneakingEyePosition(ctx.entity()), new Vec3d(placeX, placeY, placeZ), ctx.entityRotations());
                 HitResult result = RayTraceUtils.rayTraceTowards(ctx.entity(), rot, ctx.playerController().getBlockReachDistance(), true);
                 if (result != null && result.getType() == HitResult.Type.BLOCK && ((BlockHitResult) result).getBlockPos().equals(placeAgainstPos) && ((BlockHitResult) result).getSide() == against.getOpposite()) {
                     OptionalInt hotbar = hasAnyItemThatWouldPlace(toPlace, result, rot);
@@ -465,7 +465,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
                 // and is unable since it's unsneaked in the intermediary tick
                 baritone.getInputOverrideHandler().setInputForceState(Input.SNEAK, true);
             }
-            if (ctx.isLookingAt(pos) || ctx.playerRotations().isReallyCloseTo(rot)) {
+            if (ctx.isLookingAt(pos) || ctx.entityRotations().isReallyCloseTo(rot)) {
                 baritone.getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, true);
             }
             return new PathingCommand(null, PathingCommandType.CANCEL_AND_SET_GOAL);
@@ -477,7 +477,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
             baritone.getLookBehavior().updateTarget(rot, true);
             inventory.selectedSlot = toPlace.get().hotbarSelection;
             baritone.getInputOverrideHandler().setInputForceState(Input.SNEAK, true);
-            if ((ctx.isLookingAt(toPlace.get().placeAgainst) && ((BlockHitResult) ctx.objectMouseOver()).getSide().equals(toPlace.get().side)) || ctx.playerRotations().isReallyCloseTo(rot)) {
+            if ((ctx.isLookingAt(toPlace.get().placeAgainst) && ((BlockHitResult) ctx.objectMouseOver()).getSide().equals(toPlace.get().side)) || ctx.entityRotations().isReallyCloseTo(rot)) {
                 baritone.getInputOverrideHandler().setInputForceState(Input.CLICK_RIGHT, true);
             }
             return new PathingCommand(null, PathingCommandType.CANCEL_AND_SET_GOAL);
@@ -549,7 +549,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
     }
 
     private void recalcNearby(BuilderCalculationContext bcc) {
-        BetterBlockPos center = ctx.playerFeet();
+        BetterBlockPos center = ctx.feetPos();
         int radius = Baritone.settings().builderTickScanRadius.value;
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dy = -radius; dy <= radius; dy++) {
@@ -801,7 +801,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
                 continue;
             }
             // <toxic cloud>
-            result.add(((BlockItem) stack.getItem()).getBlock().getPlacementState(new ItemPlacementContext(new ItemUsageContext(ctx.world(), player, Hand.MAIN_HAND, stack, new BlockHitResult(new Vec3d(ctx.entity().getX(), ctx.entity().getY(), ctx.entity().getZ()), Direction.UP, ctx.playerFeet(), false)) {})));
+            result.add(((BlockItem) stack.getItem()).getBlock().getPlacementState(new ItemPlacementContext(new ItemUsageContext(ctx.world(), player, Hand.MAIN_HAND, stack, new BlockHitResult(new Vec3d(ctx.entity().getX(), ctx.entity().getY(), ctx.entity().getZ()), Direction.UP, ctx.feetPos(), false)) {})));
             // </toxic cloud>
         }
         return result;

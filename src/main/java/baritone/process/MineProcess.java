@@ -91,7 +91,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
                 if (Baritone.settings().desktopNotifications.value && Baritone.settings().notificationOnMineFail.value) {
                     NotificationHelper.notify("Unable to find any path to " + filter + ", blacklisting presumably unreachable closest instance...", true);
                 }
-                knownOreLocations.stream().min(Comparator.comparingDouble(ctx.playerFeet()::getSquaredDistance)).ifPresent(blacklist::add);
+                knownOreLocations.stream().min(Comparator.comparingDouble(ctx.feetPos()::getSquaredDistance)).ifPresent(blacklist::add);
                 knownOreLocations.removeIf(blacklist::contains);
             } else {
                 logDirect("Unable to find any path to " + filter + ", canceling mine");
@@ -118,10 +118,10 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
             addNearby();
         }
         Optional<BlockPos> shaft = curr.stream()
-                .filter(pos -> pos.getX() == ctx.playerFeet().getX() && pos.getZ() == ctx.playerFeet().getZ())
-                .filter(pos -> pos.getY() >= ctx.playerFeet().getY())
+                .filter(pos -> pos.getX() == ctx.feetPos().getX() && pos.getZ() == ctx.feetPos().getZ())
+                .filter(pos -> pos.getY() >= ctx.feetPos().getY())
                 .filter(pos -> !(BlockStateInterface.get(ctx, pos).getBlock() instanceof AirBlock)) // after breaking a block, it takes mineGoalUpdateInterval ticks for it to actually update this list =(
-                .min(Comparator.comparingDouble(ctx.playerFeet()::getSquaredDistance));
+                .min(Comparator.comparingDouble(ctx.feetPos()::getSquaredDistance));
         baritone.getInputOverrideHandler().clearAllKeys();
         if (shaft.isPresent() && ctx.entity().isOnGround()) {
             BlockPos pos = shaft.get();
@@ -131,7 +131,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
                 if (rot.isPresent() && isSafeToCancel) {
                     baritone.getLookBehavior().updateTarget(rot.get(), true);
                     MovementHelper.switchToBestToolFor(ctx, ctx.world().getBlockState(pos));
-                    if (ctx.isLookingAt(pos) || ctx.playerRotations().isReallyCloseTo(rot.get())) {
+                    if (ctx.isLookingAt(pos) || ctx.entityRotations().isReallyCloseTo(rot.get())) {
                         baritone.getInputOverrideHandler().setInputForceState(Input.CLICK_LEFT, true);
                     }
                     return new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
@@ -201,7 +201,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
             } else {
                 return new GoalYLevel(y);
             }*/
-            branchPoint = ctx.playerFeet();
+            branchPoint = ctx.feetPos();
         }
         // TODO shaft mode, mine 1x1 shafts to either side
         // TODO also, see if the GoalRunAway with maintain Y at 11 works even from the surface
@@ -334,7 +334,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
         for (BlockOptionalMeta bom : filter.blocks()) {
             Block block = bom.getBlock();
             if (CachedChunk.BLOCKS_TO_KEEP_TRACK_OF.contains(block)) {
-                BetterBlockPos pf = ctx.baritone.getPlayerContext().playerFeet();
+                BetterBlockPos pf = ctx.baritone.getPlayerContext().feetPos();
 
                 // maxRegionDistanceSq 2 means adjacent directly or adjacent diagonally; nothing further than that
                 locs.addAll(ctx.worldData.getCachedWorld().getLocationsOf(
@@ -369,7 +369,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
     private void addNearby() {
         List<BlockPos> dropped = droppedItemsScan();
         knownOreLocations.addAll(dropped);
-        BlockPos playerFeet = ctx.playerFeet();
+        BlockPos playerFeet = ctx.feetPos();
         BlockStateInterface bsi = new BlockStateInterface(ctx);
         int searchDist = 10;
         double fakedBlockReachDistance = 20; // at least 10 * sqrt(3) with some extra space to account for positioning within the block

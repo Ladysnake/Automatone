@@ -90,8 +90,8 @@ public class MovementFall extends Movement {
             return state;
         }
 
-        BlockPos playerFeet = ctx.playerFeet();
-        Rotation toDest = RotationUtils.calcRotationFromVec3d(ctx.playerHead(), VecUtils.getBlockPosCenter(dest), ctx.playerRotations());
+        BlockPos playerFeet = ctx.feetPos();
+        Rotation toDest = RotationUtils.calcRotationFromVec3d(ctx.headPos(), VecUtils.getBlockPosCenter(dest), ctx.entityRotations());
         Rotation targetRotation = null;
         BlockState destState = ctx.world().getBlockState(dest);
         Block destBlock = destState.getBlock();
@@ -157,14 +157,14 @@ public class MovementFall extends Movement {
         }
         if (targetRotation == null) {
             Vec3d destCenterOffset = new Vec3d(destCenter.x + 0.125 * avoid.getX(), destCenter.y, destCenter.z + 0.125 * avoid.getZ());
-            state.setTarget(new MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.playerHead(), destCenterOffset, ctx.playerRotations()), false));
+            state.setTarget(new MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.headPos(), destCenterOffset, ctx.entityRotations()), false));
         }
         return state;
     }
 
     private Direction avoid() {
         for (int i = 0; i < 15; i++) {
-            BlockState state = ctx.world().getBlockState(ctx.playerFeet().down(i));
+            BlockState state = ctx.world().getBlockState(ctx.feetPos().down(i));
             if (state.getBlock() == Blocks.LADDER) {
                 return state.get(LadderBlock.FACING);
             }
@@ -176,7 +176,7 @@ public class MovementFall extends Movement {
     public boolean safeToCancel(MovementState state) {
         // if we haven't started walking off the edge yet, or if we're in the process of breaking blocks before doing the fall
         // then it's safe to cancel this
-        return ctx.playerFeet().equals(src) || state.getStatus() != MovementStatus.RUNNING;
+        return ctx.feetPos().equals(src) || state.getStatus() != MovementStatus.RUNNING;
     }
 
     private static BetterBlockPos[] buildPositionsToBreak(BetterBlockPos src, BetterBlockPos dest) {

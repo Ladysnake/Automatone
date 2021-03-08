@@ -37,7 +37,7 @@ public class ThisWayCommand extends Command {
     public void execute(String label, IArgConsumer args) throws CommandException {
         args.requireExactly(1);
         GoalXZ goal = GoalXZ.fromDirection(
-                ctx.playerFeetAsVec(),
+                ctx.feetPosAsVec(),
                 ctx.entity().headYaw,
                 args.getAs(Double.class)
         );

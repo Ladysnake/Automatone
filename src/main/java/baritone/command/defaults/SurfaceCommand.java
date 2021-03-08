@@ -38,7 +38,7 @@ public class SurfaceCommand extends Command {
 
     @Override
     public void execute(String label, IArgConsumer args) throws CommandException {
-        final BetterBlockPos playerPos = baritone.getPlayerContext().playerFeet();
+        final BetterBlockPos playerPos = baritone.getPlayerContext().feetPos();
         final int surfaceLevel = baritone.getPlayerContext().world().getSeaLevel();
         final int worldHeight = baritone.getPlayerContext().world().getHeight();
 

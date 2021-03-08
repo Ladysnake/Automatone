@@ -38,7 +38,7 @@ public abstract class Movement implements IMovement, MovementHelper {
     public static final Direction[] HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN};
 
     protected final IBaritone baritone;
-    protected final IPlayerContext ctx;
+    protected final IEntityContext ctx;
 
     private MovementState currentState = new MovementState().setStatus(MovementStatus.PREPPING);
 
@@ -112,7 +112,7 @@ public abstract class Movement implements IMovement, MovementHelper {
     }
 
     protected boolean playerInValidPosition() {
-        return getValidPositions().contains(ctx.playerFeet()) || getValidPositions().contains(((PathingBehavior) baritone.getPathingBehavior()).pathStart());
+        return getValidPositions().contains(ctx.feetPos()) || getValidPositions().contains(((PathingBehavior) baritone.getPathingBehavior()).pathStart());
     }
 
     /**
@@ -127,7 +127,7 @@ public abstract class Movement implements IMovement, MovementHelper {
             ((PlayerEntity) ctx.entity()).abilities.flying = false;
         }
         currentState = updateState(currentState);
-        if (MovementHelper.isLiquid(ctx, ctx.playerFeet())) {
+        if (MovementHelper.isLiquid(ctx, ctx.feetPos())) {
             currentState.setInput(Input.JUMP, true);
         }
         if (ctx.entity().isInsideWall()) {
@@ -170,7 +170,7 @@ public abstract class Movement implements IMovement, MovementHelper {
                 if (reachable.isPresent()) {
                     Rotation rotTowardsBlock = reachable.get();
                     state.setTarget(new MovementState.MovementTarget(rotTowardsBlock, true));
-                    if (ctx.isLookingAt(blockPos) || ctx.playerRotations().isReallyCloseTo(rotTowardsBlock)) {
+                    if (ctx.isLookingAt(blockPos) || ctx.entityRotations().isReallyCloseTo(rotTowardsBlock)) {
                         state.setInput(Input.CLICK_LEFT, true);
                     }
                     return false;
@@ -179,8 +179,8 @@ public abstract class Movement implements IMovement, MovementHelper {
                 //i'm doing it anyway
                 //i dont care if theres snow in the way!!!!!!!
                 //you dont own me!!!!
-                state.setTarget(new MovementState.MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
-                        VecUtils.getBlockPosCenter(blockPos), ctx.playerRotations()), true)
+                state.setTarget(new MovementState.MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.headPos(),
+                        VecUtils.getBlockPosCenter(blockPos), ctx.entityRotations()), true)
                 );
                 // don't check selectedblock on this one, this is a fallback when we can't see any face directly, it's intended to be breaking the "incorrect" block
                 state.setInput(Input.CLICK_LEFT, true);

@@ -17,7 +17,7 @@
 
 package baritone.utils;
 
-import baritone.api.utils.IPlayerContext;
+import baritone.api.utils.IEntityContext;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -45,7 +45,7 @@ public class BlockStateInterface {
 
     private static final BlockState AIR = Blocks.AIR.getDefaultState();
 
-    public BlockStateInterface(IPlayerContext ctx) {
+    public BlockStateInterface(IEntityContext ctx) {
         this(ctx.world());
     }
 
@@ -60,11 +60,11 @@ public class BlockStateInterface {
         return provider.isChunkLoaded(blockX >> 4, blockZ >> 4);
     }
 
-    public static Block getBlock(IPlayerContext ctx, BlockPos pos) { // won't be called from the pathing thread because the pathing thread doesn't make a single blockpos pog
+    public static Block getBlock(IEntityContext ctx, BlockPos pos) { // won't be called from the pathing thread because the pathing thread doesn't make a single blockpos pog
         return get(ctx, pos).getBlock();
     }
 
-    public static BlockState get(IPlayerContext ctx, BlockPos pos) {
+    public static BlockState get(IEntityContext ctx, BlockPos pos) {
         return ctx.world().getBlockState(pos);
     }
 

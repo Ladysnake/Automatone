@@ -128,8 +128,8 @@ public class WaypointsCommand extends Command {
             }
             String name = args.hasAny() ? args.getString() : "";
             BetterBlockPos pos = args.hasAny()
-                    ? args.getDatatypePost(RelativeBlockPos.INSTANCE, ctx.playerFeet())
-                    : ctx.playerFeet();
+                    ? args.getDatatypePost(RelativeBlockPos.INSTANCE, ctx.feetPos())
+                    : ctx.feetPos();
             args.requireMax(0);
             IWaypoint waypoint = new Waypoint(name, tag, pos);
             ForWaypoints.waypoints(this.baritone).addWaypoint(waypoint);

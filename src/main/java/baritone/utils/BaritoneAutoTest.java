@@ -23,7 +23,7 @@ import baritone.api.event.listener.AbstractGameEventListener;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalBlock;
 import baritone.api.utils.Helper;
-import baritone.api.utils.IPlayerContext;
+import baritone.api.utils.IEntityContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.options.*;
@@ -90,7 +90,7 @@ public class BaritoneAutoTest implements AbstractGameEventListener, Helper {
 
     @Override
     public void onTickClient(TickEvent event) {
-        IPlayerContext ctx = BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext();
+        IEntityContext ctx = BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext();
         // If we're on the main menu then create the test world and launch the integrated server
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.currentScreen instanceof TitleScreen) {
@@ -142,7 +142,7 @@ public class BaritoneAutoTest implements AbstractGameEventListener, Helper {
 
             // Print out an update of our position every 5 seconds
             if (event.getCount() % 100 == 0) {
-                System.out.println(ctx.playerFeet() + " " + event.getCount());
+                System.out.println(ctx.feetPos() + " " + event.getCount());
             }
 
             // Setup Baritone's pathing goal and (if needed) begin pathing
@@ -151,8 +151,8 @@ public class BaritoneAutoTest implements AbstractGameEventListener, Helper {
             }
 
             // If we have reached our goal, print a message and safely close the game
-            if (GOAL.isInGoal(ctx.playerFeet())) {
-                System.out.println("Successfully pathed to " + ctx.playerFeet() + " in " + event.getCount() + " ticks");
+            if (GOAL.isInGoal(ctx.feetPos())) {
+                System.out.println("Successfully pathed to " + ctx.feetPos() + " in " + event.getCount() + " ticks");
                 try {
                     File file = new File("success");
                     System.out.println("Writing success to " + file.getAbsolutePath());

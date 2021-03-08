@@ -163,26 +163,26 @@ public class MovementPillar extends Movement {
             return state;
         }
 
-        if (ctx.playerFeet().y < src.y) {
+        if (ctx.feetPos().y < src.y) {
             return state.setStatus(MovementStatus.UNREACHABLE);
         }
 
         BlockState fromDown = BlockStateInterface.get(ctx, src);
         if (MovementHelper.isWater(fromDown) && MovementHelper.isWater(ctx, dest)) {
             // stay centered while swimming up a water column
-            state.setTarget(new MovementState.MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.playerHead(), VecUtils.getBlockPosCenter(dest), ctx.playerRotations()), false));
+            state.setTarget(new MovementState.MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.headPos(), VecUtils.getBlockPosCenter(dest), ctx.entityRotations()), false));
             Vec3d destCenter = VecUtils.getBlockPosCenter(dest);
             if (Math.abs(ctx.entity().getX() - destCenter.x) > 0.2 || Math.abs(ctx.entity().getZ() - destCenter.z) > 0.2) {
                 state.setInput(Input.MOVE_FORWARD, true);
             }
-            if (ctx.playerFeet().equals(dest)) {
+            if (ctx.feetPos().equals(dest)) {
                 return state.setStatus(MovementStatus.SUCCESS);
             }
             return state;
         }
         boolean ladder = fromDown.getBlock() == Blocks.LADDER || fromDown.getBlock() == Blocks.VINE;
         boolean vine = fromDown.getBlock() == Blocks.VINE;
-        Rotation rotation = RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
+        Rotation rotation = RotationUtils.calcRotationFromVec3d(ctx.headPos(),
                 VecUtils.getBlockPosCenter(positionToPlace),
                 new Rotation(ctx.entity().yaw, ctx.entity().pitch));
         if (!ladder) {
@@ -197,7 +197,7 @@ public class MovementPillar extends Movement {
                 return state.setStatus(MovementStatus.UNREACHABLE);
             }
 
-            if (ctx.playerFeet().equals(against.up()) || ctx.playerFeet().equals(dest)) {
+            if (ctx.feetPos().equals(against.up()) || ctx.feetPos().equals(dest)) {
                 return state.setStatus(MovementStatus.SUCCESS);
             }
             if (MovementHelper.isBottomSlab(BlockStateInterface.get(ctx, src.down()))) {
@@ -258,7 +258,7 @@ public class MovementPillar extends Movement {
         }
 
         // If we are at our goal and the block below us is placed
-        if (ctx.playerFeet().equals(dest) && blockIsThere) {
+        if (ctx.feetPos().equals(dest) && blockIsThere) {
             return state.setStatus(MovementStatus.SUCCESS);
         }
 
@@ -267,7 +267,7 @@ public class MovementPillar extends Movement {
 
     @Override
     protected boolean prepared(MovementState state) {
-        if (ctx.playerFeet().equals(src) || ctx.playerFeet().equals(src.down())) {
+        if (ctx.feetPos().equals(src) || ctx.feetPos().equals(src.down())) {
             Block block = BlockStateInterface.getBlock(ctx, src.down());
             if (block == Blocks.LADDER || block == Blocks.VINE) {
                 state.setInput(Input.SNEAK, true);

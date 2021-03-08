@@ -35,7 +35,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -211,7 +210,7 @@ public class MovementDescend extends Movement {
             return state;
         }
 
-        BlockPos playerFeet = ctx.playerFeet();
+        BlockPos playerFeet = ctx.feetPos();
         BlockPos fakeDest = new BlockPos(dest.getX() * 2 - src.getX(), dest.getY(), dest.getZ() * 2 - src.getZ());
         if ((playerFeet.equals(dest) || playerFeet.equals(fakeDest)) && (MovementHelper.isLiquid(ctx, dest) || ctx.entity().getY() - dest.getY() < 0.5)) { // lilypads
             // Wait until we're actually on the ground before saying we're done because sometimes we continue to fall if the next action starts immediately
@@ -225,7 +224,7 @@ public class MovementDescend extends Movement {
             double destZ = (src.getZ() + 0.5) * 0.17 + (dest.getZ() + 0.5) * 0.83;
             LivingEntity player = ctx.entity();
             state.setTarget(new MovementState.MovementTarget(
-                    new Rotation(RotationUtils.calcRotationFromVec3d(ctx.playerHead(),
+                    new Rotation(RotationUtils.calcRotationFromVec3d(ctx.headPos(),
                             new Vec3d(destX, dest.getY(), destZ),
                             new Rotation(player.yaw, player.pitch)).getYaw(), player.pitch),
                     false

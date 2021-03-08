@@ -19,7 +19,7 @@ package baritone.utils.pathing;
 
 import baritone.Baritone;
 import baritone.api.utils.BetterBlockPos;
-import baritone.api.utils.IPlayerContext;
+import baritone.api.utils.IEntityContext;
 import it.unimi.dsi.fastutil.longs.Long2DoubleOpenHashMap;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.MobEntity;
@@ -60,7 +60,7 @@ public class Avoidance {
         return xDiff * xDiff + yDiff * yDiff + zDiff * zDiff <= radiusSq ? coefficient : 1.0D;
     }
 
-    public static List<Avoidance> create(IPlayerContext ctx) {
+    public static List<Avoidance> create(IEntityContext ctx) {
         if (!Baritone.settings().avoidance.value) {
             return Collections.emptyList();
         }
@@ -69,7 +69,7 @@ public class Avoidance {
         double mobCoeff = Baritone.settings().mobAvoidanceCoefficient.value;
 
         if (mobCoeff != 1.0D) {
-            ctx.entitiesStream()
+            ctx.worldEntitiesStream()
                     .filter(entity -> entity instanceof MobEntity)
                     .filter(entity -> (!(entity instanceof SpiderEntity)) || ctx.entity().getBrightnessAtEyes() < 0.5)
                     .filter(entity -> !(entity instanceof ZombifiedPiglinEntity) || ((ZombifiedPiglinEntity) entity).getAttacker() != null)
