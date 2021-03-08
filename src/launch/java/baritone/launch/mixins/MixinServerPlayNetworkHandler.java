@@ -20,7 +20,8 @@ package baritone.launch.mixins;
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.event.events.ChatEvent;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -37,7 +38,8 @@ public class MixinServerPlayNetworkHandler {
     @Inject(method = "onGameMessage", at = @At("HEAD"), cancellable = true)
     private void receiveChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
         ChatEvent event = new ChatEvent(packet.getChatMessage());
-        IBaritone baritone = BaritoneAPI.getProvider().getBaritoneForPlayer(this.player);
+        Entity cameraEntity = this.player.getCameraEntity();
+        IBaritone baritone = BaritoneAPI.getProvider().getBaritone(cameraEntity instanceof LivingEntity ? (LivingEntity) cameraEntity : this.player);
         if (baritone == null) {
             return;
         }

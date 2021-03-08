@@ -168,7 +168,7 @@ public final class RotationUtils {
     }
 
     public static Optional<Rotation> reachable(LivingEntity entity, BlockPos pos, double blockReachDistance, boolean wouldSneak) {
-        IBaritone baritone = BaritoneAPI.getProvider().getBaritoneForPlayer(entity);
+        IBaritone baritone = BaritoneAPI.getProvider().getBaritone(entity);
         if (baritone.getPlayerContext().isLookingAt(pos)) {
             /*
              * why add 0.0001?

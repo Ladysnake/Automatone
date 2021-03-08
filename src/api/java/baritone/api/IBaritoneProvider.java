@@ -46,7 +46,7 @@ public interface IBaritoneProvider {
      * returned by {@link #getPrimaryBaritone()}.
      *
      * @return All active {@link IBaritone} instances.
-     * @see #getBaritoneForPlayer(LivingEntity)
+     * @see #getBaritone(LivingEntity)
      */
     Collection<IBaritone> getAllBaritones();
 
@@ -56,7 +56,7 @@ public interface IBaritoneProvider {
      * @param player The player
      * @return The {@link IBaritone} instance.
      */
-    IBaritone getBaritoneForPlayer(LivingEntity player);
+    IBaritone getBaritone(LivingEntity player);
 
     /**
      * Returns the {@link IWorldScanner} instance. This is not a type returned by

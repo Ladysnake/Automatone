@@ -19,13 +19,9 @@ package baritone.launch.mixins;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
-import baritone.api.event.events.ChatEvent;
 import baritone.api.event.events.PlayerUpdateEvent;
 import baritone.api.event.events.type.EventState;
-import baritone.behavior.LookBehavior;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -33,7 +29,6 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
@@ -52,7 +47,7 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity {
             at = @At(value = "HEAD")
     )
     private void onPreUpdate(CallbackInfo ci) {
-        IBaritone baritone = BaritoneAPI.getProvider().getBaritoneForPlayer(this);
+        IBaritone baritone = BaritoneAPI.getProvider().getBaritone(this);
         if (baritone != null) {
             baritone.getGameEventHandler().onPlayerUpdate(new PlayerUpdateEvent(EventState.PRE));
         }
@@ -63,7 +58,7 @@ public abstract class MixinServerPlayerEntity extends PlayerEntity {
             at = @At("RETURN")
     )
     private void onPostUpdate(CallbackInfo ci) {
-        IBaritone baritone = BaritoneAPI.getProvider().getBaritoneForPlayer(this);
+        IBaritone baritone = BaritoneAPI.getProvider().getBaritone(this);
         if (baritone != null) {
             baritone.getGameEventHandler().onPlayerUpdate(new PlayerUpdateEvent(EventState.POST));
         }

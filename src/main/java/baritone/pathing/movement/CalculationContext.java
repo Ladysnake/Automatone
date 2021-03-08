@@ -102,7 +102,7 @@ public class CalculationContext {
         this.allowDownward = Baritone.settings().allowDownward.value;
         this.maxFallHeightNoWater = Baritone.settings().maxFallHeightNoWater.value;
         this.maxFallHeightBucket = Baritone.settings().maxFallHeightBucket.value;
-        int depth = EnchantmentHelper.getDepthStrider(player);
+        int depth = EnchantmentHelper.getDepthStrider(entity);
         if (depth > 3) {
             depth = 3;
         }

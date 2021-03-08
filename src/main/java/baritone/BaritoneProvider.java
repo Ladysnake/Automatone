@@ -58,7 +58,7 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
     public static final BaritoneProvider INSTANCE = new BaritoneProvider();
 
     private final Map<RegistryKey<World>, WorldProvider> worldProviders = new HashMap<>();
-    private final Map<ServerPlayerEntity, IBaritone> all = new WeakHashMap<>();
+    private final Map<LivingEntity, IBaritone> all = new WeakHashMap<>();
     private Baritone clientBaritone;
     public ExampleBaritoneControl autocompleteHandler;
 
@@ -83,10 +83,9 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
     }
 
     @Override
-    public IBaritone getBaritoneForPlayer(LivingEntity entity) {
-        if (!(entity instanceof ServerPlayerEntity)) throw new IllegalStateException("Lol we only support servers now");
-        ServerPlayerEntity player = (ServerPlayerEntity) entity;
-        return all.computeIfAbsent(player, p -> {
+    public IBaritone getBaritone(LivingEntity entity) {
+        if (entity.world.isClient()) throw new IllegalStateException("Lol we only support servers now");
+        return all.computeIfAbsent(entity, p -> {
             Baritone baritone = new Baritone(new EntityContext(p), this.worldProviders.get(entity.world.getRegistryKey()));
             baritone.getGameEventHandler().registerEventListener(new ExampleBaritoneControl(baritone.getCommandManager()));
             return baritone;

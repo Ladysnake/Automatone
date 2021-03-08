@@ -32,9 +32,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class EntityContext implements IEntityContext {
 
-    private LivingEntity entity;
+    private final LivingEntity entity;
 
-    public EntityContext(ServerPlayerEntity entity) {
+    public EntityContext(LivingEntity entity) {
         this.entity = entity;
     }
 
@@ -60,7 +60,7 @@ public class EntityContext implements IEntityContext {
 
     @Override
     public IWorldData worldData() {
-        return BaritoneAPI.getProvider().getBaritoneForPlayer(this.entity).getPlayerContext().worldData();
+        return BaritoneAPI.getProvider().getBaritone(this.entity).getPlayerContext().worldData();
     }
 
     @Override
