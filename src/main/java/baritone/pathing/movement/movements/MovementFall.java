@@ -97,12 +97,13 @@ public class MovementFall extends Movement {
         Block destBlock = destState.getBlock();
         boolean isWater = destState.getFluidState().getFluid() instanceof WaterFluid;
         if (!isWater && willPlaceBucket() && !playerFeet.equals(dest)) {
-            if (!PlayerInventory.isValidHotbarIndex(ctx.player().inventory.getSlotWithStack(STACK_BUCKET_WATER)) || ctx.world().getRegistryKey() == World.NETHER) {
+            PlayerInventory inventory = ctx.inventory();
+            if (inventory == null || !PlayerInventory.isValidHotbarIndex(inventory.getSlotWithStack(STACK_BUCKET_WATER)) || ctx.world().getRegistryKey() == World.NETHER) {
                 return state.setStatus(MovementStatus.UNREACHABLE);
             }
 
-            if (ctx.player().getY() - dest.getY() < ctx.playerController().getBlockReachDistance() && !ctx.player().isOnGround()) {
-                ctx.player().inventory.selectedSlot = ctx.player().inventory.getSlotWithStack(STACK_BUCKET_WATER);
+            if (ctx.entity().getY() - dest.getY() < ctx.playerController().getBlockReachDistance() && !ctx.entity().isOnGround()) {
+                inventory.selectedSlot = inventory.getSlotWithStack(STACK_BUCKET_WATER);
 
                 targetRotation = new Rotation(toDest.getYaw(), 90.0F);
 
@@ -116,17 +117,19 @@ public class MovementFall extends Movement {
         } else {
             state.setTarget(new MovementTarget(toDest, false));
         }
-        if (playerFeet.equals(dest) && (ctx.player().getY() - playerFeet.getY() < 0.094 || isWater)) { // 0.094 because lilypads
+        if (playerFeet.equals(dest) && (ctx.entity().getY() - playerFeet.getY() < 0.094 || isWater)) { // 0.094 because lilypads
             if (isWater) { // only match water, not flowing water (which we cannot pick up with a bucket)
-                if (PlayerInventory.isValidHotbarIndex(ctx.player().inventory.getSlotWithStack(STACK_BUCKET_EMPTY))) {
-                    ctx.player().inventory.selectedSlot = ctx.player().inventory.getSlotWithStack(STACK_BUCKET_EMPTY);
-                    if (ctx.player().getVelocity().y >= 0) {
+                PlayerInventory inventory = ctx.inventory();
+
+                if (inventory != null && PlayerInventory.isValidHotbarIndex(inventory.getSlotWithStack(STACK_BUCKET_EMPTY))) {
+                    inventory.selectedSlot = inventory.getSlotWithStack(STACK_BUCKET_EMPTY);
+                    if (ctx.entity().getVelocity().y >= 0) {
                         return state.setInput(Input.CLICK_RIGHT, true);
                     } else {
                         return state;
                     }
                 } else {
-                    if (ctx.player().getVelocity().y >= 0) {
+                    if (ctx.entity().getVelocity().y >= 0) {
                         return state.setStatus(MovementStatus.SUCCESS);
                     } // don't else return state; we need to stay centered because this water might be flowing under the surface
                 }
@@ -135,8 +138,8 @@ public class MovementFall extends Movement {
             }
         }
         Vec3d destCenter = VecUtils.getBlockPosCenter(dest); // we are moving to the 0.5 center not the edge (like if we were falling on a ladder)
-        if (Math.abs(ctx.player().getX() + ctx.player().getVelocity().x - destCenter.x) > 0.1 || Math.abs(ctx.player().getZ() + ctx.player().getVelocity().z - destCenter.z) > 0.1) {
-            if (!ctx.player().isOnGround() && Math.abs(ctx.player().getVelocity().y) > 0.4) {
+        if (Math.abs(ctx.entity().getX() + ctx.entity().getVelocity().x - destCenter.x) > 0.1 || Math.abs(ctx.entity().getZ() + ctx.entity().getVelocity().z - destCenter.z) > 0.1) {
+            if (!ctx.entity().isOnGround() && Math.abs(ctx.entity().getVelocity().y) > 0.4) {
                 state.setInput(Input.SNEAK, true);
             }
             state.setInput(Input.MOVE_FORWARD, true);
@@ -145,10 +148,10 @@ public class MovementFall extends Movement {
         if (avoid == null) {
             avoid = src.subtract(dest);
         } else {
-            double dist = Math.abs(avoid.getX() * (destCenter.x - avoid.getX() / 2.0 - ctx.player().getX())) + Math.abs(avoid.getZ() * (destCenter.z - avoid.getZ() / 2.0 - ctx.player().getZ()));
+            double dist = Math.abs(avoid.getX() * (destCenter.x - avoid.getX() / 2.0 - ctx.entity().getX())) + Math.abs(avoid.getZ() * (destCenter.z - avoid.getZ() / 2.0 - ctx.entity().getZ()));
             if (dist < 0.6) {
                 state.setInput(Input.MOVE_FORWARD, true);
-            } else if (!ctx.player().isOnGround()) {
+            } else if (!ctx.entity().isOnGround()) {
                 state.setInput(Input.SNEAK, false);
             }
         }

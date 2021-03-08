@@ -26,6 +26,7 @@ import baritone.api.utils.input.Input;
 import baritone.behavior.PathingBehavior;
 import baritone.utils.BlockStateInterface;
 import net.minecraft.entity.FallingBlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -122,12 +123,14 @@ public abstract class Movement implements IMovement, MovementHelper {
      */
     @Override
     public MovementStatus update() {
-        ctx.player().abilities.flying = false;
+        if (ctx.entity() instanceof PlayerEntity) {
+            ((PlayerEntity) ctx.entity()).abilities.flying = false;
+        }
         currentState = updateState(currentState);
         if (MovementHelper.isLiquid(ctx, ctx.playerFeet())) {
             currentState.setInput(Input.JUMP, true);
         }
-        if (ctx.player().isInsideWall()) {
+        if (ctx.entity().isInsideWall()) {
             ctx.getSelectedBlock().ifPresent(pos -> MovementHelper.switchToBestToolFor(ctx, BlockStateInterface.get(ctx, pos)));
             currentState.setInput(Input.CLICK_LEFT, true);
         }
@@ -163,7 +166,7 @@ public abstract class Movement implements IMovement, MovementHelper {
             if (!MovementHelper.canWalkThrough(ctx, blockPos)) { // can't break air, so don't try
                 somethingInTheWay = true;
                 MovementHelper.switchToBestToolFor(ctx, BlockStateInterface.get(ctx, blockPos));
-                Optional<Rotation> reachable = RotationUtils.reachable(ctx.player(), blockPos, ctx.playerController().getBlockReachDistance());
+                Optional<Rotation> reachable = RotationUtils.reachable(ctx.entity(), blockPos, ctx.playerController().getBlockReachDistance());
                 if (reachable.isPresent()) {
                     Rotation rotTowardsBlock = reachable.get();
                     state.setTarget(new MovementState.MovementTarget(rotTowardsBlock, true));

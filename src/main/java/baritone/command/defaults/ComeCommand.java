@@ -40,7 +40,7 @@ public class ComeCommand extends Command {
     @Override
     public void execute(String label, IArgConsumer args) throws CommandException {
         args.requireMax(0);
-        Entity entity = ctx.world().getClosestEntityIncludingUngeneratedChunks(CreeperEntity.class, TargetPredicate.DEFAULT, ctx.player(), ctx.player().getX(), ctx.player().getY(), ctx.player().getZ(), ctx.player().getBoundingBox().expand(5));
+        Entity entity = ctx.world().getClosestEntityIncludingUngeneratedChunks(CreeperEntity.class, TargetPredicate.DEFAULT, ctx.entity(), ctx.entity().getX(), ctx.entity().getY(), ctx.entity().getZ(), ctx.entity().getBoundingBox().expand(5));
         if (entity == null) {
             throw new CommandInvalidStateException("render view entity is null");
         }

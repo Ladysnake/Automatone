@@ -21,11 +21,13 @@ import baritone.api.cache.IWorldData;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -37,7 +39,9 @@ import java.util.stream.StreamSupport;
  */
 public interface IPlayerContext {
 
-    PlayerEntity player();
+    LivingEntity entity();
+
+    @Nullable PlayerInventory inventory();
 
     IPlayerController playerController();
 
@@ -58,7 +62,7 @@ public interface IPlayerContext {
 
     default BetterBlockPos playerFeet() {
         // TODO find a better way to deal with soul sand!!!!!
-        BetterBlockPos feet = new BetterBlockPos(player().getX(), player().getY() + 0.1251, player().getZ());
+        BetterBlockPos feet = new BetterBlockPos(entity().getX(), entity().getY() + 0.1251, entity().getZ());
 
         // sometimes when calling this from another thread or while world is null, it'll throw a NullPointerException
         // that causes the game to immediately crash
@@ -78,15 +82,15 @@ public interface IPlayerContext {
     }
 
     default Vec3d playerFeetAsVec() {
-        return new Vec3d(player().getX(), player().getY(), player().getZ());
+        return new Vec3d(entity().getX(), entity().getY(), entity().getZ());
     }
 
     default Vec3d playerHead() {
-        return new Vec3d(player().getX(), player().getY() + player().getStandingEyeHeight(), player().getZ());
+        return new Vec3d(entity().getX(), entity().getY() + entity().getStandingEyeHeight(), entity().getZ());
     }
 
     default Rotation playerRotations() {
-        return new Rotation(player().yaw, player().pitch);
+        return new Rotation(entity().yaw, entity().pitch);
     }
 
     static double eyeHeight(boolean ifSneaking) {

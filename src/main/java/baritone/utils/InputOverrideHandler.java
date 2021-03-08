@@ -26,7 +26,6 @@ import baritone.behavior.Behavior;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.KeyboardInput;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -96,7 +95,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
         blockBreakHelper.tick(isInputForcedDown(Input.CLICK_LEFT));
         blockPlaceHelper.tick(isInputForcedDown(Input.CLICK_RIGHT));
 
-        ClientPlayerEntity player = (ClientPlayerEntity) ctx.player();
+        ClientPlayerEntity player = (ClientPlayerEntity) ctx.entity();
 
         if (inControl()) {
             if (player.input.getClass() != PlayerMovementInput.class) {

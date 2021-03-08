@@ -175,9 +175,5 @@ public class ContainerMemory implements IContainerMemory {
             return this.size;
         }
 
-        public void updateFromOpenWindow(IPlayerContext ctx) {
-            items.clear();
-            items.addAll(ctx.player().playerScreenHandler.getStacks().subList(0, size));
-        }
     }
 }

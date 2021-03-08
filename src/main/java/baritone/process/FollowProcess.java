@@ -73,7 +73,7 @@ public final class FollowProcess extends BaritoneProcessHelper implements IFollo
         if (!entity.isAlive()) {
             return false;
         }
-        if (entity.equals(ctx.player())) {
+        if (entity.equals(ctx.entity())) {
             return false;
         }
         return ctx.entitiesStream().anyMatch(entity::equals);

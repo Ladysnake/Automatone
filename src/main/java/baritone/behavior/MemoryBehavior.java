@@ -56,7 +56,7 @@ public final class MemoryBehavior extends Behavior {
 
     public EnderChestMemory getCurrent() {
         Path path = baritone.getWorldProvider().getCurrentWorld().directory;
-        return EnderChestMemory.getByServerAndPlayer(path.getParent(), ctx.player().getUuid());
+        return EnderChestMemory.getByServerAndPlayer(path.getParent(), ctx.entity().getUuid());
     }
 
     public static class EnderChestMemory {

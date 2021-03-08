@@ -230,9 +230,9 @@ public final class FarmProcess extends BaritoneProcessHelper implements IFarmPro
         both.addAll(openSoulsand);
         for (BlockPos pos : both) {
             boolean soulsand = openSoulsand.contains(pos);
-            Optional<Rotation> rot = RotationUtils.reachableOffset(ctx.player(), pos, new Vec3d(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5), ctx.playerController().getBlockReachDistance(), false);
+            Optional<Rotation> rot = RotationUtils.reachableOffset(ctx.entity(), pos, new Vec3d(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5), ctx.playerController().getBlockReachDistance(), false);
             if (rot.isPresent() && isSafeToCancel && baritone.getInventoryBehavior().throwaway(true, soulsand ? this::isNetherWart : this::isPlantable)) {
-                HitResult result = RayTraceUtils.rayTraceTowards(ctx.player(), rot.get(), ctx.playerController().getBlockReachDistance());
+                HitResult result = RayTraceUtils.rayTraceTowards(ctx.entity(), rot.get(), ctx.playerController().getBlockReachDistance());
                 if (result instanceof BlockHitResult && ((BlockHitResult) result).getSide() == Direction.UP) {
                     baritone.getLookBehavior().updateTarget(rot.get(), true);
                     if (ctx.isLookingAt(pos)) {

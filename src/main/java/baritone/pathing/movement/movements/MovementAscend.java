@@ -177,7 +177,7 @@ public class MovementAscend extends Movement {
             ticksWithoutPlacement++;
             if (MovementHelper.attemptToPlaceABlock(state, baritone, dest.down(), false, true) == PlaceResult.READY_TO_PLACE) {
                 state.setInput(Input.SNEAK, true);
-                if (ctx.player().isSneaking()) {
+                if (ctx.entity().isSneaking()) {
                     state.setInput(Input.CLICK_RIGHT, true);
                 }
             }
@@ -200,10 +200,10 @@ public class MovementAscend extends Movement {
 
         int xAxis = Math.abs(src.getX() - dest.getX()); // either 0 or 1
         int zAxis = Math.abs(src.getZ() - dest.getZ()); // either 0 or 1
-        double flatDistToNext = xAxis * Math.abs((dest.getX() + 0.5D) - ctx.player().getX()) + zAxis * Math.abs((dest.getZ() + 0.5D) - ctx.player().getZ());
-        double sideDist = zAxis * Math.abs((dest.getX() + 0.5D) - ctx.player().getX()) + xAxis * Math.abs((dest.getZ() + 0.5D) - ctx.player().getZ());
+        double flatDistToNext = xAxis * Math.abs((dest.getX() + 0.5D) - ctx.entity().getX()) + zAxis * Math.abs((dest.getZ() + 0.5D) - ctx.entity().getZ());
+        double sideDist = zAxis * Math.abs((dest.getX() + 0.5D) - ctx.entity().getX()) + xAxis * Math.abs((dest.getZ() + 0.5D) - ctx.entity().getZ());
 
-        double lateralMotion = xAxis * ctx.player().getVelocity().z + zAxis * ctx.player().getVelocity().x;
+        double lateralMotion = xAxis * ctx.entity().getVelocity().z + zAxis * ctx.entity().getVelocity().x;
         if (Math.abs(lateralMotion) > 0.1) {
             return state;
         }

@@ -72,26 +72,26 @@ public final class LookBehavior extends Behavior implements ILookBehavior {
         switch (event.getState()) {
             case PRE: {
                 if (this.force) {
-                    ctx.player().yaw = this.target.getYaw();
-                    float oldPitch = ctx.player().pitch;
+                    ctx.entity().yaw = this.target.getYaw();
+                    float oldPitch = ctx.entity().pitch;
                     float desiredPitch = this.target.getPitch();
-                    ctx.player().pitch = desiredPitch;
-                    ctx.player().yaw += (Math.random() - 0.5) * Baritone.settings().randomLooking.value;
-                    ctx.player().pitch += (Math.random() - 0.5) * Baritone.settings().randomLooking.value;
+                    ctx.entity().pitch = desiredPitch;
+                    ctx.entity().yaw += (Math.random() - 0.5) * Baritone.settings().randomLooking.value;
+                    ctx.entity().pitch += (Math.random() - 0.5) * Baritone.settings().randomLooking.value;
                     if (desiredPitch == oldPitch && !Baritone.settings().freeLook.value) {
                         nudgeToLevel();
                     }
                     this.target = null;
                 }
                 if (silent) {
-                    this.lastYaw = ctx.player().yaw;
-                    ctx.player().yaw = this.target.getYaw();
+                    this.lastYaw = ctx.entity().yaw;
+                    ctx.entity().yaw = this.target.getYaw();
                 }
                 break;
             }
             case POST: {
                 if (silent) {
-                    ctx.player().yaw = this.lastYaw;
+                    ctx.entity().yaw = this.lastYaw;
                     this.target = null;
                 }
                 break;
@@ -103,7 +103,7 @@ public final class LookBehavior extends Behavior implements ILookBehavior {
 
     public void pig() {
         if (this.target != null) {
-            ctx.player().yaw = this.target.getYaw();
+            ctx.entity().yaw = this.target.getYaw();
         }
     }
 
@@ -125,10 +125,10 @@ public final class LookBehavior extends Behavior implements ILookBehavior {
      * Nudges the player's pitch to a regular level. (Between {@code -20} and {@code 10}, increments are by {@code 1})
      */
     private void nudgeToLevel() {
-        if (ctx.player().pitch < -20) {
-            ctx.player().pitch++;
-        } else if (ctx.player().pitch > 10) {
-            ctx.player().pitch--;
+        if (ctx.entity().pitch < -20) {
+            ctx.entity().pitch++;
+        } else if (ctx.entity().pitch > 10) {
+            ctx.entity().pitch--;
         }
     }
 }

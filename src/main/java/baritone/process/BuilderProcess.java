@@ -49,6 +49,8 @@ import net.minecraft.block.AirBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FluidBlock;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -214,7 +216,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
                     BlockState curr = bcc.bsi.get0(x, y, z);
                     if (!(curr.getBlock() instanceof AirBlock) && !(curr.getBlock() == Blocks.WATER || curr.getBlock() == Blocks.LAVA) && !valid(curr, desired, false)) {
                         BetterBlockPos pos = new BetterBlockPos(x, y, z);
-                        Optional<Rotation> rot = RotationUtils.reachable(ctx.player(), pos, ctx.playerController().getBlockReachDistance());
+                        Optional<Rotation> rot = RotationUtils.reachable(ctx.entity(), pos, ctx.playerController().getBlockReachDistance());
                         if (rot.isPresent()) {
                             return Optional.of(new Pair<>(pos, rot.get()));
                         }
@@ -292,8 +294,8 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
                 double placeX = placeAgainstPos.x + aabb.minX * placementMultiplier.x + aabb.maxX * (1 - placementMultiplier.x);
                 double placeY = placeAgainstPos.y + aabb.minY * placementMultiplier.y + aabb.maxY * (1 - placementMultiplier.y);
                 double placeZ = placeAgainstPos.z + aabb.minZ * placementMultiplier.z + aabb.maxZ * (1 - placementMultiplier.z);
-                Rotation rot = RotationUtils.calcRotationFromVec3d(RayTraceUtils.inferSneakingEyePosition(ctx.player()), new Vec3d(placeX, placeY, placeZ), ctx.playerRotations());
-                HitResult result = RayTraceUtils.rayTraceTowards(ctx.player(), rot, ctx.playerController().getBlockReachDistance(), true);
+                Rotation rot = RotationUtils.calcRotationFromVec3d(RayTraceUtils.inferSneakingEyePosition(ctx.entity()), new Vec3d(placeX, placeY, placeZ), ctx.playerRotations());
+                HitResult result = RayTraceUtils.rayTraceTowards(ctx.entity(), rot, ctx.playerController().getBlockReachDistance(), true);
                 if (result != null && result.getType() == HitResult.Type.BLOCK && ((BlockHitResult) result).getBlockPos().equals(placeAgainstPos) && ((BlockHitResult) result).getSide() == against.getOpposite()) {
                     OptionalInt hotbar = hasAnyItemThatWouldPlace(toPlace, result, rot);
                     if (hotbar.isPresent()) {
@@ -306,26 +308,29 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
     }
 
     private OptionalInt hasAnyItemThatWouldPlace(BlockState desired, HitResult result, Rotation rot) {
+        if (!(ctx.entity() instanceof PlayerEntity)) return OptionalInt.empty();
+        PlayerEntity player = (PlayerEntity) ctx.entity();
+
         for (int i = 0; i < 9; i++) {
-            ItemStack stack = ctx.player().inventory.main.get(i);
+            ItemStack stack = player.inventory.main.get(i);
             if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) {
                 continue;
             }
-            float originalYaw = ctx.player().yaw;
-            float originalPitch = ctx.player().pitch;
+            float originalYaw = player.yaw;
+            float originalPitch = player.pitch;
             // the state depends on the facing of the player sometimes
-            ctx.player().yaw = rot.getYaw();
-            ctx.player().pitch = rot.getPitch();
+            player.yaw = rot.getYaw();
+            player.pitch = rot.getPitch();
             ItemPlacementContext meme = new ItemPlacementContext(new ItemUsageContext(
                     ctx.world(),
-                    ctx.player(),
+                    player,
                     Hand.MAIN_HAND,
                     stack,
                     (BlockHitResult) result
             ) {}); // that {} gives us access to a protected constructor lmfao
             BlockState wouldBePlaced = ((BlockItem) stack.getItem()).getBlock().getPlacementState(meme);
-            ctx.player().yaw = originalYaw;
-            ctx.player().pitch = originalPitch;
+            player.yaw = originalYaw;
+            player.pitch = originalPitch;
             if (wouldBePlaced == null) {
                 continue;
             }
@@ -359,6 +364,12 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
 
     @Override
     public PathingCommand onTick(boolean calcFailed, boolean isSafeToCancel) {
+        PlayerInventory inventory = ctx.inventory();
+        if (inventory == null) {
+            this.schematic = null;  // cancel the task
+            return null;
+        }
+
         approxPlaceable = approxPlaceable(36);
         if (baritone.getInputOverrideHandler().isInputForcedDown(Input.CLICK_LEFT)) {
             ticks = 5;
@@ -441,14 +452,14 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         }
 
         Optional<Pair<BetterBlockPos, Rotation>> toBreak = toBreakNearPlayer(bcc);
-        if (toBreak.isPresent() && isSafeToCancel && ctx.player().isOnGround()) {
+        if (toBreak.isPresent() && isSafeToCancel && ctx.entity().isOnGround()) {
             // we'd like to pause to break this block
             // only change look direction if it's safe (don't want to fuck up an in progress parkour for example
             Rotation rot = toBreak.get().getRight();
             BetterBlockPos pos = toBreak.get().getLeft();
             baritone.getLookBehavior().updateTarget(rot, true);
             MovementHelper.switchToBestToolFor(ctx, bcc.get(pos));
-            if (ctx.player().isSneaking()) {
+            if (ctx.entity().isSneaking()) {
                 // really horrible bug where a block is visible for breaking while sneaking but not otherwise
                 // so you can't see it, it goes to place something else, sneaks, then the next tick it tries to break
                 // and is unable since it's unsneaked in the intermediary tick
@@ -461,10 +472,10 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         }
         List<BlockState> desirableOnHotbar = new ArrayList<>();
         Optional<Placement> toPlace = searchForPlacables(bcc, desirableOnHotbar);
-        if (toPlace.isPresent() && isSafeToCancel && ctx.player().isOnGround() && ticks <= 0) {
+        if (toPlace.isPresent() && isSafeToCancel && ctx.entity().isOnGround() && ticks <= 0) {
             Rotation rot = toPlace.get().rot;
             baritone.getLookBehavior().updateTarget(rot, true);
-            ctx.player().inventory.selectedSlot = toPlace.get().hotbarSelection;
+            inventory.selectedSlot = toPlace.get().hotbarSelection;
             baritone.getInputOverrideHandler().setInputForceState(Input.SNEAK, true);
             if ((ctx.isLookingAt(toPlace.get().placeAgainst) && ((BlockHitResult) ctx.objectMouseOver()).getSide().equals(toPlace.get().side)) || ctx.playerRotations().isReallyCloseTo(rot)) {
                 baritone.getInputOverrideHandler().setInputForceState(Input.CLICK_RIGHT, true);
@@ -490,7 +501,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
             for (int i = 9; i < 36; i++) {
                 for (BlockState desired : noValidHotbarOption) {
                     if (valid(approxPlaceable.get(i), desired, true)) {
-                        baritone.getInventoryBehavior().attemptToPutOnHotbar(i, usefulSlots::contains);
+                        baritone.getInventoryBehavior().attemptToPutOnHotbar(i, usefulSlots::contains, inventory);
                         break outer;
                     }
                 }
@@ -531,7 +542,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
 
     private void trim() {
         HashSet<BetterBlockPos> copy = new HashSet<>(incorrectPositions);
-        copy.removeIf(pos -> pos.getSquaredDistance(ctx.player().getBlockPos()) > 200);
+        copy.removeIf(pos -> pos.getSquaredDistance(ctx.entity().getBlockPos()) > 200);
         if (!copy.isEmpty()) {
             incorrectPositions = copy;
         }
@@ -782,14 +793,15 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
 
     private List<BlockState> approxPlaceable(int size) {
         List<BlockState> result = new ArrayList<>();
+        PlayerEntity player = (PlayerEntity) ctx.entity();
         for (int i = 0; i < size; i++) {
-            ItemStack stack = ctx.player().inventory.main.get(i);
+            ItemStack stack = player.inventory.main.get(i);
             if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) {
                 result.add(Blocks.AIR.getDefaultState());
                 continue;
             }
             // <toxic cloud>
-            result.add(((BlockItem) stack.getItem()).getBlock().getPlacementState(new ItemPlacementContext(new ItemUsageContext(ctx.world(), ctx.player(), Hand.MAIN_HAND, stack, new BlockHitResult(new Vec3d(ctx.player().getX(), ctx.player().getY(), ctx.player().getZ()), Direction.UP, ctx.playerFeet(), false)) {})));
+            result.add(((BlockItem) stack.getItem()).getBlock().getPlacementState(new ItemPlacementContext(new ItemUsageContext(ctx.world(), player, Hand.MAIN_HAND, stack, new BlockHitResult(new Vec3d(ctx.entity().getX(), ctx.entity().getY(), ctx.entity().getZ()), Direction.UP, ctx.playerFeet(), false)) {})));
             // </toxic cloud>
         }
         return result;

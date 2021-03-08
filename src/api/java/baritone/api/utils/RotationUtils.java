@@ -22,7 +22,7 @@ import baritone.api.IBaritone;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FireBlock;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -134,21 +134,21 @@ public final class RotationUtils {
         float f1 = MathHelper.sin(-rotation.getYaw() * (float) DEG_TO_RAD - (float) Math.PI);
         float f2 = -MathHelper.cos(-rotation.getPitch() * (float) DEG_TO_RAD);
         float f3 = MathHelper.sin(-rotation.getPitch() * (float) DEG_TO_RAD);
-        return new Vec3d((double) (f1 * f2), (double) f3, (double) (f * f2));
+        return new Vec3d(f1 * f2, f3, f * f2);
     }
 
     /**
      * @param ctx Context for the viewing entity
      * @param pos The target block position
      * @return The optional rotation
-     * @see #reachable(PlayerEntity, BlockPos, double)
+     * @see #reachable(LivingEntity, BlockPos, double)
      */
     public static Optional<Rotation> reachable(IPlayerContext ctx, BlockPos pos) {
-        return reachable(ctx.player(), pos, ctx.playerController().getBlockReachDistance());
+        return reachable(ctx.entity(), pos, ctx.playerController().getBlockReachDistance());
     }
 
     public static Optional<Rotation> reachable(IPlayerContext ctx, BlockPos pos, boolean wouldSneak) {
-        return reachable(ctx.player(), pos, ctx.playerController().getBlockReachDistance(), wouldSneak);
+        return reachable(ctx.entity(), pos, ctx.playerController().getBlockReachDistance(), wouldSneak);
     }
 
     /**
@@ -163,11 +163,11 @@ public final class RotationUtils {
      * @param blockReachDistance The block reach distance of the entity
      * @return The optional rotation
      */
-    public static Optional<Rotation> reachable(PlayerEntity entity, BlockPos pos, double blockReachDistance) {
+    public static Optional<Rotation> reachable(LivingEntity entity, BlockPos pos, double blockReachDistance) {
         return reachable(entity, pos, blockReachDistance, false);
     }
 
-    public static Optional<Rotation> reachable(PlayerEntity entity, BlockPos pos, double blockReachDistance, boolean wouldSneak) {
+    public static Optional<Rotation> reachable(LivingEntity entity, BlockPos pos, double blockReachDistance, boolean wouldSneak) {
         IBaritone baritone = BaritoneAPI.getProvider().getBaritoneForPlayer(entity);
         if (baritone.getPlayerContext().isLookingAt(pos)) {
             /*

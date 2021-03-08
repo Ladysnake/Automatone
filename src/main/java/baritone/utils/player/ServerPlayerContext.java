@@ -22,22 +22,30 @@ import baritone.api.cache.IWorldData;
 import baritone.api.utils.IPlayerContext;
 import baritone.api.utils.IPlayerController;
 import baritone.api.utils.RayTraceUtils;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 public class ServerPlayerContext implements IPlayerContext {
 
-    private PlayerEntity player;
+    private LivingEntity entity;
 
-    public ServerPlayerContext(ServerPlayerEntity player) {
-        this.player = player;
+    public ServerPlayerContext(ServerPlayerEntity entity) {
+        this.entity = entity;
     }
 
     @Override
-    public PlayerEntity player() {
-        return this.player;
+    public LivingEntity entity() {
+        return this.entity;
+    }
+
+    @Override
+    public @Nullable PlayerInventory inventory() {
+        return entity instanceof PlayerEntity ? ((PlayerEntity) entity).inventory : null;
     }
 
     @Override
@@ -47,16 +55,16 @@ public class ServerPlayerContext implements IPlayerContext {
 
     @Override
     public World world() {
-        return this.player.world;
+        return this.entity.world;
     }
 
     @Override
     public IWorldData worldData() {
-        return BaritoneAPI.getProvider().getBaritoneForPlayer(this.player).getPlayerContext().worldData();
+        return BaritoneAPI.getProvider().getBaritoneForPlayer(this.entity).getPlayerContext().worldData();
     }
 
     @Override
     public HitResult objectMouseOver() {
-        return RayTraceUtils.rayTraceTowards(player(), playerRotations(), playerController().getBlockReachDistance());
+        return RayTraceUtils.rayTraceTowards(entity(), playerRotations(), playerController().getBlockReachDistance());
     }
 }

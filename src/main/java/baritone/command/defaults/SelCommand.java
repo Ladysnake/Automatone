@@ -29,7 +29,6 @@ import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidStateException;
 import baritone.api.command.exception.CommandInvalidTypeException;
 import baritone.api.command.helpers.TabCompleteHelper;
-import baritone.api.event.events.RenderEvent;
 import baritone.api.schematic.*;
 import baritone.api.selection.ISelection;
 import baritone.api.selection.ISelectionManager;
@@ -46,7 +45,6 @@ import net.minecraft.util.math.Vec3i;
 import java.awt.*;
 import java.util.List;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -81,7 +79,7 @@ public class SelCommand extends Command {
             if (action == Action.POS2 && pos1 == null) {
                 throw new CommandInvalidStateException("Set pos1 first before using pos2");
             }
-            BetterBlockPos playerPos = ((ServerPlayerEntity) ctx.player()).getCameraEntity() != null ? BetterBlockPos.from(((ServerPlayerEntity) ctx.player()).getCameraEntity().getBlockPos()) : ctx.playerFeet();
+            BetterBlockPos playerPos = ((ServerPlayerEntity) ctx.entity()).getCameraEntity() != null ? BetterBlockPos.from(((ServerPlayerEntity) ctx.entity()).getCameraEntity().getBlockPos()) : ctx.playerFeet();
             BetterBlockPos pos = args.hasAny() ? args.getDatatypePost(RelativeBlockPos.INSTANCE, playerPos) : playerPos;
             args.requireMax(0);
             if (action == Action.POS1) {

@@ -23,9 +23,11 @@ import baritone.api.utils.Helper;
 import baritone.api.utils.IPlayerContext;
 import baritone.api.utils.IPlayerController;
 import baritone.api.utils.RayTraceUtils;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Implementation of {@link IPlayerContext} that provides information about the primary player.
@@ -38,8 +40,14 @@ public enum PrimaryPlayerContext implements IPlayerContext, Helper {
     INSTANCE;
 
     @Override
-    public PlayerEntity player() {
+    public LivingEntity entity() {
         return mc.player;
+    }
+
+    @Override
+    public @Nullable PlayerInventory inventory() {
+        assert mc.player != null;
+        return mc.player.inventory;
     }
 
     @Override
@@ -59,6 +67,6 @@ public enum PrimaryPlayerContext implements IPlayerContext, Helper {
 
     @Override
     public HitResult objectMouseOver() {
-        return RayTraceUtils.rayTraceTowards(player(), playerRotations(), playerController().getBlockReachDistance());
+        return RayTraceUtils.rayTraceTowards(entity(), playerRotations(), playerController().getBlockReachDistance());
     }
 }

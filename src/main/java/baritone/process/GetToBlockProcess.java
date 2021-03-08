@@ -32,6 +32,7 @@ import baritone.pathing.movement.MovementHelper;
 import baritone.utils.BaritoneProcessHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.math.BlockPos;
 
@@ -191,13 +192,14 @@ public final class GetToBlockProcess extends BaritoneProcessHelper implements IG
 
     private boolean rightClick() {
         for (BlockPos pos : knownLocations) {
-            Optional<Rotation> reachable = RotationUtils.reachable(ctx.player(), pos, ctx.playerController().getBlockReachDistance());
+            Optional<Rotation> reachable = RotationUtils.reachable(ctx.entity(), pos, ctx.playerController().getBlockReachDistance());
             if (reachable.isPresent()) {
                 baritone.getLookBehavior().updateTarget(reachable.get(), true);
                 if (knownLocations.contains(ctx.getSelectedBlock().orElse(null))) {
                     baritone.getInputOverrideHandler().setInputForceState(Input.CLICK_RIGHT, true); // TODO find some way to right click even if we're in an ESC menu
-                    System.out.println(ctx.player().playerScreenHandler);
-                    if (!(ctx.player().playerScreenHandler instanceof PlayerScreenHandler)) {
+                    PlayerScreenHandler handler = ctx.entity() instanceof PlayerEntity ? ((PlayerEntity) ctx.entity()).playerScreenHandler : null;
+                    System.out.println();
+                    if (handler == null) {
                         return true;
                     }
                 }

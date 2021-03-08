@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -61,7 +62,7 @@ public class MovementDiagonal extends Movement {
     protected boolean safeToCancel(MovementState state) {
         //too simple. backfill does not work after cornering with this
         //return MovementHelper.canWalkOn(ctx, ctx.playerFeet().down());
-        PlayerEntity player = ctx.player();
+        LivingEntity player = ctx.entity();
         double offset = 0.25;
         double x = player.getX();
         double y = player.getY() - 1;
@@ -256,7 +257,7 @@ public class MovementDiagonal extends Movement {
         } else if (!playerInValidPosition() && !(MovementHelper.isLiquid(ctx, src) && getValidPositions().contains(ctx.playerFeet().up()))) {
             return state.setStatus(MovementStatus.UNREACHABLE);
         }
-        if (dest.y > src.y && ctx.player().getY() < src.y + 0.1 && ctx.player().horizontalCollision) {
+        if (dest.y > src.y && ctx.entity().getY() < src.y + 0.1 && ctx.entity().horizontalCollision) {
             state.setInput(Input.JUMP, true);
         }
         if (sprint()) {

@@ -33,7 +33,6 @@ import baritone.pathing.calc.AbstractNodeCostSearch;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.path.PathExecutor;
-import baritone.utils.PathRenderer;
 import baritone.utils.PathingCommandContext;
 import baritone.utils.pathing.Favoring;
 import net.minecraft.util.math.BlockPos;
@@ -361,9 +360,9 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
     public BetterBlockPos pathStart() { // TODO move to a helper or util class
         BetterBlockPos feet = ctx.playerFeet();
         if (!MovementHelper.canWalkOn(ctx, feet.down())) {
-            if (ctx.player().isOnGround()) {
-                double playerX = ctx.player().getX();
-                double playerZ = ctx.player().getZ();
+            if (ctx.entity().isOnGround()) {
+                double playerX = ctx.entity().getX();
+                double playerZ = ctx.entity().getZ();
                 ArrayList<BetterBlockPos> closest = new ArrayList<>();
                 for (int dx = -1; dx <= 1; dx++) {
                     for (int dz = -1; dz <= 1; dz++) {

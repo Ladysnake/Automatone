@@ -55,7 +55,7 @@ public class TunnelCommand extends Command {
                 width--;
                 BlockPos corner1;
                 BlockPos corner2;
-                Direction enumFacing = ctx.player().getHorizontalFacing();
+                Direction enumFacing = ctx.entity().getHorizontalFacing();
                 int addition = ((width % 2 == 0) ? 0 : 1);
                 switch (enumFacing) {
                     case EAST:
@@ -83,7 +83,7 @@ public class TunnelCommand extends Command {
         } else {
             Goal goal = new GoalStrictDirection(
                     ctx.playerFeet(),
-                    ctx.player().getHorizontalFacing()
+                    ctx.entity().getHorizontalFacing()
             );
             baritone.getCustomGoalProcess().setGoalAndPath(goal);
             logDirect(String.format("Goal: %s", goal.toString()));

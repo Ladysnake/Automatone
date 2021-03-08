@@ -35,6 +35,7 @@ import net.minecraft.block.*;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 
@@ -73,7 +74,8 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
     @Override
     public PathingCommand onTick(boolean calcFailed, boolean isSafeToCancel) {
         if (desiredQuantity > 0) {
-            int curr = ctx.player().inventory.main.stream()
+            PlayerInventory inventory = ctx.inventory();
+            int curr = inventory == null ? -1 : inventory.main.stream()
                     .filter(stack -> filter.has(stack))
                     .mapToInt(ItemStack::getCount).sum();
             System.out.println("Currently have " + curr + " valid items");
@@ -121,7 +123,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
                 .filter(pos -> !(BlockStateInterface.get(ctx, pos).getBlock() instanceof AirBlock)) // after breaking a block, it takes mineGoalUpdateInterval ticks for it to actually update this list =(
                 .min(Comparator.comparingDouble(ctx.playerFeet()::getSquaredDistance));
         baritone.getInputOverrideHandler().clearAllKeys();
-        if (shaft.isPresent() && ctx.player().isOnGround()) {
+        if (shaft.isPresent() && ctx.entity().isOnGround()) {
             BlockPos pos = shaft.get();
             BlockState state = baritone.bsi.get0(pos);
             if (!MovementHelper.avoidBreaking(baritone.bsi, pos.getX(), pos.getY(), pos.getZ(), state)) {
@@ -378,7 +380,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
                     // is an x-ray and it'll get caught
                     if (filter.has(bsi.get0(x, y, z))) {
                         BlockPos pos = new BlockPos(x, y, z);
-                        if ((Baritone.settings().legitMineIncludeDiagonals.value && knownOreLocations.stream().anyMatch(ore -> ore.getSquaredDistance(pos) <= 2 /* sq means this is pytha dist <= sqrt(2) */)) || RotationUtils.reachable(ctx.player(), pos, fakedBlockReachDistance).isPresent()) {
+                        if ((Baritone.settings().legitMineIncludeDiagonals.value && knownOreLocations.stream().anyMatch(ore -> ore.getSquaredDistance(pos) <= 2 /* sq means this is pytha dist <= sqrt(2) */)) || RotationUtils.reachable(ctx.entity(), pos, fakedBlockReachDistance).isPresent()) {
                             knownOreLocations.add(pos);
                         }
                     }
@@ -419,7 +421,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
 
                 .filter(pos -> !blacklist.contains(pos))
 
-                .sorted(Comparator.comparingDouble(ctx.getBaritone().getPlayerContext().player().getBlockPos()::getSquaredDistance))
+                .sorted(Comparator.comparingDouble(ctx.getBaritone().getPlayerContext().entity().getBlockPos()::getSquaredDistance))
                 .collect(Collectors.toList());
 
         if (locs.size() > max) {

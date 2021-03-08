@@ -18,7 +18,6 @@
 package baritone.behavior;
 
 import baritone.Baritone;
-import baritone.api.event.events.TickEvent;
 import baritone.utils.ToolSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -26,12 +25,12 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.*;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.OptionalInt;
@@ -49,34 +48,42 @@ public final class InventoryBehavior extends Behavior {
         if (!Baritone.settings().allowInventory.value) {
             return;
         }
-        if (ctx.player().playerScreenHandler != ctx.player().currentScreenHandler) {
+        if (!(ctx.entity() instanceof PlayerEntity)) {
+            return;
+        }
+        PlayerEntity player = (PlayerEntity) ctx.entity();
+        if (player.playerScreenHandler != player.currentScreenHandler) {
             // we have a crafting table or a chest or something open
             return;
         }
-        if (firstValidThrowaway() >= 9) { // aka there are none on the hotbar, but there are some in main inventory
-            swapWithHotBar(firstValidThrowaway(), 8);
+        if (firstValidThrowaway(player.inventory) >= 9) { // aka there are none on the hotbar, but there are some in main inventory
+            swapWithHotBar(firstValidThrowaway(player.inventory), 8, player.inventory);
         }
         int pick = bestToolAgainst(Blocks.STONE, PickaxeItem.class);
         if (pick >= 9) {
-            swapWithHotBar(pick, 0);
+            swapWithHotBar(pick, 0, player.inventory);
         }
     }
 
-    public void attemptToPutOnHotbar(int inMainInvy, Predicate<Integer> disallowedHotbar) {
+    public void attemptToPutOnHotbar(int inMainInvy, Predicate<Integer> disallowedHotbar, PlayerInventory inventory) {
         OptionalInt destination = getTempHotbarSlot(disallowedHotbar);
         if (destination.isPresent()) {
-            swapWithHotBar(inMainInvy, destination.getAsInt());
+            swapWithHotBar(inMainInvy, destination.getAsInt(), inventory);
         }
     }
 
     public OptionalInt getTempHotbarSlot(Predicate<Integer> disallowedHotbar) {
+        PlayerInventory inventory = ctx.inventory();
+        if (inventory == null) return OptionalInt.empty();
+
         // we're using 0 and 8 for pickaxe and throwaway
         ArrayList<Integer> candidates = new ArrayList<>();
         for (int i = 1; i < 8; i++) {
-            if (ctx.player().inventory.main.get(i).isEmpty() && !disallowedHotbar.test(i)) {
+            if (inventory.main.get(i).isEmpty() && !disallowedHotbar.test(i)) {
                 candidates.add(i);
             }
         }
+
         if (candidates.isEmpty()) {
             for (int i = 1; i < 8; i++) {
                 if (!disallowedHotbar.test(i)) {
@@ -84,21 +91,22 @@ public final class InventoryBehavior extends Behavior {
                 }
             }
         }
+
         if (candidates.isEmpty()) {
             return OptionalInt.empty();
         }
+
         return OptionalInt.of(candidates.get(new Random().nextInt(candidates.size())));
     }
 
-    private void swapWithHotBar(int inInventory, int inHotbar) {
-        PlayerInventory inventory = ctx.player().inventory;
+    private void swapWithHotBar(int inInventory, int inHotbar, PlayerInventory inventory) {
         ItemStack h = inventory.getStack(inHotbar);
         inventory.setStack(inHotbar, inventory.getStack(inInventory));
         inventory.setStack(inInventory, h);
     }
 
-    private int firstValidThrowaway() { // TODO offhand idk
-        DefaultedList<ItemStack> invy = ctx.player().inventory.main;
+    private int firstValidThrowaway(PlayerInventory inventory) { // TODO offhand idk
+        DefaultedList<ItemStack> invy = inventory.main;
         for (int i = 0; i < invy.size(); i++) {
             if (Baritone.settings().acceptableThrowawayItems.value.contains(invy.get(i).getItem())) {
                 return i;
@@ -108,7 +116,7 @@ public final class InventoryBehavior extends Behavior {
     }
 
     private int bestToolAgainst(Block against, Class<? extends ToolItem> cla$$) {
-        DefaultedList<ItemStack> invy = ctx.player().inventory.main;
+        DefaultedList<ItemStack> invy = ctx.inventory().main;
         int bestInd = -1;
         double bestSpeed = -1;
         for (int i = 0; i < invy.size(); i++) {
@@ -137,8 +145,11 @@ public final class InventoryBehavior extends Behavior {
     }
 
     public boolean selectThrowawayForLocation(boolean select, int x, int y, int z) {
+        if (!(ctx.entity() instanceof PlayerEntity)) return false;
+
+        PlayerEntity player = (PlayerEntity) ctx.entity();
         BlockState maybe = baritone.getBuilderProcess().placeAt(x, y, z, baritone.bsi.get0(x, y, z));
-        if (maybe != null && throwaway(select, stack -> stack.getItem() instanceof BlockItem && maybe.equals(((BlockItem) stack.getItem()).getBlock().getPlacementState(new ItemPlacementContext(new ItemUsageContext(ctx.world(), ctx.player(), Hand.MAIN_HAND, stack, new BlockHitResult(new Vec3d(ctx.player().getX(), ctx.player().getY(), ctx.player().getZ()), Direction.UP, ctx.playerFeet(), false)) {}))))) {
+        if (maybe != null && throwaway(select, stack -> stack.getItem() instanceof BlockItem && maybe.equals(((BlockItem) stack.getItem()).getBlock().getPlacementState(new ItemPlacementContext(new ItemUsageContext(ctx.world(), player, Hand.MAIN_HAND, stack, new BlockHitResult(new Vec3d(player.getX(), player.getY(), player.getZ()), Direction.UP, ctx.playerFeet(), false)) {}))))) {
             return true; // gotem
         }
         if (maybe != null && throwaway(select, stack -> stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock().equals(maybe.getBlock()))) {
@@ -153,7 +164,9 @@ public final class InventoryBehavior extends Behavior {
     }
 
     public boolean throwaway(boolean select, Predicate<? super ItemStack> desired) {
-        PlayerEntity p = ctx.player();
+        if (!(ctx.entity() instanceof PlayerEntity)) return false;
+
+        PlayerEntity p = (PlayerEntity) ctx.entity();
         DefaultedList<ItemStack> inv = p.inventory.main;
         for (int i = 0; i < 9; i++) {
             ItemStack item = inv.get(i);

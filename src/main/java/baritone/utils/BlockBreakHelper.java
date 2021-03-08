@@ -38,7 +38,7 @@ public final class BlockBreakHelper implements Helper {
 
     public void stopBreakingBlock() {
         // The player controller will never be null, but the player can be
-        if (ctx.player() != null && didBreakLastTick) {
+        if (ctx.entity() != null && didBreakLastTick) {
             if (!ctx.playerController().hasBrokenBlock()) {
                 // insane bypass to check breaking succeeded
                 ctx.playerController().setHittingBlock(true);
@@ -56,12 +56,12 @@ public final class BlockBreakHelper implements Helper {
             if (!didBreakLastTick) {
                 ctx.playerController().syncHeldItem();
                 ctx.playerController().clickBlock(((BlockHitResult) trace).getBlockPos(), ((BlockHitResult) trace).getSide());
-                ctx.player().swingHand(Hand.MAIN_HAND);
+                ctx.entity().swingHand(Hand.MAIN_HAND);
             }
 
             // Attempt to break the block
             if (ctx.playerController().onPlayerDamageBlock(((BlockHitResult) trace).getBlockPos(), ((BlockHitResult) trace).getSide())) {
-                ctx.player().swingHand(Hand.MAIN_HAND);
+                ctx.entity().swingHand(Hand.MAIN_HAND);
             }
 
             ctx.playerController().setHittingBlock(false);

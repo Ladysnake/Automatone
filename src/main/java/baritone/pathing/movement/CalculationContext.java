@@ -27,12 +27,14 @@ import baritone.utils.pathing.BetterWorldBorder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import static baritone.api.pathing.movement.ActionCosts.COST_INF;
 
@@ -49,7 +51,7 @@ public class CalculationContext {
     public final World world;
     public final WorldData worldData;
     public final BlockStateInterface bsi;
-    public final ToolSet toolSet;
+    public final @Nullable ToolSet toolSet;
     public final boolean hasWaterBucket;
     public final boolean hasThrowaway;
     public final boolean canSprint;
@@ -79,14 +81,15 @@ public class CalculationContext {
     public CalculationContext(IBaritone baritone, boolean forUseOnAnotherThread) {
         this.safeForThreadedUse = forUseOnAnotherThread;
         this.baritone = baritone;
-        PlayerEntity player = baritone.getPlayerContext().player();
+        LivingEntity entity = baritone.getPlayerContext().entity();
+        PlayerEntity player = entity instanceof PlayerEntity ? (PlayerEntity) entity : null;
         this.world = baritone.getPlayerContext().world();
         this.worldData = (WorldData) baritone.getWorldProvider().getCurrentWorld();
         this.bsi = new BlockStateInterface(world);
-        this.toolSet = new ToolSet(player);
+        this.toolSet = player == null ? null : new ToolSet(player);
         this.hasThrowaway = Baritone.settings().allowPlace.value && ((Baritone) baritone).getInventoryBehavior().hasGenericThrowaway();
-        this.hasWaterBucket = Baritone.settings().allowWaterBucketFall.value && PlayerInventory.isValidHotbarIndex(player.inventory.getSlotWithStack(STACK_BUCKET_WATER)) && world.getRegistryKey() != World.NETHER;
-        this.canSprint = Baritone.settings().allowSprint.value && player.getHungerManager().getFoodLevel() > 6;
+        this.hasWaterBucket = player != null && Baritone.settings().allowWaterBucketFall.value && PlayerInventory.isValidHotbarIndex(player.inventory.getSlotWithStack(STACK_BUCKET_WATER)) && world.getRegistryKey() != World.NETHER;
+        this.canSprint = player != null && Baritone.settings().allowSprint.value && player.getHungerManager().getFoodLevel() > 6;
         this.placeBlockCost = Baritone.settings().blockPlacementPenalty.value;
         this.allowBreak = Baritone.settings().allowBreak.value;
         this.allowParkour = Baritone.settings().allowParkour.value;

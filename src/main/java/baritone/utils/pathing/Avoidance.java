@@ -71,7 +71,7 @@ public class Avoidance {
         if (mobCoeff != 1.0D) {
             ctx.entitiesStream()
                     .filter(entity -> entity instanceof MobEntity)
-                    .filter(entity -> (!(entity instanceof SpiderEntity)) || ctx.player().getBrightnessAtEyes() < 0.5)
+                    .filter(entity -> (!(entity instanceof SpiderEntity)) || ctx.entity().getBrightnessAtEyes() < 0.5)
                     .filter(entity -> !(entity instanceof ZombifiedPiglinEntity) || ((ZombifiedPiglinEntity) entity).getAttacker() != null)
                     .filter(entity -> !(entity instanceof EndermanEntity) || ((EndermanEntity) entity).isAngry())
                     .forEach(entity -> res.add(new Avoidance(entity.getBlockPos(), mobCoeff, Baritone.settings().mobAvoidanceRadius.value)));

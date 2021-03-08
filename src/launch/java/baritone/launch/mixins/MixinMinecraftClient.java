@@ -18,12 +18,10 @@
 package baritone.launch.mixins;
 
 import baritone.BaritoneProvider;
-import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.event.events.TickEvent;
 import baritone.utils.BaritoneAutoTest;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import org.objectweb.asm.Opcodes;
@@ -31,7 +29,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Function;
@@ -73,7 +70,7 @@ public class MixinMinecraftClient {
 
         IBaritone baritone = BaritoneProvider.INSTANCE.getPrimaryBaritone();
 
-        TickEvent.Type type = baritone.getPlayerContext().player() != null && baritone.getPlayerContext().world() != null
+        TickEvent.Type type = baritone.getPlayerContext().entity() != null && baritone.getPlayerContext().world() != null
                 ? TickEvent.Type.IN
                 : TickEvent.Type.OUT;
 
