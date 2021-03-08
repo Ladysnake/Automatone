@@ -93,6 +93,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
         LivingEntity entity = this.ctx.entity();
         entity.sidewaysSpeed = 0.0F;
         entity.forwardSpeed = 0.0F;
+        entity.setSneaking(false);
 
         entity.setJumping(this.isInputForcedDown(Input.JUMP)); // oppa gangnam style
 

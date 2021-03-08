@@ -52,7 +52,7 @@ public enum PrimaryPlayerContext implements IEntityContext, Helper {
 
     @Override
     public IPlayerController playerController() {
-        return PrimaryPlayerController.INSTANCE;
+        throw new UnsupportedOperationException("Tf u doin");
     }
 
     @Override

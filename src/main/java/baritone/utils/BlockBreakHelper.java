@@ -54,7 +54,6 @@ public final class BlockBreakHelper implements Helper {
 
         if (isLeftClick && isBlockTrace) {
             if (!didBreakLastTick) {
-                ctx.playerController().syncHeldItem();
                 ctx.playerController().clickBlock(((BlockHitResult) trace).getBlockPos(), ((BlockHitResult) trace).getSide());
                 ctx.entity().swingHand(Hand.MAIN_HAND);
             }

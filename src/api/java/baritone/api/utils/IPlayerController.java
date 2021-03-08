@@ -35,15 +35,11 @@ import net.minecraft.world.World;
  */
 public interface IPlayerController {
 
-    void syncHeldItem();
-
     boolean hasBrokenBlock();
 
     boolean onPlayerDamageBlock(BlockPos pos, Direction side);
 
     void resetBlockRemoving();
-
-    ItemStack windowClick(int windowId, int slotId, int mouseButton, SlotActionType type, PlayerEntity player);
 
     GameMode getGameType();
 

@@ -8,7 +8,6 @@
     "maxShiftBy": 2
   },
   "client": [
-    "MixinClientPlayNetHandler",
     "MixinCommandSuggestionHelper",
     "MixinEntityRenderManager",
     "MixinItemStack",
@@ -20,6 +19,7 @@
   ],
   "mixins": [
     "MixinMobEntity",
-    "MixinServerPlayNetworkHandler"
+    "MixinServerPlayNetworkHandler",
+    "MixinServerPlayerInteractionManager"
   ]
 }

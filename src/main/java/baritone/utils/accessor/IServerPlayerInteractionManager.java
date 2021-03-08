@@ -15,15 +15,13 @@
  * along with Baritone.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package baritone.launch.mixins;
+package baritone.utils.accessor;
 
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.util.math.BlockPos;
 
-/**
- * @author Brady
- * @since 8/3/2018
- */
-@Mixin(ClientPlayNetworkHandler.class)
-public class MixinClientPlayNetHandler {
+public interface IServerPlayerInteractionManager {
+    boolean isMining();
+    BlockPos getMiningPos();
+    boolean automatone$hasBrokenBlock();
+    int getBlockBreakingProgress();
 }
