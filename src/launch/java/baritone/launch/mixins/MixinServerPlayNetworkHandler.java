@@ -23,8 +23,10 @@ import baritone.api.event.events.ChatEvent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,16 +37,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinServerPlayNetworkHandler {
     @Shadow public ServerPlayerEntity player;
 
+    @Shadow @Final private MinecraftServer server;
+
     @Inject(method = "onGameMessage", at = @At("HEAD"), cancellable = true)
     private void receiveChatMessage(ChatMessageC2SPacket packet, CallbackInfo ci) {
-        ChatEvent event = new ChatEvent(packet.getChatMessage());
-        Entity cameraEntity = this.player.getCameraEntity();
-        IBaritone baritone = BaritoneAPI.getProvider().getBaritone(cameraEntity instanceof LivingEntity ? (LivingEntity) cameraEntity : this.player);
-        if (baritone == null) {
-            return;
-        }
-        baritone.getGameEventHandler().onSendChatMessage(event);
-        if (event.isCancelled()) {
+        if (packet.getChatMessage().startsWith("#")) {
+            ChatEvent event = new ChatEvent(packet.getChatMessage());
+            this.server.execute(() -> {
+                Entity cameraEntity = this.player.getCameraEntity();
+                IBaritone baritone = BaritoneAPI.getProvider().getBaritone(cameraEntity instanceof LivingEntity ? (LivingEntity) cameraEntity : this.player);
+                if (baritone == null) {
+                    return;
+                }
+                baritone.getGameEventHandler().onSendChatMessage(event);
+            });
             ci.cancel();
         }
     }
