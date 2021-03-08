@@ -26,6 +26,7 @@ import baritone.behavior.Behavior;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.input.KeyboardInput;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.LivingEntity;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -85,39 +86,39 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
     }
 
     @Override
-    public final void onTickClient(TickEvent event) {
-        if (true) { // TODO fix that maybe
-            return;
-        }
+    public final void onTickServer() {
         if (isInputForcedDown(Input.CLICK_LEFT)) {
             setInputForceState(Input.CLICK_RIGHT, false);
         }
+        LivingEntity entity = this.ctx.entity();
+        entity.sidewaysSpeed = 0.0F;
+        entity.forwardSpeed = 0.0F;
+
+        entity.setJumping(this.isInputForcedDown(Input.JUMP)); // oppa gangnam style
+
+        if (this.isInputForcedDown(Input.MOVE_FORWARD)) {
+            entity.forwardSpeed++;
+        }
+
+        if (this.isInputForcedDown(Input.MOVE_BACK)) {
+            entity.forwardSpeed--;
+        }
+
+        if (this.isInputForcedDown(Input.MOVE_LEFT)) {
+            entity.sidewaysSpeed++;
+        }
+
+        if (this.isInputForcedDown(Input.MOVE_RIGHT)) {
+            entity.sidewaysSpeed--;
+        }
+
+        if (this.isInputForcedDown(Input.SNEAK)) {
+            entity.setSneaking(true);
+            entity.sidewaysSpeed *= 0.3D;
+            entity.forwardSpeed *= 0.3D;
+        }
         blockBreakHelper.tick(isInputForcedDown(Input.CLICK_LEFT));
         blockPlaceHelper.tick(isInputForcedDown(Input.CLICK_RIGHT));
-
-        ClientPlayerEntity player = (ClientPlayerEntity) ctx.entity();
-
-        if (inControl()) {
-            if (player.input.getClass() != PlayerMovementInput.class) {
-                player.input = new PlayerMovementInput(this);
-            }
-        } else {
-            if (player.input.getClass() == PlayerMovementInput.class) { // allow other movement inputs that aren't this one, e.g. for a freecam
-                player.input = new KeyboardInput(MinecraftClient.getInstance().options);
-            }
-        }
-        // only set it if it was previously incorrect
-        // gotta do it this way, or else it constantly thinks you're beginning a double tap W sprint lol
-    }
-
-    private boolean inControl() {
-        for (Input input : new Input[]{Input.MOVE_FORWARD, Input.MOVE_BACK, Input.MOVE_LEFT, Input.MOVE_RIGHT, Input.SNEAK}) {
-            if (isInputForcedDown(input)) {
-                return true;
-            }
-        }
-        // if we are not primary (a bot) we should set the movementinput even when idle (not pathing)
-        return baritone.getPathingBehavior().isPathing() || baritone != BaritoneAPI.getProvider().getPrimaryBaritone();
     }
 
     public BlockBreakHelper getBlockBreakHelper() {

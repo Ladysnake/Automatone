@@ -45,52 +45,58 @@ public enum PrimaryPlayerController implements baritone.api.utils.IPlayerControl
 
     @Override
     public void syncHeldItem() {
-        ((IPlayerController) mc.interactionManager).callSyncSelectedSlot();
+        if (mc.interactionManager != null) {
+            ((IPlayerController) mc.interactionManager).callSyncSelectedSlot();
+        }
     }
 
     @Override
     public boolean hasBrokenBlock() {
-        return ((IPlayerController) mc.interactionManager).getCurrentBreakingPos().getY() == -1;
+        return mc.interactionManager != null && ((IPlayerController) mc.interactionManager).getCurrentBreakingPos().getY() == -1;
     }
 
     @Override
     public boolean onPlayerDamageBlock(BlockPos pos, Direction side) {
-        return mc.interactionManager.updateBlockBreakingProgress(pos, side);
+        return mc.interactionManager != null && mc.interactionManager.updateBlockBreakingProgress(pos, side);
     }
 
     @Override
     public void resetBlockRemoving() {
-        mc.interactionManager.cancelBlockBreaking();
+        if (mc.interactionManager != null) {
+            mc.interactionManager.cancelBlockBreaking();
+        }
     }
 
     @Override
     public ItemStack windowClick(int windowId, int slotId, int mouseButton, SlotActionType type, PlayerEntity player) {
-        return mc.interactionManager.clickSlot(windowId, slotId, mouseButton, type, player);
+        return mc.interactionManager == null ? ItemStack.EMPTY : mc.interactionManager.clickSlot(windowId, slotId, mouseButton, type, player);
     }
 
     @Override
     public GameMode getGameType() {
-        return mc.interactionManager.getCurrentGameMode();
+        return mc.interactionManager == null ? GameMode.ADVENTURE : mc.interactionManager.getCurrentGameMode();
     }
 
     @Override
     public ActionResult processRightClickBlock(PlayerEntity player, World world, Hand hand, BlockHitResult result) {
         // primaryplayercontroller is always in a ClientWorld so this is ok
-        return mc.interactionManager.interactBlock((ClientPlayerEntity) player, (ClientWorld) world, hand, result);
+        return mc.interactionManager == null ? ActionResult.FAIL : mc.interactionManager.interactBlock((ClientPlayerEntity) player, (ClientWorld) world, hand, result);
     }
 
     @Override
     public ActionResult processRightClick(PlayerEntity player, World world, Hand hand) {
-        return mc.interactionManager.interactItem(player, world, hand);
+        return mc.interactionManager == null ? ActionResult.FAIL : mc.interactionManager.interactItem(player, world, hand);
     }
 
     @Override
     public boolean clickBlock(BlockPos loc, Direction face) {
-        return mc.interactionManager.attackBlock(loc, face);
+        return mc.interactionManager != null && mc.interactionManager.attackBlock(loc, face);
     }
 
     @Override
     public void setHittingBlock(boolean hittingBlock) {
-        ((IPlayerController) mc.interactionManager).setBreakingBlock(hittingBlock);
+        if (mc.interactionManager != null) {
+            ((IPlayerController) mc.interactionManager).setBreakingBlock(hittingBlock);
+        }
     }
 }

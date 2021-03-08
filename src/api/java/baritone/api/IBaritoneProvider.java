@@ -58,6 +58,10 @@ public interface IBaritoneProvider {
      */
     IBaritone getBaritone(LivingEntity player);
 
+    IBaritone getBaritoneOrNull(LivingEntity player);
+
+    boolean isPathing(LivingEntity entity);
+
     /**
      * Returns the {@link IWorldScanner} instance. This is not a type returned by
      * {@link IBaritone} implementation, because it is not linked with {@link IBaritone}.

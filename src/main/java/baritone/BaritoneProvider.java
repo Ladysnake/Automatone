@@ -83,6 +83,12 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
     }
 
     @Override
+    public boolean isPathing(LivingEntity entity) {
+        IBaritone b = this.all.get(entity);
+        return b != null && b.getGetToBlockProcess().isActive();
+    }
+
+    @Override
     public IBaritone getBaritone(LivingEntity entity) {
         if (entity.world.isClient()) throw new IllegalStateException("Lol we only support servers now");
         return all.computeIfAbsent(entity, p -> {
@@ -90,6 +96,11 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
             baritone.getGameEventHandler().registerEventListener(new ExampleBaritoneControl(baritone.getCommandManager()));
             return baritone;
         });
+    }
+
+    @Override
+    public IBaritone getBaritoneOrNull(LivingEntity player) {
+        return all.get(player);
     }
 
     @Override
