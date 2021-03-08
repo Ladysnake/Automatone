@@ -235,10 +235,7 @@ public class PathExecutor implements IPathExecutor, Helper {
             onTick();
             return true;
         } else {
-            sprintNextTick = shouldSprintNextTick();
-            if (!sprintNextTick) {
-                ctx.entity().setSprinting(false); // letting go of control doesn't make you stop sprinting actually
-            }
+            ctx.entity().setSprinting(shouldSprintNextTick());
             ticksOnCurrent++;
             if (ticksOnCurrent > currentMovementOriginalCostEstimate + Baritone.settings().movementTimeoutTicks.value) {
                 // only cancel if the total time has exceeded the initial estimate
