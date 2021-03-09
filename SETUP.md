@@ -15,7 +15,7 @@ v1.2.* is for 1.12.2, v1.3.* is for 1.13.2
 
 Any official release will be GPG signed by leijurv (44A3EA646EADAC6A) and ZeroMemes (73A788379A197567). Please verify that the hash of the file you download is in `checksums.txt` and that `checksums_signed.asc` is a valid signature by those two public keys of `checksums.txt`. 
 
-The build is fully deterministic and reproducible, and you can verify Travis did it properly by running `docker build --no-cache -t cabaletta/baritone .` yourself and comparing the shasum. This works identically on Travis, Mac, and Linux (if you have docker on Windows, I'd be grateful if you could let me know if it works there too).
+The build is fully deterministic and reproducible, and you can verify Travis did it properly by running `docker build --no-cache -t cabaletta/automatone .` yourself and comparing the shasum. This works identically on Travis, Mac, and Linux (if you have docker on Windows, I'd be grateful if you could let me know if it works there too).
 
 
 ## Artifacts
@@ -24,7 +24,7 @@ Building Baritone will result in 5 artifacts created in the ``dist`` directory. 
 
 **The Forge release can simply be added as a Forge mod.**
 
-If another one of your Forge mods has a Baritone integration, you want `baritone-api-forge-VERSION.jar`. Otherwise, you want `baritone-standalone-forge-VERSION.jar`
+If another one of your Forge mods has a Baritone integration, you want `automatone-api-forge-VERSION.jar`. Otherwise, you want `automatone-standalone-forge-VERSION.jar`
 
 - **API**: Only the non-api packages are obfuscated. This should be used in environments where other mods would like to use Baritone's features.
 - **Forge API**: Same as API, but packaged for Forge. This should be used where another mod has a Baritone integration.
@@ -33,7 +33,7 @@ If another one of your Forge mods has a Baritone integration, you want `baritone
 - **Unoptimized**: Nothing is obfuscated. This shouldn't be used ever in production.
 
 ## More Info
-To replace out Impact 4.5's Baritone build with a customized one, build Baritone as above then copy & **rename** `dist/baritone-api-$VERSION$.jar` into `minecraft/libraries/cabaletta/baritone-api/1.2/baritone-api-1.2.jar`, replacing the jar that was previously there. You also need to edit `minecraft/versions/1.12.2-Impact_4.5/1.12.2-Impact_4.5.json`, find the line `"name": "cabaletta:baritone-api:1.2"`, remove the comma from the end, and **entirely remove the NEXT line** (starts with `"url"`). **Restart your launcher** then load as normal. 
+To replace out Impact 4.5's Baritone build with a customized one, build Baritone as above then copy & **rename** `dist/automatone-api-$VERSION$.jar` into `minecraft/libraries/cabaletta/automatone-api/1.2/automatone-api-1.2.jar`, replacing the jar that was previously there. You also need to edit `minecraft/versions/1.12.2-Impact_4.5/1.12.2-Impact_4.5.json`, find the line `"name": "cabaletta:automatone-api:1.2"`, remove the comma from the end, and **entirely remove the NEXT line** (starts with `"url"`). **Restart your launcher** then load as normal. 
 
 You can verify whether or not it worked by running `.b version` in chat (only valid in Impact). It should print out the version that you downloaded. Note: The version that comes with 4.5 is `v1.2.3`.
 
@@ -89,7 +89,7 @@ Running Baritone:
 $ gradlew runClient
 ```
 
-For information on how to build baritone, see [Building Baritone](#building-baritone)
+For information on how to build automatone, see [Building Baritone](#building-baritone)
 
 ## IntelliJ
 - Open the project in IntelliJ as a Gradle project

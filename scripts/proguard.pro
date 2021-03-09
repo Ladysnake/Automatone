@@ -8,45 +8,45 @@
 -overloadaggressively
 -dontusemixedcaseclassnames
 
-# instead of renaming to a, b, c, rename to baritone.a, baritone.b, baritone.c so as to not conflict with minecraft's obfd classes
+# instead of renaming to a, b, c, rename to automatone.a, automatone.b, automatone.c so as to not conflict with minecraft's obfd classes
 -flattenpackagehierarchy
--repackageclasses 'baritone'
+-repackageclasses 'automatone'
 
 # lwjgl is weird
 -dontwarn org.lwjgl.**
 # also lwjgl lol
 -dontwarn module-info
 # we dont have forge
--dontwarn baritone.launch.BaritoneForgeModXD
+-dontwarn automatone.launch.BaritoneForgeModXD
 
 # please do not change the comment below
--keep class baritone.api.** { *; } # this is the keep api
+-keep class automatone.api.** { *; } # this is the keep api
 
 # service provider needs these class names
--keep class baritone.BaritoneProvider
--keep class baritone.api.IBaritoneProvider
+-keep class automatone.BaritoneProvider
+-keep class automatone.api.IBaritoneProvider
 
--keep class baritone.api.utils.MyChunkPos { *; } # even in standalone we need to keep this for gson reflect
+-keep class automatone.api.utils.MyChunkPos { *; } # even in standalone we need to keep this for gson reflect
 
 # Keep any class or member annotated with @KeepName so we dont have to put everything in the script
--keep,allowobfuscation @interface baritone.KeepName
--keep @baritone.KeepName class *
+-keep,allowobfuscation @interface automatone.KeepName
+-keep @automatone.KeepName class *
 -keepclassmembers class * {
-    @baritone.KeepName *;
+    @automatone.KeepName *;
 }
 
 # setting names are reflected from field names, so keep field names
--keepclassmembers class baritone.api.Settings {
+-keepclassmembers class automatone.api.Settings {
     public <fields>;    
 }
 
 # need to keep mixin names
--keep class baritone.launch.** { *; }
+-keep class automatone.launch.** { *; }
 
 #try to keep usage of schematica in separate classes
--keep class baritone.utils.schematic.schematica.**
+-keep class automatone.utils.schematic.schematica.**
 #proguard doesnt like it when it cant find our fake schematica classes
--dontwarn baritone.utils.schematic.schematica.**
+-dontwarn automatone.utils.schematic.schematica.**
 
 
 # Keep - Applications. Keep all application classes, along with their 'main'

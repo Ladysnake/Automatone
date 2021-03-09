@@ -16,8 +16,8 @@
  */
 import net.fabricmc.loom.LoomGradlePlugin
 
-group 'baritone'
-version '1.6.2'
+group 'ladysnake'
+version '0.1.0'
 
 buildscript {
     repositories {
@@ -76,7 +76,7 @@ task sourceJar(type: Jar, dependsOn: classes) {
 }
 
 minecraft {
-    refmapName = 'mixins.baritone.refmap.json'
+    refmapName = 'mixins.automatone.refmap.json'
 }
 
 repositories {
@@ -134,19 +134,14 @@ javadoc {
 jar {
     from sourceSets.launch.output, sourceSets.api.output
 
-    if (!getProject().hasProperty("baritone.forge_build")) {
-        exclude "**/BaritoneForgeModXD.class"
-        exclude "**/mods.toml"
-    }
-
     preserveFileTimestamps = false
     reproducibleFileOrder = true
 
     manifest {
         attributes(
-                'MixinConfigs': 'mixins.baritone.json',
+                'MixinConfigs': 'mixins.automatone.json',
 
-                'Implementation-Title': 'Baritone',
+                'Implementation-Title': 'Automatone',
                 'Implementation-Version': version
         )
     }

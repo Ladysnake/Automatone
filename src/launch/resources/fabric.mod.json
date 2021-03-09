@@ -1,23 +1,24 @@
 {
   "schemaVersion": 1,
-  "id": "baritoe",
+  "id": "automatone",
   "version": "1.6.1",
-  "name": "Baritone",
-  "description": "A Minecraft pathfinder bot.",
+  "name": "Automatone",
+  "description": "A serverside Minecraft pathfinder bot.",
   "entrypoints": {
-    "main": ["baritone.BaritoneProvider::INSTANCE"]
+    "main": ["automatone.BaritoneProvider::INSTANCE"]
   },
   "authors": [
     "leijurv",
-    "Brady"
+    "Brady",
+    "Pyrofab"
   ],
   "contact": {
-    "sources": "https://github.com/cabaletta/baritone",
-    "issues": "https://github.com/cabaletta/baritone/issues"
+    "sources": "https://github.com/Ladysnake/automatone",
+    "issues": "https://github.com/Ladysnake/automatone/issues"
   },
   "license": "LGPL-3.0-only",
   "environment": "client",
   "mixins": [
-    "mixins.baritone.json"
+    "mixins.automatone.json"
   ]
 }
