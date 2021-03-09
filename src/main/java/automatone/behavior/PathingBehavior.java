@@ -88,7 +88,7 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
     public void onTickServer() {
         dispatchEvents();
         expectedSegmentStart = pathStart();
-        baritone.getPathingControlManager().preTick();
+        baritone.getPathingControlManager().prePathingTick();
         tickPath();
         dispatchEvents();
     }
@@ -96,13 +96,6 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
     public void shutdown() {
         secretInternalSegmentCancel();
         baritone.getPathingControlManager().cancelEverything();
-    }
-
-    @Override
-    public void onPlayerSprintState(SprintStateEvent event) {
-        if (isPathing()) {
-            event.setState(current.isSprinting());
-        }
     }
 
     private void tickPath() {

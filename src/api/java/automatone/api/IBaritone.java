@@ -26,12 +26,17 @@ import automatone.api.process.*;
 import automatone.api.utils.IEntityContext;
 import automatone.api.utils.IInputOverrideHandler;
 import automatone.api.command.manager.ICommandManager;
+import dev.onyxstudios.cca.api.v3.component.Component;
+import dev.onyxstudios.cca.api.v3.component.ComponentKey;
+import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
+import net.minecraft.util.Identifier;
 
 /**
  * @author Brady
  * @since 9/29/2018
  */
-public interface IBaritone {
+public interface IBaritone extends Component {
+    ComponentKey<IBaritone> KEY = ComponentRegistry.getOrCreate(new Identifier("automatone", "core"), IBaritone.class);
 
     /**
      * @return The {@link IPathingBehavior} instance
@@ -130,4 +135,19 @@ public interface IBaritone {
      * Open click
      */
     void openClick();
+
+    /**
+     * Make this baritone start ticking and running processes
+     */
+    void activate();
+
+    /**
+     * Make this baritone stop ticking.
+     *
+     * <p>This method is called every tick by this instance's
+     * {@link IPathingControlManager} when no process is active.
+     */
+    void deactivate();
+
+    boolean isActive();
 }

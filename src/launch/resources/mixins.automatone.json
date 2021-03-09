@@ -14,12 +14,12 @@
     "MixinLootContext",
     "MixinMinecraftClient",
     "MixinPlayerController",
-    "MixinServerPlayerEntity",
     "MixinWorldRenderer"
   ],
   "mixins": [
     "MixinMobEntity",
+    "MixinServerPlayerInteractionManager",
     "MixinServerPlayNetworkHandler",
-    "MixinServerPlayerInteractionManager"
+    "MixinServerWorld"
   ]
 }

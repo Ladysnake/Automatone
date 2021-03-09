@@ -31,25 +31,13 @@ import automatone.api.event.events.*;
 public interface AbstractGameEventListener extends IGameEventListener {
 
     @Override
-    default void onTickClient(TickEvent event) {}
-
-    @Override
     default void onTickServer() {}
 
     @Override
-    default void onPlayerUpdate(PlayerUpdateEvent event) {}
-
-    @Override
-    default void onSendChatMessage(ChatEvent event) {}
+    default void onReceiveChatMessage(ChatEvent event) {}
 
     @Override
     default void onPreTabComplete(TabCompleteEvent event) {}
-
-    @Override
-    default void onPlayerRotationMove(RotationMoveEvent event) {}
-
-    @Override
-    default void onPlayerSprintState(SprintStateEvent event) {}
 
     @Override
     default void onBlockInteract(BlockInteractEvent event) {}

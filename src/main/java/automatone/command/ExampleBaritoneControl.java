@@ -56,7 +56,7 @@ public class ExampleBaritoneControl implements Helper, AbstractGameEventListener
     }
 
     @Override
-    public void onSendChatMessage(ChatEvent event) {
+    public void onReceiveChatMessage(ChatEvent event) {
         String msg = event.getMessage();
         String prefix = settings.prefix.value;
         boolean forceRun = msg.startsWith(FORCE_COMMAND_PREFIX);

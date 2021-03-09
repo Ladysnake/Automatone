@@ -55,6 +55,7 @@ public class SelCommand extends Command {
 
     public SelCommand(IBaritone baritone) {
         super(baritone, "sel", "selection", "s");
+        // FIXME this will big crash on servers
         BaritoneProvider.extraRenderers.add(event -> {
             if (!Baritone.settings().renderSelectionCorners.value || pos1 == null) {
                 return;

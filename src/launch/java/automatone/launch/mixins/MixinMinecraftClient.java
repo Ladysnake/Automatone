@@ -53,27 +53,4 @@ public class MixinMinecraftClient {
     private void preInit(CallbackInfo ci) {
         BaritoneAutoTest.INSTANCE.onPreInit();
     }
-
-    @Inject(
-            method = "tick",
-            at = @At(
-                    value = "FIELD",
-                    opcode = Opcodes.GETFIELD,
-                    target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;",
-                    ordinal = 5,
-                    shift = At.Shift.BY,
-                    by = -3
-            )
-    )
-    private void runTick(CallbackInfo ci) {
-        final Function<TickEvent.Type, TickEvent> tickProvider = TickEvent.createNextProvider();
-
-        IBaritone baritone = BaritoneProvider.INSTANCE.getPrimaryBaritone();
-
-        TickEvent.Type type = baritone.getPlayerContext().entity() != null && baritone.getPlayerContext().world() != null
-                ? TickEvent.Type.IN
-                : TickEvent.Type.OUT;
-
-        baritone.getGameEventHandler().onTickClient(tickProvider.apply(type));
-    }
 }

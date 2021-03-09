@@ -17,31 +17,14 @@
 
 package automatone.utils;
 
-import automatone.api.BaritoneAPI;
-import automatone.api.event.events.TickEvent;
 import automatone.api.event.listener.AbstractGameEventListener;
 import automatone.api.pathing.goals.Goal;
 import automatone.api.pathing.goals.GoalBlock;
 import automatone.api.utils.Helper;
-import automatone.api.utils.IEntityContext;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.options.*;
 import net.minecraft.client.tutorial.TutorialStep;
-import net.minecraft.client.util.NetworkUtils;
-import net.minecraft.resource.DataPackSettings;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.DynamicRegistryManager;
-import net.minecraft.world.*;
-import net.minecraft.world.gen.GeneratorOptions;
-import net.minecraft.world.level.LevelInfo;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.OptionalLong;
 
 /**
  * Responsible for automatically testing Baritone's pathing algorithm by automatically creating a world with a specific
@@ -86,91 +69,6 @@ public class BaritoneAutoTest implements AbstractGameEventListener, Helper {
         s.tutorialStep = TutorialStep.NONE;
         s.hudHidden = true;
         s.fov = 30.0F;
-    }
-
-    @Override
-    public void onTickClient(TickEvent event) {
-        IEntityContext ctx = BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext();
-        // If we're on the main menu then create the test world and launch the integrated server
-        MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.currentScreen instanceof TitleScreen) {
-            System.out.println("Beginning Baritone automatic test routine");
-            mc.openScreen(null);
-            LevelInfo worldsettings = new LevelInfo("BaritoneAutoTest", GameMode.SURVIVAL, false, Difficulty.NORMAL, true, new GameRules(), DataPackSettings.SAFE_MODE);
-            DynamicRegistryManager.Impl impl = DynamicRegistryManager.create();
-            mc.method_29607("BaritoneAutoTest", worldsettings, impl, GeneratorOptions.method_31112(impl).withHardcore(false, OptionalLong.of(TEST_SEED)));
-        }
-
-        IntegratedServer server = mc.getServer();
-
-        // If the integrated server is launched and the world has initialized, set the spawn point
-        // to our defined starting position
-        if (server != null && server.getWorld(World.OVERWORLD) != null) {
-            server.setDifficulty(Difficulty.PEACEFUL, true);
-            if (mc.player == null) {
-                server.execute(() -> {
-                    server.getWorld(World.OVERWORLD).setSpawnPos(STARTING_POSITION, 0.0f);
-                    server.getCommandManager().execute(server.getCommandSource(), "/difficulty peaceful");
-                    int result = server.getCommandManager().execute(server.getCommandSource(), "/gamerule spawnRadius 0");
-                    if (result != 0) {
-                        throw new IllegalStateException(result + "");
-                    }
-                });
-                for (final ServerWorld world : mc.getServer().getWorlds()) {
-                    // If the world has initialized, set the spawn point to our defined starting position
-                    if (world != null) {
-                        world.getGameRules().get(GameRules.SPAWN_RADIUS).validate("0");
-                        world.setSpawnPos(STARTING_POSITION, 0.0f);
-                    }
-                }
-            }
-        }
-
-        if (event.getType() == TickEvent.Type.IN) { // If we're in-game
-
-            // Force the integrated server to share the world to LAN so that
-            // the ingame pause menu gui doesn't actually pause our game
-            if (mc.isInSingleplayer() && !mc.getServer().isRemote()) {
-                mc.getServer().openToLan(GameMode.SURVIVAL, false, NetworkUtils.findLocalPort());
-            }
-
-            // For the first 200 ticks, wait for the world to generate
-            if (event.getCount() < 200) {
-                System.out.println("Waiting for world to generate... " + event.getCount());
-                return;
-            }
-
-            // Print out an update of our position every 5 seconds
-            if (event.getCount() % 100 == 0) {
-                System.out.println(ctx.feetPos() + " " + event.getCount());
-            }
-
-            // Setup Baritone's pathing goal and (if needed) begin pathing
-            if (!BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().isActive()) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(GOAL);
-            }
-
-            // If we have reached our goal, print a message and safely close the game
-            if (GOAL.isInGoal(ctx.feetPos())) {
-                System.out.println("Successfully pathed to " + ctx.feetPos() + " in " + event.getCount() + " ticks");
-                try {
-                    File file = new File("success");
-                    System.out.println("Writing success to " + file.getAbsolutePath());
-                    Files.write(file.getAbsoluteFile().toPath(), "Success!".getBytes());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                mc.scheduleStop();
-                mc.stop();
-                System.exit(0);
-            }
-
-            // If we have exceeded the expected number of ticks to complete the pathing
-            // task, then throw an IllegalStateException to cause the build to fail
-            if (event.getCount() > MAX_TICKS) {
-                throw new IllegalStateException("took too long");
-            }
-        }
     }
 
     private BaritoneAutoTest() {

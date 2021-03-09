@@ -5,7 +5,8 @@
   "name": "Automatone",
   "description": "A serverside Minecraft pathfinder bot.",
   "entrypoints": {
-    "main": ["automatone.BaritoneProvider::INSTANCE"]
+    "main": ["automatone.BaritoneProvider::INSTANCE"],
+    "cardinal-components-entity": ["automatone.AutomatoneComponents"]
   },
   "authors": [
     "leijurv",
@@ -20,5 +21,10 @@
   "environment": "client",
   "mixins": [
     "mixins.automatone.json"
-  ]
+  ],
+  "custom": {
+    "cardinal-components": [
+      "automatone:core"
+    ]
+  }
 }

@@ -30,6 +30,7 @@ import automatone.utils.*;
 import automatone.command.manager.CommandManager;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.nbt.CompoundTag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -208,6 +209,21 @@ public class Baritone implements IBaritone {
     }
 
     @Override
+    public void activate() {
+        BaritoneProvider.INSTANCE.activate(this);
+    }
+
+    @Override
+    public void deactivate() {
+        BaritoneProvider.INSTANCE.deactivate(this);
+    }
+
+    @Override
+    public boolean isActive() {
+        return BaritoneProvider.INSTANCE.isActive(this);
+    }
+
+    @Override
     public void openClick() {
         new Thread(() -> {
             try {
@@ -215,6 +231,16 @@ public class Baritone implements IBaritone {
                 MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().openScreen(new GuiClick()));
             } catch (Exception ignored) {}
         }).start();
+    }
+
+    @Override
+    public void readFromNbt(CompoundTag tag) {
+        // NO-OP
+    }
+
+    @Override
+    public void writeToNbt(CompoundTag tag) {
+        // NO-OP
     }
 
     public static Settings settings() {

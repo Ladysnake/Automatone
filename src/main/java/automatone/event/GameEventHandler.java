@@ -42,11 +42,6 @@ public final class GameEventHandler implements IEventBus, Helper {
     }
 
     @Override
-    public final void onTickClient(TickEvent event) {
-        listeners.forEach(l -> l.onTickClient(event));
-    }
-
-    @Override
     public void onTickServer() {
         try {
             baritone.bsi = new BlockStateInterface(baritone.getPlayerContext());
@@ -58,28 +53,13 @@ public final class GameEventHandler implements IEventBus, Helper {
     }
 
     @Override
-    public final void onPlayerUpdate(PlayerUpdateEvent event) {
-        listeners.forEach(l -> l.onPlayerUpdate(event));
-    }
-
-    @Override
-    public final void onSendChatMessage(ChatEvent event) {
-        listeners.forEach(l -> l.onSendChatMessage(event));
+    public final void onReceiveChatMessage(ChatEvent event) {
+        listeners.forEach(l -> l.onReceiveChatMessage(event));
     }
 
     @Override
     public void onPreTabComplete(TabCompleteEvent event) {
         listeners.forEach(l -> l.onPreTabComplete(event));
-    }
-
-    @Override
-    public void onPlayerRotationMove(RotationMoveEvent event) {
-        listeners.forEach(l -> l.onPlayerRotationMove(event));
-    }
-
-    @Override
-    public void onPlayerSprintState(SprintStateEvent event) {
-        listeners.forEach(l -> l.onPlayerSprintState(event));
     }
 
     @Override

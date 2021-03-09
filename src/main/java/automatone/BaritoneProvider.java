@@ -31,19 +31,23 @@ import automatone.command.CommandSystem;
 import automatone.command.ExampleBaritoneControl;
 import automatone.selection.SelectionManager;
 import automatone.selection.SelectionRenderer;
+import automatone.utils.GuiClick;
 import automatone.utils.PathRenderer;
-import automatone.utils.player.EntityContext;
 import automatone.utils.player.PrimaryPlayerContext;
 import automatone.utils.schematic.SchematicSystem;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 /**
@@ -53,11 +57,11 @@ import java.util.function.Consumer;
 public final class BaritoneProvider implements IBaritoneProvider, ModInitializer {
 
     private static final SelectionManager selectionManager = new SelectionManager();
-    public static final List<Consumer<RenderEvent>> extraRenderers = new ArrayList<>();
+    public static final List<Consumer<RenderEvent>> extraRenderers = new CopyOnWriteArrayList<>();
     public static final BaritoneProvider INSTANCE = new BaritoneProvider();
 
+    private final Set<IBaritone> activeBaritones = new ReferenceOpenHashSet<>();
     private final Map<RegistryKey<World>, WorldProvider> worldProviders = new HashMap<>();
-    private final Map<LivingEntity, IBaritone> all = new WeakHashMap<>();
     private Baritone clientBaritone;
     public ExampleBaritoneControl autocompleteHandler;
 
@@ -65,41 +69,54 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
         return selectionManager;
     }
 
+    public WorldProvider getWorldProvider(RegistryKey<World> id) {
+        return this.worldProviders.get(id);
+    }
+
     public void onInitialize() {
         this.clientBaritone = new Baritone(PrimaryPlayerContext.INSTANCE, worldProviders.computeIfAbsent(World.OVERWORLD, r -> new WorldProvider()));
         this.autocompleteHandler = new ExampleBaritoneControl(this.clientBaritone.getCommandManager());
         ServerTickEvents.START_SERVER_TICK.register(minecraftServer -> {
-            for (IBaritone baritone : all.values()) {
+            for (IBaritone baritone : this.activeBaritones) {
                 baritone.getGameEventHandler().onTickServer();
             }
         });
-        ServerLifecycleEvents.SERVER_STOPPING.register(minecraftServer -> {
-            this.all.values().forEach(b -> ((PathingBehavior) b.getPathingBehavior()).shutdown());
-            this.worldProviders.values().forEach(WorldProvider::closeWorld);
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            for (Iterator<IBaritone> iterator = this.activeBaritones.iterator(); iterator.hasNext(); ) {
+                ((PathingBehavior) iterator.next().getPathingBehavior()).shutdown();
+                iterator.remove();
+            }
         });
         ServerWorldEvents.LOAD.register((minecraftServer, serverWorld) ->
                 worldProviders.computeIfAbsent(serverWorld.getRegistryKey(), r -> new WorldProvider()).initWorld(serverWorld));
+        ServerWorldEvents.UNLOAD.register((minecraftServer, serverWorld) -> {
+            WorldProvider worldProvider = this.worldProviders.remove(serverWorld.getRegistryKey());
+            if (worldProvider != null) worldProvider.closeWorld();
+        });
     }
 
-    @Override
-    public boolean isPathing(LivingEntity entity) {
-        IBaritone b = this.all.get(entity);
-        return b != null && b.getCustomGoalProcess().isActive();
+    public void activate(IBaritone baritone) {
+        this.activeBaritones.add(baritone);
+    }
+
+    public void deactivate(IBaritone baritone) {
+        this.activeBaritones.remove(baritone);
+    }
+
+    public boolean isActive(IBaritone baritone) {
+        return this.activeBaritones.contains(baritone);
     }
 
     @Override
     public IBaritone getBaritone(LivingEntity entity) {
         if (entity.world.isClient()) throw new IllegalStateException("Lol we only support servers now");
-        return all.computeIfAbsent(entity, p -> {
-            Baritone baritone = new Baritone(new EntityContext(p), this.worldProviders.get(entity.world.getRegistryKey()));
-            baritone.getGameEventHandler().registerEventListener(new ExampleBaritoneControl(baritone.getCommandManager()));
-            return baritone;
-        });
+        return IBaritone.KEY.get(entity);
     }
 
     @Override
-    public IBaritone getBaritoneOrNull(LivingEntity player) {
-        return all.get(player);
+    public @Nullable IBaritone getActiveBaritone(LivingEntity entity) {
+        IBaritone baritone = this.getBaritone(entity);
+        return this.isActive(baritone) ? baritone : null;
     }
 
     @Override
@@ -108,8 +125,8 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
     }
 
     @Override
-    public List<IBaritone> getAllBaritones() {
-        return new ArrayList<>(all.values());
+    public Collection<IBaritone> getActiveBaritones() {
+        return this.activeBaritones;
     }
 
     @Override
@@ -131,10 +148,19 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
         SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), selectionManager.getSelections());
 
         // FIXME BOOM REACHING ACROSS SIDES
-        for (IBaritone b : this.getAllBaritones()) {
-            if (!b.getPlayerContext().world().isClient()) {
-                PathRenderer.render(renderEvent, (PathingBehavior) b.getPathingBehavior());
+        Collection<IBaritone> activeBaritones = this.getActiveBaritones();
+        if (!activeBaritones.isEmpty()) {
+            // Copy to avoid concurrency issues
+            for (IBaritone b : activeBaritones.toArray(new IBaritone[0])) {
+                if (!b.getPlayerContext().world().isClient()) {
+                    PathRenderer.render(renderEvent, (PathingBehavior) b.getPathingBehavior());
+                }
             }
+        }
+
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.currentScreen instanceof GuiClick) {
+            ((GuiClick) mc.currentScreen).onRender(renderEvent.getModelViewStack(), renderEvent.getProjectionMatrix());
         }
 
         for (Consumer<RenderEvent> extra : extraRenderers) {

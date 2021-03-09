@@ -110,6 +110,7 @@ public final class FollowProcess extends BaritoneProcessHelper implements IFollo
     @Override
     public void follow(Predicate<Entity> filter) {
         this.filter = filter;
+        this.baritone.activate();
     }
 
     @Override

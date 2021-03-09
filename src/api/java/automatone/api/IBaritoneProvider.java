@@ -22,6 +22,7 @@ import automatone.api.command.ICommand;
 import automatone.api.command.ICommandSystem;
 import automatone.api.schematic.ISchematicSystem;
 import net.minecraft.entity.LivingEntity;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -39,6 +40,7 @@ public interface IBaritoneProvider {
      *
      * @return The primary {@link IBaritone} instance.
      */
+    @Deprecated
     IBaritone getPrimaryBaritone();
 
     /**
@@ -48,7 +50,7 @@ public interface IBaritoneProvider {
      * @return All active {@link IBaritone} instances.
      * @see #getBaritone(LivingEntity)
      */
-    Collection<IBaritone> getAllBaritones();
+    Collection<IBaritone> getActiveBaritones();
 
     /**
      * Provides the {@link IBaritone} instance for a given {@link LivingEntity}.
@@ -58,9 +60,7 @@ public interface IBaritoneProvider {
      */
     IBaritone getBaritone(LivingEntity player);
 
-    IBaritone getBaritoneOrNull(LivingEntity player);
-
-    boolean isPathing(LivingEntity entity);
+    @Nullable IBaritone getActiveBaritone(LivingEntity entity);
 
     /**
      * Returns the {@link IWorldScanner} instance. This is not a type returned by

@@ -62,6 +62,7 @@ public final class ExploreProcess extends BaritoneProcessHelper implements IExpl
     public void explore(int centerX, int centerZ) {
         explorationOrigin = new BlockPos(centerX, 0, centerZ);
         distanceCompleted = 0;
+        this.baritone.activate();
     }
 
     @Override

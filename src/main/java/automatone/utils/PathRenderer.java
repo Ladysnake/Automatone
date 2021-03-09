@@ -77,9 +77,6 @@ public final class PathRenderer implements IRenderer, Helper {
         float partialTicks = event.getPartialTicks();
         Goal goal = behavior.getGoal();
         MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.currentScreen instanceof GuiClick) {
-            ((GuiClick) mc.currentScreen).onRender(event.getModelViewStack(), event.getProjectionMatrix());
-        }
 
         DimensionType thisPlayerDimension = behavior.baritone.getPlayerContext().world().getDimension();
         World world = Objects.requireNonNull(MinecraftClient.getInstance().world);

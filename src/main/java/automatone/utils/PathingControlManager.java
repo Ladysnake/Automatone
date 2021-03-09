@@ -18,6 +18,7 @@
 package automatone.utils;
 
 import automatone.Baritone;
+import automatone.BaritoneProvider;
 import automatone.api.event.listener.AbstractGameEventListener;
 import automatone.api.pathing.calc.IPathingControlManager;
 import automatone.api.pathing.goals.Goal;
@@ -47,7 +48,7 @@ public class PathingControlManager implements IPathingControlManager {
         baritone.getGameEventHandler().registerEventListener(new AbstractGameEventListener() { // needs to be after all behavior ticks
             @Override
             public void onTickServer() {
-                postTick();
+                postPathingTick();
             }
         });
     }
@@ -81,7 +82,7 @@ public class PathingControlManager implements IPathingControlManager {
         return Optional.ofNullable(command);
     }
 
-    public void preTick() {
+    public void prePathingTick() {
         inControlLastTick = inControlThisTick;
         inControlThisTick = null;
         PathingBehavior p = baritone.getPathingBehavior();
@@ -125,7 +126,7 @@ public class PathingControlManager implements IPathingControlManager {
         }
     }
 
-    private void postTick() {
+    private void postPathingTick() {
         // if we did this in pretick, it would suck
         // we use the time between ticks as calculation time
         // therefore, we only cancel and recalculate after the tick for the current path has executed
@@ -189,6 +190,12 @@ public class PathingControlManager implements IPathingControlManager {
                 active.remove(process);
             }
         }
+
+        if (active.isEmpty()) {
+            this.baritone.deactivate();
+            return null;
+        }
+
         // ties are broken by which was added to the beginning of the list first
         active.sort(Comparator.comparingDouble(IBaritoneProcess::priority).reversed());
 

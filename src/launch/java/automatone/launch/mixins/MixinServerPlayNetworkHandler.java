@@ -49,7 +49,7 @@ public class MixinServerPlayNetworkHandler {
                 if (baritone == null) {
                     return;
                 }
-                baritone.getGameEventHandler().onSendChatMessage(event);
+                baritone.getGameEventHandler().onReceiveChatMessage(event);
             });
             ci.cancel();
         }

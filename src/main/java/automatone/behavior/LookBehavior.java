@@ -21,7 +21,6 @@ import automatone.Baritone;
 import automatone.api.Settings;
 import automatone.api.behavior.ILookBehavior;
 import automatone.api.event.events.PlayerUpdateEvent;
-import automatone.api.event.events.RotationMoveEvent;
 import automatone.api.utils.Rotation;
 
 public final class LookBehavior extends Behavior implements ILookBehavior {
@@ -61,63 +60,28 @@ public final class LookBehavior extends Behavior implements ILookBehavior {
     }
 
     @Override
-    public void onPlayerUpdate(PlayerUpdateEvent event) {
+    public void onTickServer() {
         if (this.target == null) {
             return;
         }
 
-        // Whether or not we're going to silently set our angles
-        boolean silent = Baritone.settings().antiCheatCompatibility.value && !this.force;
-
-        switch (event.getState()) {
-            case PRE: {
-                if (this.force) {
-                    ctx.entity().yaw = this.target.getYaw();
-                    float oldPitch = ctx.entity().pitch;
-                    float desiredPitch = this.target.getPitch();
-                    ctx.entity().pitch = desiredPitch;
-                    ctx.entity().yaw += (Math.random() - 0.5) * Baritone.settings().randomLooking.value;
-                    ctx.entity().pitch += (Math.random() - 0.5) * Baritone.settings().randomLooking.value;
-                    if (desiredPitch == oldPitch && !Baritone.settings().freeLook.value) {
-                        nudgeToLevel();
-                    }
-                    this.target = null;
-                }
-                if (silent) {
-                    this.lastYaw = ctx.entity().yaw;
-                    ctx.entity().yaw = this.target.getYaw();
-                }
-                break;
+        if (this.force) {
+            ctx.entity().yaw = this.target.getYaw();
+            float oldPitch = ctx.entity().pitch;
+            float desiredPitch = this.target.getPitch();
+            ctx.entity().pitch = desiredPitch;
+            ctx.entity().yaw += (Math.random() - 0.5) * Baritone.settings().randomLooking.value;
+            ctx.entity().pitch += (Math.random() - 0.5) * Baritone.settings().randomLooking.value;
+            if (desiredPitch == oldPitch && !Baritone.settings().freeLook.value) {
+                nudgeToLevel();
             }
-            case POST: {
-                if (silent) {
-                    ctx.entity().yaw = this.lastYaw;
-                    this.target = null;
-                }
-                break;
-            }
-            default:
-                break;
+            this.target = null;
         }
     }
 
     public void pig() {
         if (this.target != null) {
             ctx.entity().yaw = this.target.getYaw();
-        }
-    }
-
-    @Override
-    public void onPlayerRotationMove(RotationMoveEvent event) {
-        if (this.target != null) {
-
-            event.setYaw(this.target.getYaw());
-
-            // If we have antiCheatCompatibility on, we're going to use the target value later in onPlayerUpdate()
-            // Also the type has to be MOTION_UPDATE because that is called after JUMP
-            if (!Baritone.settings().antiCheatCompatibility.value && event.getType() == RotationMoveEvent.Type.MOTION_UPDATE && !this.force) {
-                this.target = null;
-            }
         }
     }
 
