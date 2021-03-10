@@ -419,6 +419,7 @@ public interface MovementHelper extends ActionCosts, Helper {
         return 0; // we won't actually mine it, so don't check fallings above
     }
 
+    // TODO handle other collision boxes
     static boolean isBottomSlab(BlockState state) {
         return state.getBlock() instanceof SlabBlock
                 && state.get(SlabBlock.TYPE) == SlabType.BOTTOM;
