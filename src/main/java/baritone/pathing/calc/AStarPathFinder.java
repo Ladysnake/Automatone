@@ -109,7 +109,7 @@ public final class AStarPathFinder extends AbstractNodeCostSearch {
                 if (!moves.dynamicXZ && !worldBorder.entirelyContains(newX, newZ)) {
                     continue;
                 }
-                if (currentNode.y + moves.yOffset > 256 || currentNode.y + moves.yOffset < 0) {
+                if (currentNode.y + moves.yOffset > calcContext.worldHeight || currentNode.y + moves.yOffset < 0) {
                     continue;
                 }
                 res.reset();

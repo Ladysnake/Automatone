@@ -266,7 +266,7 @@ public final class PathRenderer implements IRenderer, Helper {
                         1.0F,
                         player.world.getTime(),
                         0,
-                        256,
+                        player.world.getHeight(),
                         color.getColorComponents(null),
 
                         // Arguments filled by the private method lol
@@ -292,7 +292,7 @@ public final class PathRenderer implements IRenderer, Helper {
             y1 = 0;
             y2 = 0;
             minY = 0 - renderPosY;
-            maxY = 256 - renderPosY;
+            maxY = player.world.getHeight() - renderPosY;
         } else if (goal instanceof GoalComposite) {
             for (Goal g : ((GoalComposite) goal).goals()) {
                 drawDankLitGoalBox(stack, player, g, partialTicks, color);
