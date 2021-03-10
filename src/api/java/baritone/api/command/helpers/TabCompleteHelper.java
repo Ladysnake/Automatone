@@ -236,7 +236,6 @@ public class TabCompleteHelper {
      * Appends every command in the specified {@link ICommandManager} to this {@link TabCompleteHelper}
      *
      * @param manager A command manager
-     *
      * @return This {@link TabCompleteHelper}
      */
     public TabCompleteHelper addCommands(ICommandManager manager) {

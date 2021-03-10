@@ -88,6 +88,7 @@ public class SetCommand extends Command {
                         hoverComponent.append(setting.getName());
                         hoverComponent.append(String.format("\nType: %s", settingTypeToString(setting)));
                         hoverComponent.append(String.format("\n\nValue:\n%s", settingValueToString(setting)));
+                        hoverComponent.append(String.format("\n\nDefault Value:\n%s", settingDefaultToString(setting)));
                         String commandSuggestion = Baritone.settings().prefix.value + String.format("set %s ", setting.getName());
                         BaseText component = new LiteralText(setting.getName());
                         component.setStyle(component.getStyle().withFormatting(Formatting.GRAY));

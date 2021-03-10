@@ -18,22 +18,22 @@
 package baritone.command.defaults;
 
 import baritone.api.IBaritone;
-import baritone.api.command.Command;
-import baritone.api.command.argument.IArgConsumer;
-import baritone.api.command.exception.CommandException;
-import baritone.api.command.exception.CommandInvalidStateException;
 import baritone.api.pathing.calc.IPathingControlManager;
 import baritone.api.process.IBaritoneProcess;
-import baritone.api.process.PathingCommand;
+import baritone.api.behavior.IPathingBehavior;
+import baritone.api.command.Command;
+import baritone.api.command.exception.CommandException;
+import baritone.api.command.exception.CommandInvalidStateException;
+import baritone.api.command.argument.IArgConsumer;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ProcCommand extends Command {
+public class ETACommand extends Command {
 
-    public ProcCommand(IBaritone baritone) {
-        super(baritone, "proc");
+    public ETACommand(IBaritone baritone) {
+        super(baritone, "eta");
     }
 
     @Override
@@ -44,20 +44,12 @@ public class ProcCommand extends Command {
         if (process == null) {
             throw new CommandInvalidStateException("No process in control");
         }
+        IPathingBehavior pathingBehavior = baritone.getPathingBehavior();
         logDirect(String.format(
-                "Class: %s\n" +
-                        "Priority: %f\n" +
-                        "Temporary: %b\n" +
-                        "Display name: %s\n" +
-                        "Last command: %s",
-                process.getClass().getTypeName(),
-                process.priority(),
-                process.isTemporary(),
-                process.displayName(),
-                pathingControlManager
-                        .mostRecentCommand()
-                        .map(PathingCommand::toString)
-                        .orElse("None")
+                "Next segment: %.2f\n" +
+                "Goal: %.2f",
+                pathingBehavior.ticksRemainingInSegment().orElse(-1.0),
+                pathingBehavior.estimatedTicksToGoal().orElse(-1.0)
         ));
     }
 
@@ -68,18 +60,19 @@ public class ProcCommand extends Command {
 
     @Override
     public String getShortDesc() {
-        return "View process state information";
+        return "View the current ETA";
     }
 
     @Override
     public List<String> getLongDesc() {
         return Arrays.asList(
-                "The proc command provides miscellaneous information about the process currently controlling Baritone.",
+                "The ETA command provides information about the estimated time until the next segment.",
+                "and the goal",
                 "",
-                "You are not expected to understand this if you aren't familiar with how Baritone works.",
+                "Be aware that the ETA to your goal is really unprecise",
                 "",
                 "Usage:",
-                "> proc - View process information, if present"
+                "> eta - View ETA, if present"
         );
     }
 }

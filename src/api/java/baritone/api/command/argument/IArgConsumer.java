@@ -18,8 +18,6 @@
 package baritone.api.command.argument;
 
 import baritone.api.command.ICommand;
-import baritone.api.command.exception.CommandTooManyArgumentsException;
-import baritone.api.utils.Helper;
 import baritone.api.command.argparser.IArgParser;
 import baritone.api.command.datatypes.IDatatype;
 import baritone.api.command.datatypes.IDatatypeFor;
@@ -223,7 +221,7 @@ public interface IArgConsumer {
      * @param type  The type to peek as
      * @param index The index to peek
      * @return An instance of the specified type
-     * @throws CommandInvalidTypeException     If the parsing failed
+     * @throws CommandInvalidTypeException If the parsing failed
      * @see IArgParser
      * @see #peekAs(Class)
      * @see #peekAsOrDefault(Class, Object, int)
@@ -240,7 +238,7 @@ public interface IArgConsumer {
      *
      * @param type The type to peek as
      * @return An instance of the specified type
-     * @throws CommandInvalidTypeException     If the parsing failed
+     * @throws CommandInvalidTypeException If the parsing failed
      * @see IArgParser
      * @see #peekAs(Class, int)
      * @see #peekAsOrDefault(Class, Object)
@@ -458,7 +456,7 @@ public interface IArgConsumer {
      *
      * @param type The type to peek as
      * @return An instance of the specified type
-     * @throws CommandInvalidTypeException     If the parsing failed
+     * @throws CommandInvalidTypeException If the parsing failed
      * @see IArgParser
      * @see #get()
      * @see #getAsOrDefault(Class, Object)
