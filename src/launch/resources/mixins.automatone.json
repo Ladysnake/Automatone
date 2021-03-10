@@ -17,6 +17,7 @@
     "MixinWorldRenderer"
   ],
   "mixins": [
+    "MixinEntity",
     "MixinMobEntity",
     "MixinServerPlayerInteractionManager",
     "MixinServerPlayNetworkHandler",

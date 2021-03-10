@@ -18,6 +18,7 @@
 package automatone.api.utils;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
@@ -61,6 +62,6 @@ public final class RayTraceUtils {
     }
 
     public static Vec3d inferSneakingEyePosition(Entity entity) {
-        return new Vec3d(entity.getX(), entity.getY() + IEntityContext.eyeHeight(true), entity.getZ());
+        return new Vec3d(entity.getX(), entity.getY() + ((IEntity) entity).getEyeHeight(EntityPose.CROUCHING, entity.getDimensions(EntityPose.CROUCHING)), entity.getZ());
     }
 }
