@@ -1,6 +1,6 @@
 {
   "required": true,
-  "package": "automatone.launch.mixins",
+  "package": "baritone.launch.mixins",
   "refmap": "mixins.baritone.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "verbose": false,
