@@ -22,6 +22,10 @@ import automatone.api.utils.IEntityContext;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 /**
  * @author Brady
@@ -30,7 +34,7 @@ import net.minecraft.util.hit.HitResult;
 public final class BlockBreakHelper implements Helper {
 
     private final IEntityContext ctx;
-    private boolean didBreakLastTick;
+    private @Nullable BlockPos lastPos;
 
     BlockBreakHelper(IEntityContext ctx) {
         this.ctx = ctx;
@@ -38,13 +42,13 @@ public final class BlockBreakHelper implements Helper {
 
     public void stopBreakingBlock() {
         // The player controller will never be null, but the player can be
-        if (ctx.entity() != null && didBreakLastTick) {
+        if (ctx.entity() != null && lastPos != null) {
             if (!ctx.playerController().hasBrokenBlock()) {
                 // insane bypass to check breaking succeeded
                 ctx.playerController().setHittingBlock(true);
             }
             ctx.playerController().resetBlockRemoving();
-            didBreakLastTick = false;
+            lastPos = null;
         }
     }
 
@@ -53,22 +57,23 @@ public final class BlockBreakHelper implements Helper {
         boolean isBlockTrace = trace != null && trace.getType() == HitResult.Type.BLOCK;
 
         if (isLeftClick && isBlockTrace) {
-            if (!didBreakLastTick) {
-                ctx.playerController().clickBlock(((BlockHitResult) trace).getBlockPos(), ((BlockHitResult) trace).getSide());
+            BlockPos pos = ((BlockHitResult) trace).getBlockPos();
+            if (!Objects.equals(lastPos, pos)) {
+                ctx.playerController().clickBlock(pos, ((BlockHitResult) trace).getSide());
                 ctx.entity().swingHand(Hand.MAIN_HAND);
             }
 
             // Attempt to break the block
-            if (ctx.playerController().onPlayerDamageBlock(((BlockHitResult) trace).getBlockPos(), ((BlockHitResult) trace).getSide())) {
+            if (ctx.playerController().onPlayerDamageBlock(pos, ((BlockHitResult) trace).getSide())) {
                 ctx.entity().swingHand(Hand.MAIN_HAND);
             }
 
             ctx.playerController().setHittingBlock(false);
 
-            didBreakLastTick = true;
-        } else if (didBreakLastTick) {
+            lastPos = pos;
+        } else if (lastPos != null) {
             stopBreakingBlock();
-            didBreakLastTick = false;
+            lastPos = null;
         }
     }
 }
