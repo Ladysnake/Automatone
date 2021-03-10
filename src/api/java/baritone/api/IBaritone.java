@@ -36,7 +36,7 @@ import net.minecraft.util.Identifier;
  * @since 9/29/2018
  */
 public interface IBaritone extends Component {
-    ComponentKey<IBaritone> KEY = ComponentRegistry.getOrCreate(new Identifier("baritone", "core"), IBaritone.class);
+    ComponentKey<IBaritone> KEY = ComponentRegistry.getOrCreate(new Identifier("automatone", "core"), IBaritone.class);
 
     /**
      * @return The {@link IPathingBehavior} instance

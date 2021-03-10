@@ -99,7 +99,7 @@ public final class FarmProcess extends BaritoneProcessHelper implements IFarmPro
     @Override
     public void farm(int range, BlockPos pos) {
         if (pos == null) {
-            center = baritone.getPlayerContext().playerFeet();
+            center = baritone.getPlayerContext().feetPos();
         } else {
             center = pos;
         }
@@ -199,7 +199,7 @@ public final class FarmProcess extends BaritoneProcessHelper implements IFarmPro
         List<BlockPos> openSoulsand = new ArrayList<>();
         for (BlockPos pos : locations) {
             //check if the target block is out of range.
-            if (range != 0 && pos.getDistance(center.getX(), center.getY(), center.getZ()) > range) {
+            if (range != 0 && !pos.isWithinDistance(center, range)) {
                 continue;
             }
 

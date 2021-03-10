@@ -364,8 +364,9 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         }
     }
 
+    public PathingCommand onTick(boolean calcFailed, boolean isSafeToCancel) {
         return onTick(calcFailed, isSafeToCancel, 0);
-}
+    }
 
     public PathingCommand onTick(boolean calcFailed, boolean isSafeToCancel, int recursions) {
         if (recursions > 1000) { // onTick calls itself, don't crash
@@ -638,14 +639,14 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         List<BetterBlockPos> breakable = new ArrayList<>();
         List<BetterBlockPos> sourceLiquids = new ArrayList<>();
         List<BetterBlockPos> flowingLiquids = new ArrayList<>();
-        Map<IBlockState, Integer> missing = new HashMap<>();
+        Map<BlockState, Integer> missing = new HashMap<>();
         incorrectPositions.forEach(pos -> {
             BlockState state = bcc.bsi.get0(pos);
             if (state.getBlock() instanceof AirBlock) {
                 if (approxPlaceable.contains(bcc.getSchematic(pos.x, pos.y, pos.z, state))) {
                     placeable.add(pos);
                 } else {
-                    IBlockState desired = bcc.getSchematic(pos.x, pos.y, pos.z, state);
+                    BlockState desired = bcc.getSchematic(pos.x, pos.y, pos.z, state);
                     missing.put(desired, 1 + missing.getOrDefault(desired, 0));
                 }
             } else {

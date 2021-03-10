@@ -39,9 +39,8 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static baritone.api.utils.SettingsUtil.settingTypeToString;
-import static baritone.api.utils.SettingsUtil.settingValueToString;
 import static baritone.api.command.IBaritoneChatControl.FORCE_COMMAND_PREFIX;
+import static baritone.api.utils.SettingsUtil.*;
 
 public class SetCommand extends Command {
 

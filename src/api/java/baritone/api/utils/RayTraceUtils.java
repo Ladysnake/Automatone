@@ -62,6 +62,6 @@ public final class RayTraceUtils {
     }
 
     public static Vec3d inferSneakingEyePosition(Entity entity) {
-        return new Vec3d(entity.getX(), entity.getY() + ((IEntity) entity).getEyeHeight(EntityPose.CROUCHING, entity.getDimensions(EntityPose.CROUCHING)), entity.getZ());
+        return new Vec3d(entity.getX(), entity.getY() + ((IEntity) entity).invokeGetEyeHeight(EntityPose.CROUCHING, entity.getDimensions(EntityPose.CROUCHING)), entity.getZ());
     }
 }
