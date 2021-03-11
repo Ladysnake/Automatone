@@ -86,7 +86,7 @@ public class MovementTraverse extends Movement {
         int checkedX = destX + checkedXShift;
         int checkedZ = destZ + checkedZShift;
         int height = MathHelper.ceil(dimensions.height);
-        int requiredForwardSpace = Math.max(requiredSideSpace, 1);
+        int requiredForwardSpace = requiredSideSpace == 0 ? 1 : 2;
         int volume = requiredForwardSpace * (requiredSideSpace * 2 + 1) * height;
         int i = 0;
         BetterBlockPos[] ret = new BetterBlockPos[volume];
@@ -94,7 +94,9 @@ public class MovementTraverse extends Movement {
         for (int df = 0; df < requiredForwardSpace; df++) {
             for (int ds = -requiredSideSpace; ds <= requiredSideSpace; ds++) {
                 for (int dy = 0; dy < height; dy++) {
-                    ret[i++] = new BetterBlockPos(checkedX + (movX == 0 ? ds : df), y + dy, checkedZ + (movZ == 0 ? ds : df));
+                    // + mov[z/x] * ds => make hole in the wall
+                    // - mov[x/z] * df => handle unexpectedly close walls
+                    ret[i++] = new BetterBlockPos(checkedX + movZ * ds - movX * df, y + dy, checkedZ + movX * ds - movZ * df);
                 }
             }
         }
