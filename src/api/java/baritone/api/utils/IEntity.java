@@ -21,5 +21,5 @@ import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 
 public interface IEntity {
-    float invokeGetEyeHeight(EntityPose pose, EntityDimensions dimensions);
+    float automatone$invokeGetEyeHeight(EntityPose pose, EntityDimensions dimensions);
 }

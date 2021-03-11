@@ -28,5 +28,5 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public abstract class MixinEntity implements IEntity {
     @Override
     @Invoker("getEyeHeight")
-    public abstract float invokeGetEyeHeight(EntityPose pose, EntityDimensions dimensions);
+    public abstract float automatone$invokeGetEyeHeight(EntityPose pose, EntityDimensions dimensions);
 }
