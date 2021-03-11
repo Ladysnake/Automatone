@@ -27,12 +27,15 @@ import baritone.utils.pathing.BetterWorldBorder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,6 +77,9 @@ public class CalculationContext {
     public final double walkOnWaterOnePenalty;
     public final BetterWorldBorder worldBorder;
     public final int worldHeight;
+    public final int width;
+    public final int requiredSideSpace;
+    public final int height;
 
     public CalculationContext(IBaritone baritone) {
         this(baritone, false);
@@ -118,6 +124,15 @@ public class CalculationContext {
         // then you get a wildly inconsistent path that isn't optimal for either scenario.
         this.worldBorder = new BetterWorldBorder(world.getWorldBorder());
         this.worldHeight = world.getHeight();
+        EntityDimensions dimensions = entity.getDimensions(EntityPose.STANDING);
+        this.width = MathHelper.ceil(dimensions.width);
+        // Note: if width is less than 1 (but not negative), we get side space of 0
+        this.requiredSideSpace = getRequiredSideSpace(dimensions);
+        this.height = MathHelper.ceil(dimensions.height);
+    }
+
+    public static int getRequiredSideSpace(EntityDimensions dimensions) {
+        return MathHelper.ceil((dimensions.width - 1) * 0.5f);
     }
 
     public final IBaritone getBaritone() {
