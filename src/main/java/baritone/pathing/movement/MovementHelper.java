@@ -35,6 +35,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.*;
 import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.tag.FluidTags;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -471,7 +472,7 @@ public interface MovementHelper extends ActionCosts, Helper {
      */
     static boolean isWater(BlockState state) {
         Fluid f = state.getFluidState().getFluid();
-        return f == Fluids.WATER || f == Fluids.FLOWING_WATER;
+        return FluidTags.WATER.contains(f);
     }
 
     /**
