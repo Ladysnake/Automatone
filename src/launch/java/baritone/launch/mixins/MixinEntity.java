@@ -17,16 +17,21 @@
 
 package baritone.launch.mixins;
 
-import baritone.api.utils.IEntity;
+import baritone.api.utils.IEntityAccessor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(Entity.class)
-public abstract class MixinEntity implements IEntity {
+public abstract class MixinEntity implements IEntityAccessor {
     @Override
     @Invoker("getEyeHeight")
     public abstract float automatone$invokeGetEyeHeight(EntityPose pose, EntityDimensions dimensions);
+    @Override
+    @Accessor("type")
+    public abstract void automatone$setType(EntityType<?> type);
 }

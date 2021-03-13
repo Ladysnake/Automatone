@@ -20,6 +20,10 @@
     "MixinMobEntity",
     "MixinServerPlayerInteractionManager",
     "MixinServerPlayNetworkHandler",
-    "MixinServerWorld"
+    "MixinServerWorld",
+    "player.PlayerAdvancementTrackerMixin",
+    "player.PlayerEntityMixin",
+    "player.ServerPlayerEntityMixin",
+    "player.ServerWorldMixin",
   ]
 }

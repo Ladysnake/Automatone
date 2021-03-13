@@ -19,7 +19,9 @@ package baritone.api.utils;
 
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.EntityType;
 
-public interface IEntity {
+public interface IEntityAccessor {
     float automatone$invokeGetEyeHeight(EntityPose pose, EntityDimensions dimensions);
+    void automatone$setType(EntityType<?> type);
 }
