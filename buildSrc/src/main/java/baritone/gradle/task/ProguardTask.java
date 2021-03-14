@@ -177,9 +177,9 @@ public class ProguardTask extends BaritoneGradleTask {
     }
 
     private boolean validateJavaVersion(String java) {
-        final JavaVersion javaVersion = new DefaultJvmVersionDetector(new DefaultExecActionFactory(new IdentityFileResolver())).getJavaVersion(java);
+        final JavaVersion javaVersion = JavaVersion.current();
 
-        if (!javaVersion.getMajorVersion().equals("8")) {
+        if (javaVersion != JavaVersion.VERSION_1_8) {
             System.out.println("Failed to validate Java version " + javaVersion.toString() + " [" + java + "] for ProGuard libraryjars");
             // throw new RuntimeException("Java version incorrect: " + javaVersion.getMajorVersion() + " for " + java);
             return false;
