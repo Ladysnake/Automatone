@@ -17,13 +17,15 @@
 
 package baritone.utils.schematic;
 
-import baritone.api.command.registry.Registry;
 import baritone.api.schematic.ISchematicSystem;
 import baritone.api.schematic.format.ISchematicFormat;
 import baritone.utils.schematic.format.DefaultSchematicFormats;
+import net.fabricmc.fabric.api.event.registry.FabricRegistryBuilder;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -33,10 +35,12 @@ import java.util.Optional;
 public enum SchematicSystem implements ISchematicSystem {
     INSTANCE;
 
-    private final Registry<ISchematicFormat> registry = new Registry<>();
+    private final Registry<ISchematicFormat> registry = FabricRegistryBuilder.createSimple(ISchematicFormat.class, new Identifier("automatone", "schematics")).buildAndRegister();
 
     SchematicSystem() {
-        Arrays.stream(DefaultSchematicFormats.values()).forEach(this.registry::register);
+        for (DefaultSchematicFormats s : DefaultSchematicFormats.values()) {
+            Registry.register(this.registry, new Identifier("automatone", s.name().toLowerCase(Locale.ROOT)), s);
+        }
     }
 
     @Override

@@ -17,8 +17,8 @@
 
 package baritone.api.schematic;
 
-import baritone.api.command.registry.Registry;
 import baritone.api.schematic.format.ISchematicFormat;
+import net.minecraft.util.registry.Registry;
 
 import java.io.File;
 import java.util.Optional;
