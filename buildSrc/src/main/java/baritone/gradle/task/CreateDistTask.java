@@ -19,7 +19,6 @@ package baritone.gradle.task;
 
 import org.gradle.api.tasks.TaskAction;
 
-import javax.xml.bind.DatatypeConverter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -85,12 +84,23 @@ public class CreateDistTask extends BaritoneGradleTask {
         );
     }
 
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
     private static synchronized String sha1(Path path) {
         try {
             if (SHA1_DIGEST == null) {
                 SHA1_DIGEST = MessageDigest.getInstance("SHA-1");
             }
-            return DatatypeConverter.printHexBinary(SHA1_DIGEST.digest(Files.readAllBytes(path))).toLowerCase();
+            return bytesToHex(SHA1_DIGEST.digest(Files.readAllBytes(path))).toLowerCase();
         } catch (Exception e) {
             // haha no thanks
             throw new IllegalStateException(e);
