@@ -34,6 +34,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.EntitySelector;
@@ -99,10 +101,13 @@ public class BaritoneArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        assert MinecraftClient.getInstance().player != null;
-        IBaritone baritone = IBaritone.KEY.get(MinecraftClient.getInstance().player);
-        tabComplete(baritone.getCommandManager(), builder.getRemaining()).forEach(builder::suggest);
-        return builder.buildFuture();
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            assert MinecraftClient.getInstance().player != null;
+            IBaritone baritone = IBaritone.KEY.get(MinecraftClient.getInstance().player);
+            tabComplete(baritone.getCommandManager(), builder.getRemaining()).forEach(builder::suggest);
+            return builder.buildFuture();
+        }
+        return Suggestions.empty();
     }
 
     @Override

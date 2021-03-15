@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,36 +56,31 @@ public class WorldProvider implements IWorldProvider, Helper {
      * @param world The world being loaded
      */
     public final void initWorld(ServerWorld world) {
-        File directory;
-        File readme;
+        Path directory;
+        Path readme;
 
-        MinecraftServer integratedServer = world.getServer();
+        MinecraftServer server = world.getServer();
 
         // If there is an integrated server running (Aka Singleplayer) then do magic to find the world save file
-        directory = DimensionType.getSaveDirectory(world.getRegistryKey(), integratedServer.getSavePath(WorldSavePath.ROOT).toFile());
+        directory = DimensionType.getSaveDirectory(world.getRegistryKey(), server.getSavePath(WorldSavePath.ROOT).toFile()).toPath();
 
         // Gets the "depth" of this directory relative the the game's run directory, 2 is the location of the world
-        if (directory.toPath().relativize(FabricLoader.getInstance().getGameDir()).getNameCount() != 2) {
+        if (directory.relativize(FabricLoader.getInstance().getGameDir()).getNameCount() != 2) {
             // subdirectory of the main save directory for this world
-            directory = directory.getParentFile();
+            directory = directory.getParent();
         }
 
-        directory = new File(directory, "baritone");
-        readme = directory;
-
-        // lol wtf is this baritone folder in my minecraft save?
-        try (FileOutputStream out = new FileOutputStream(new File(readme, "readme.txt"))) {
-            // good thing we have a readme
-            out.write("https://github.com/cabaletta/baritone\n".getBytes());
-        } catch (IOException ignored) {}
+        directory = directory.resolve("automatone");
+        readme = directory.resolve("readme.txt");
 
         // We will actually store the world data in a subfolder: "DIM<id>"
-        Path dir = DimensionType.getSaveDirectory(world.getRegistryKey(), directory).toPath();
-        if (!Files.exists(dir)) {
-            try {
-                Files.createDirectories(dir);
-            } catch (IOException ignored) {}
-        }
+        Path dir = DimensionType.getSaveDirectory(world.getRegistryKey(), directory.toFile()).toPath();
+        try {
+            Files.createDirectories(dir);
+            // lol wtf is this baritone folder in my minecraft save?
+            // good thing we have a readme
+            Files.write(readme, "https://github.com/cabaletta/baritone\n".getBytes());
+        } catch (IOException ignored) {}
 
         System.out.println("Baritone world data dir: " + dir);
         synchronized (worldCache) {
@@ -93,10 +89,10 @@ public class WorldProvider implements IWorldProvider, Helper {
     }
 
     public final void closeWorld() {
-        WorldData world = this.currentWorld;
+        WorldData worldData = this.currentWorld;
         this.currentWorld = null;
-        if (world != null) {
-            world.onClose();
+        if (worldData != null) {
+            worldData.onClose();
         }
     }
 

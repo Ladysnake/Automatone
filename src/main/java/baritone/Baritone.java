@@ -35,10 +35,7 @@ import baritone.utils.player.EntityContext;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +51,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class Baritone implements IBaritone {
 
-    public static final Logger LOGGER = LogManager.getLogger("Automatone");
     private static final ThreadPoolExecutor threadPool;
     private static final File dir;
 
@@ -237,7 +233,9 @@ public class Baritone implements IBaritone {
             try {
                 Thread.sleep(100);
                 MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().openScreen(new GuiClick(getPlayerContext().entity().getUuid())));
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                Automatone.LOGGER.error("Failed to open click screen, is this a dedicated server?", e);
+            }
         }).start();
     }
 

@@ -19,6 +19,7 @@ package baritone.api.utils;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.Settings;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
@@ -49,7 +50,7 @@ import java.util.stream.Stream;
 
 public class SettingsUtil {
 
-    private static final Path SETTINGS_PATH = MinecraftClient.getInstance().runDirectory.toPath().resolve("baritone").resolve("settings.txt");
+    private static final Path SETTINGS_PATH = FabricLoader.getInstance().getConfigDir().resolve("automatone").resolve("settings.txt");
     private static final Pattern SETTING_PATTERN = Pattern.compile("^(?<setting>[^ ]+) +(?<value>.+)"); // key and value split by the first space
 
 

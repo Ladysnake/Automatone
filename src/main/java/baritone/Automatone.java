@@ -34,8 +34,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class Automatone implements ModInitializer {
+    public static final Logger LOGGER = LogManager.getLogger("Automatone");
     public static final String MOD_ID = "automatone";
     public static final EntityType<FakeServerPlayerEntity> FAKE_PLAYER = FabricEntityTypeBuilder.<FakeServerPlayerEntity>createLiving()
             .spawnGroup(SpawnGroup.MISC)

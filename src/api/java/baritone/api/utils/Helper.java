@@ -18,6 +18,8 @@
 package baritone.api.utils;
 
 import baritone.api.BaritoneAPI;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
@@ -29,8 +31,7 @@ import java.util.Calendar;
 import java.util.stream.Stream;
 
 /**
- * An ease-of-access interface to provide the {@link MinecraftClient} game instance,
- * chat and console logging mechanisms, and the Baritone chat prefix.
+ * An ease-of-access interface to provide chat and console logging mechanisms, and the Baritone chat prefix.
  *
  * @author Brady
  * @since 8/1/2018
@@ -41,11 +42,6 @@ public interface Helper {
      * Instance of {@link Helper}. Used for static-context reference.
      */
     Helper HELPER = new Helper() {};
-
-    /**
-     * Instance of the game
-     */
-    MinecraftClient mc = MinecraftClient.getInstance();
 
     static Text getPrefix() {
         // Inner text component
@@ -81,11 +77,15 @@ public interface Helper {
     }
 
     /**
-     * Send components to chat with the [Baritone] prefix
+     * Send components to chat with the [Automatone] prefix
      *
      * @param components The components to send
      */
     default void logDirect(Text... components) {
+        // TODO somehow make this work on servers
+        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
+            return;
+        }
         BaseText component = new LiteralText("");
         // If we are not logging as a Toast
         // Append the prefix to the base component line

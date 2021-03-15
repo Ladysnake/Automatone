@@ -21,6 +21,7 @@ import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
+import baritone.api.command.exception.CommandInvalidStateException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +36,9 @@ public class ClickCommand extends Command {
     @Override
     public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
+        if (baritone.getPlayerContext().world().getServer().isDedicated()) {
+            throw new CommandInvalidStateException("Click only works on integrated servers right now");
+        }
         baritone.openClick();
         logDirect("aight dude");
     }
