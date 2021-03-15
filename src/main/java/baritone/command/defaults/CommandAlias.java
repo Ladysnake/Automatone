@@ -20,6 +20,7 @@ package baritone.command.defaults;
 import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
+import baritone.api.command.exception.CommandException;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +44,7 @@ public class CommandAlias extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         baritone.getCommandManager().execute(String.format("%s %s", target, args.rawRest()));
     }
 
