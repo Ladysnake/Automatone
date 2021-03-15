@@ -20,7 +20,9 @@ package baritone.api.command.manager;
 import baritone.api.IBaritone;
 import baritone.api.command.ICommand;
 import baritone.api.command.argument.ICommandArgument;
+import baritone.api.command.exception.CommandException;
 import baritone.api.command.registry.Registry;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.util.Pair;
 
 import java.util.List;
@@ -52,9 +54,9 @@ public interface ICommandManager {
 
     Registry<ICommand> getRegistry();
 
-    boolean execute(String string);
+    boolean execute(String string) throws CommandException;
 
-    boolean execute(Pair<String, List<ICommandArgument>> expanded);
+    boolean execute(Pair<String, List<ICommandArgument>> expanded) throws CommandException;
 
     Stream<String> tabComplete(Pair<String, List<ICommandArgument>> expanded);
 

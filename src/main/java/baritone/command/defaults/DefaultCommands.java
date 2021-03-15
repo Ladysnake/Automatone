@@ -17,12 +17,13 @@
 
 package baritone.command.defaults;
 
-import baritone.Baritone;
+import baritone.Automatone;
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.command.ICommand;
 import baritone.api.command.argument.ICommandArgument;
+import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandNotEnoughArgumentsException;
 import baritone.api.command.manager.ICommandManager;
 import baritone.api.utils.Helper;
@@ -31,7 +32,9 @@ import baritone.command.manager.BaritoneArgumentType;
 import baritone.command.manager.BaritoneCommandManager;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
@@ -56,6 +59,7 @@ public final class DefaultCommands {
 
     public static final ExecutionControlCommands controlCommands = new ExecutionControlCommands();
     public static final SelCommand selCommand = new SelCommand();
+    public static final DynamicCommandExceptionType BARITONE_COMMAND_FAILED_EXCEPTION = new DynamicCommandExceptionType(Message.class::cast);
 
     public static void registerAll() {
         List<ICommand> commands = new ArrayList<>(Arrays.asList(
@@ -122,12 +126,12 @@ public final class DefaultCommands {
         }
     }
 
-    public static boolean runCommand(String msg, IBaritone baritone) {
+    public static boolean runCommand(String msg, IBaritone baritone) throws CommandException {
         if (msg.trim().equalsIgnoreCase("damn")) {
             Helper.HELPER.logDirect("daniel");
             return false;
         } else if (msg.trim().equalsIgnoreCase("orderpizza")) {
-            Baritone.LOGGER.fatal("No pizza :(");
+            Automatone.LOGGER.fatal("No pizza :(");
             return false;
         }
         if (msg.isEmpty()) {
@@ -177,11 +181,15 @@ public final class DefaultCommands {
                 .requires(s -> s.hasPermissionLevel(2))
                 .then(CommandManager.argument("command", BaritoneArgumentType.baritone()).executes(command ->
                         runCommand(command.getSource().getEntityOrThrow(), BaritoneArgumentType.getCommand(command, "command"))))
-                );
+        );
     }
 
     private static int runCommand(Entity target, String command) throws CommandSyntaxException {
         if (!(target instanceof LivingEntity)) throw EntityArgumentType.ENTITY_NOT_FOUND_EXCEPTION.create();
-        return runCommand(command, BaritoneAPI.getProvider().getBaritone((LivingEntity) target)) ? Command.SINGLE_SUCCESS : 0;
+        try {
+            return runCommand(command, BaritoneAPI.getProvider().getBaritone((LivingEntity) target)) ? Command.SINGLE_SUCCESS : 0;
+        } catch (baritone.api.command.exception.CommandException e) {
+            throw BARITONE_COMMAND_FAILED_EXCEPTION.create(e.handle());
+        }
     }
 }

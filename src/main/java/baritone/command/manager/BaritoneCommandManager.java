@@ -21,6 +21,7 @@ import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.command.ICommand;
 import baritone.api.command.argument.ICommandArgument;
+import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandUnhandledException;
 import baritone.api.command.exception.ICommandException;
 import baritone.api.command.helpers.TabCompleteHelper;
@@ -32,7 +33,6 @@ import baritone.command.defaults.DefaultCommands;
 import net.minecraft.util.Pair;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Stream;
 
 
@@ -65,12 +65,12 @@ public class BaritoneCommandManager implements ICommandManager {
     }
 
     @Override
-    public boolean execute(String string) {
+    public boolean execute(String string) throws CommandException {
         return this.execute(expand(string));
     }
 
     @Override
-    public boolean execute(Pair<String, List<ICommandArgument>> expanded) {
+    public boolean execute(Pair<String, List<ICommandArgument>> expanded) throws CommandException {
         ExecutionWrapper execution = this.from(expanded);
         if (execution != null) {
             execution.execute();
@@ -118,7 +118,6 @@ public class BaritoneCommandManager implements ICommandManager {
     }
 
     private static final class ExecutionWrapper {
-
         private final IBaritone baritone;
         private final ICommand command;
         private final String label;
@@ -131,16 +130,15 @@ public class BaritoneCommandManager implements ICommandManager {
             this.args = args;
         }
 
-        private void execute() {
+        private void execute() throws CommandException {
             try {
                 this.command.execute(this.label, this.args, baritone);
             } catch (Throwable t) {
                 // Create a handleable exception, wrap if needed
-                ICommandException exception = t instanceof ICommandException
-                        ? (ICommandException) t
-                        : new CommandUnhandledException(t);
-
-                exception.handle(command, args.getArgs());
+                throw t instanceof CommandException
+                        ? (CommandException) t
+                        : new CommandUnhandledException("An unhandled exception occurred. " +
+                        "The error is in your game's log, please report this at https://github.com/Ladysnake/Automatone/issues", t);
             }
         }
 

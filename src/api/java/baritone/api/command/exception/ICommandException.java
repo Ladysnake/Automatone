@@ -17,17 +17,13 @@
 
 package baritone.api.command.exception;
 
-import baritone.api.command.ICommand;
-import baritone.api.command.argument.ICommandArgument;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-
-import java.util.List;
-
-import static baritone.api.utils.Helper.HELPER;
 
 /**
  * The base for a Baritone Command Exception, checked or unchecked. Provides a
- * {@link #handle(ICommand, List)} method that is used to provide useful output
+ * {@link #handle() } method that is used to provide useful output
  * to the user for diagnosing issues that may have occurred during execution.
  * <p>
  * Anything implementing this interface should be assignable to {@link Exception}.
@@ -45,11 +41,8 @@ public interface ICommandException {
 
     /**
      * Called when this exception is thrown, to handle the exception.
-     *
-     * @param command The command that threw it.
-     * @param args    The arguments the command was called with.
      */
-    default void handle(ICommand command, List<ICommandArgument> args) {
-        HELPER.logDirect(this.getMessage(), Formatting.RED);
+    default Text handle() {
+        return new LiteralText(this.getMessage()).formatted(Formatting.RED);
     }
 }
