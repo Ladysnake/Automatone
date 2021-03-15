@@ -28,12 +28,10 @@ import baritone.behavior.PathingBehavior;
 import baritone.cache.WorldProvider;
 import baritone.cache.WorldScanner;
 import baritone.command.CommandSystem;
-import baritone.command.ExampleBaritoneControl;
 import baritone.selection.SelectionManager;
 import baritone.selection.SelectionRenderer;
 import baritone.utils.GuiClick;
 import baritone.utils.PathRenderer;
-import baritone.utils.player.PrimaryPlayerContext;
 import baritone.utils.schematic.SchematicSystem;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.fabricmc.api.ModInitializer;
@@ -57,14 +55,12 @@ import java.util.function.Consumer;
 public final class BaritoneProvider implements IBaritoneProvider, ModInitializer {
 
     private static final SelectionManager selectionManager = new SelectionManager();
-    public static final List<Consumer<RenderEvent>> extraRenderers = new CopyOnWriteArrayList<>();
     public static final BaritoneProvider INSTANCE = new BaritoneProvider();
 
     private final Set<IBaritone> activeBaritones = new ReferenceOpenHashSet<>();
     private final Map<RegistryKey<World>, WorldProvider> worldProviders = new HashMap<>();
-    private Baritone clientBaritone;
-    public ExampleBaritoneControl autocompleteHandler;
 
+    // FIXME bad singleton
     public static ISelectionManager getSelectionManager() {
         return selectionManager;
     }
@@ -74,8 +70,6 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
     }
 
     public void onInitialize() {
-        this.clientBaritone = new Baritone(PrimaryPlayerContext.INSTANCE, worldProviders.computeIfAbsent(World.OVERWORLD, r -> new WorldProvider()));
-        this.autocompleteHandler = new ExampleBaritoneControl(this.clientBaritone.getCommandManager());
         ServerTickEvents.START_SERVER_TICK.register(minecraftServer -> {
             for (IBaritone baritone : this.activeBaritones) {
                 baritone.getGameEventHandler().onTickServer();
@@ -120,11 +114,6 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
     }
 
     @Override
-    public IBaritone getPrimaryBaritone() {
-        return clientBaritone;
-    }
-
-    @Override
     public Collection<IBaritone> getActiveBaritones() {
         return this.activeBaritones;
     }
@@ -144,27 +133,4 @@ public final class BaritoneProvider implements IBaritoneProvider, ModInitializer
         return SchematicSystem.INSTANCE;
     }
 
-    public void onRenderPass(RenderEvent renderEvent) {
-        SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), selectionManager.getSelections());
-
-        // FIXME BOOM REACHING ACROSS SIDES
-        Collection<IBaritone> activeBaritones = this.getActiveBaritones();
-        if (!activeBaritones.isEmpty()) {
-            // Copy to avoid concurrency issues
-            for (IBaritone b : activeBaritones.toArray(new IBaritone[0])) {
-                if (!b.getPlayerContext().world().isClient()) {
-                    PathRenderer.render(renderEvent, (PathingBehavior) b.getPathingBehavior());
-                }
-            }
-        }
-
-        MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.currentScreen instanceof GuiClick) {
-            ((GuiClick) mc.currentScreen).onRender(renderEvent.getModelViewStack(), renderEvent.getProjectionMatrix());
-        }
-
-        for (Consumer<RenderEvent> extra : extraRenderers) {
-            extra.accept(renderEvent);
-        }
-    }
 }

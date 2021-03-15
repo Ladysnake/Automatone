@@ -18,7 +18,6 @@
 package baritone;
 
 import baritone.api.IBaritone;
-import baritone.command.ExampleBaritoneControl;
 import baritone.utils.player.EntityContext;
 import dev.onyxstudios.cca.api.v3.entity.EntityComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.entity.EntityComponentInitializer;
@@ -27,10 +26,7 @@ import net.minecraft.entity.LivingEntity;
 public final class AutomatoneComponents implements EntityComponentInitializer {
     @Override
     public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
-        registry.registerFor(LivingEntity.class, IBaritone.KEY, entity -> {
-            Baritone baritone = new Baritone(new EntityContext(entity), BaritoneProvider.INSTANCE.getWorldProvider(entity.world.getRegistryKey()));
-            baritone.getGameEventHandler().registerEventListener(new ExampleBaritoneControl(baritone.getCommandManager()));
-            return baritone;
-        });
+        registry.registerFor(LivingEntity.class, IBaritone.KEY, entity ->
+                new Baritone(new EntityContext(entity), BaritoneProvider.INSTANCE.getWorldProvider(entity.world.getRegistryKey())));
     }
 }

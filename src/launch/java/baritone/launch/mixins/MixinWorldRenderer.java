@@ -17,7 +17,7 @@
 
 package baritone.launch.mixins;
 
-import baritone.BaritoneProvider;
+import baritone.AutomatoneClient;
 import baritone.api.event.events.RenderEvent;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
@@ -44,6 +44,6 @@ public class MixinWorldRenderer {
             locals = LocalCapture.CAPTURE_FAILSOFT
     )
     private void onStartHand(MatrixStack matrixStackIn, float partialTicks, long finishTimeNano, boolean drawBlockOutline, Camera activeRenderInfoIn, GameRenderer gameRendererIn, LightmapTextureManager lightmapIn, Matrix4f projectionIn, CallbackInfo ci) {
-        BaritoneProvider.INSTANCE.onRenderPass(new RenderEvent(partialTicks, matrixStackIn, projectionIn));
+        AutomatoneClient.onRenderPass(new RenderEvent(partialTicks, matrixStackIn, projectionIn));
     }
 }

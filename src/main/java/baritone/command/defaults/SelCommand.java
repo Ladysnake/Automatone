@@ -17,6 +17,7 @@
 
 package baritone.command.defaults;
 
+import baritone.AutomatoneClient;
 import baritone.Baritone;
 import baritone.BaritoneProvider;
 import baritone.api.IBaritone;
@@ -57,7 +58,7 @@ public class SelCommand extends Command {
     public SelCommand() {
         super("sel", "selection", "s");
         // FIXME this will big crash on servers
-        BaritoneProvider.extraRenderers.add(event -> {
+        AutomatoneClient.extraRenderers.add(event -> {
             if (!Baritone.settings().renderSelectionCorners.value || pos1 == null) {
                 return;
             }

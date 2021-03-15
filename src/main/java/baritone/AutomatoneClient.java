@@ -17,8 +17,14 @@
 
 package baritone;
 
+import baritone.api.IBaritone;
+import baritone.api.event.events.RenderEvent;
+import baritone.behavior.PathingBehavior;
 import baritone.entity.fakeplayer.AutomatoneFakePlayer;
 import baritone.entity.fakeplayer.FakeClientPlayerEntity;
+import baritone.selection.SelectionRenderer;
+import baritone.utils.GuiClick;
+import baritone.utils.PathRenderer;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -32,10 +38,40 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 
 public final class AutomatoneClient implements ClientModInitializer {
+    public static final List<Consumer<RenderEvent>> extraRenderers = new CopyOnWriteArrayList<>();
+
+    public static void onRenderPass(RenderEvent renderEvent) {
+        SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), BaritoneProvider.getSelectionManager().getSelections());
+
+        // FIXME BOOM REACHING ACROSS SIDES
+        Collection<IBaritone> activeBaritones = BaritoneProvider.INSTANCE.getActiveBaritones();
+        if (!activeBaritones.isEmpty()) {
+            // Copy to avoid concurrency issues
+            for (IBaritone b : activeBaritones.toArray(new IBaritone[0])) {
+                if (!b.getPlayerContext().world().isClient()) {
+                    PathRenderer.render(renderEvent, (PathingBehavior) b.getPathingBehavior());
+                }
+            }
+        }
+
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.currentScreen instanceof GuiClick) {
+            ((GuiClick) mc.currentScreen).onRender(renderEvent.getModelViewStack(), renderEvent.getProjectionMatrix());
+        }
+
+        for (Consumer<RenderEvent> extra : extraRenderers) {
+            extra.accept(renderEvent);
+        }
+    }
+
     @Override
     public void onInitializeClient() {
         EntityRendererRegistry.INSTANCE.register(Automatone.FAKE_PLAYER, (r, it) -> new PlayerEntityRenderer(r));

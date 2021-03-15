@@ -34,18 +34,7 @@ import java.util.Collection;
 public interface IBaritoneProvider {
 
     /**
-     * Returns the primary {@link IBaritone} instance. This instance is persistent, and
-     * is represented by the local player that is created by the game itself, not a "bot"
-     * player through Baritone.
-     *
-     * @return The primary {@link IBaritone} instance.
-     */
-    @Deprecated
-    IBaritone getPrimaryBaritone();
-
-    /**
-     * Returns all of the active {@link IBaritone} instances. This includes the local one
-     * returned by {@link #getPrimaryBaritone()}.
+     * Returns all of the active {@link IBaritone} instances.
      *
      * @return All active {@link IBaritone} instances.
      * @see #getBaritone(LivingEntity)
