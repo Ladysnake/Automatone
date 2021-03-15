@@ -30,6 +30,7 @@ import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidStateException;
 import baritone.api.command.exception.CommandInvalidTypeException;
 import baritone.api.command.helpers.TabCompleteHelper;
+import baritone.api.event.events.RenderEvent;
 import baritone.api.schematic.*;
 import baritone.api.selection.ISelection;
 import baritone.api.selection.ISelectionManager;
@@ -57,19 +58,6 @@ public class SelCommand extends Command {
 
     public SelCommand() {
         super("sel", "selection", "s");
-        // FIXME this will big crash on servers
-        AutomatoneClient.extraRenderers.add(event -> {
-            if (!Baritone.settings().renderSelectionCorners.value || pos1 == null) {
-                return;
-            }
-            Color color = Baritone.settings().colorSelectionPos1.value;
-            float opacity = Baritone.settings().selectionOpacity.value;
-            float lineWidth = Baritone.settings().selectionLineWidth.value;
-            boolean ignoreDepth = Baritone.settings().renderSelectionIgnoreDepth.value;
-            IRenderer.startLines(color, opacity, lineWidth, ignoreDepth);
-            IRenderer.drawAABB(event.getModelViewStack(), new Box(pos1, pos1.add(1, 1, 1)));
-            IRenderer.endLines(ignoreDepth);
-        });
     }
 
     @Override
@@ -257,6 +245,19 @@ public class SelCommand extends Command {
                 "> sel contract <target> <direction> <blocks> - Contract the targets.",
                 "> sel shift <target> <direction> <blocks> - Shift the targets (does not resize)."
         );
+    }
+
+    public void renderSelectionBox(RenderEvent event) {
+        if (!Baritone.settings().renderSelectionCorners.value || pos1 == null) {
+            return;
+        }
+        Color color = Baritone.settings().colorSelectionPos1.value;
+        float opacity = Baritone.settings().selectionOpacity.value;
+        float lineWidth = Baritone.settings().selectionLineWidth.value;
+        boolean ignoreDepth = Baritone.settings().renderSelectionIgnoreDepth.value;
+        IRenderer.startLines(color, opacity, lineWidth, ignoreDepth);
+        IRenderer.drawAABB(event.getModelViewStack(), new Box(pos1, pos1.add(1, 1, 1)));
+        IRenderer.endLines(ignoreDepth);
     }
 
     enum Action {

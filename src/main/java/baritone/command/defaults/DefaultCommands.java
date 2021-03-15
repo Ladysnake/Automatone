@@ -55,11 +55,11 @@ import static baritone.api.command.IBaritoneChatControl.FORCE_COMMAND_PREFIX;
 public final class DefaultCommands {
 
     public static final ExecutionControlCommands controlCommands = new ExecutionControlCommands();
-    private static final HelpCommand helpCommand = new HelpCommand();
+    public static final SelCommand selCommand = new SelCommand();
 
     public static void registerAll() {
         List<ICommand> commands = new ArrayList<>(Arrays.asList(
-                helpCommand,
+                new HelpCommand(),
                 new SetCommand(),
                 new CommandAlias(Arrays.asList("modified", "mod", "baritone", "modifiedsettings"), "List modified settings", "set modified"),
                 new CommandAlias("reset", "Reset all settings or just one", "set reset"),
@@ -95,7 +95,7 @@ public final class DefaultCommands {
                 new WaypointsCommand(),
                 new CommandAlias("sethome", "Sets your home waypoint", "waypoints save home"),
                 new CommandAlias("home", "Path to your home waypoint", "waypoints goto home"),
-                new SelCommand()
+                selCommand
         ));
         for (ICommand command : commands) {
             ICommandManager.registry.register(command);

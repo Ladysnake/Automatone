@@ -20,6 +20,7 @@ package baritone;
 import baritone.api.IBaritone;
 import baritone.api.event.events.RenderEvent;
 import baritone.behavior.PathingBehavior;
+import baritone.command.defaults.DefaultCommands;
 import baritone.entity.fakeplayer.AutomatoneFakePlayer;
 import baritone.entity.fakeplayer.FakeClientPlayerEntity;
 import baritone.selection.SelectionRenderer;
@@ -39,16 +40,23 @@ import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 
 public final class AutomatoneClient implements ClientModInitializer {
-    public static final List<Consumer<RenderEvent>> extraRenderers = new CopyOnWriteArrayList<>();
 
     public static void onRenderPass(RenderEvent renderEvent) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+
+        if (mc.currentScreen instanceof GuiClick) {
+            ((GuiClick) mc.currentScreen).onRender(renderEvent.getModelViewStack(), renderEvent.getProjectionMatrix());
+        }
+
+        if (!mc.isIntegratedServerRunning()) {
+            // FIXME we should really be able to render stuff in multiplayer
+            return;
+        }
+
         SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), BaritoneProvider.getSelectionManager().getSelections());
 
         // FIXME BOOM REACHING ACROSS SIDES
@@ -62,14 +70,7 @@ public final class AutomatoneClient implements ClientModInitializer {
             }
         }
 
-        MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc.currentScreen instanceof GuiClick) {
-            ((GuiClick) mc.currentScreen).onRender(renderEvent.getModelViewStack(), renderEvent.getProjectionMatrix());
-        }
-
-        for (Consumer<RenderEvent> extra : extraRenderers) {
-            extra.accept(renderEvent);
-        }
+        DefaultCommands.selCommand.renderSelectionBox(renderEvent);
     }
 
     @Override
