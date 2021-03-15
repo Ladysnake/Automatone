@@ -62,15 +62,15 @@ public final class PathRenderer implements IRenderer, Helper {
     private PathRenderer() {}
 
     public static double posX() {
-        return renderManager.renderPosX();
+        return renderManager.camera.getPos().x;
     }
 
     public static double posY() {
-        return renderManager.renderPosY();
+        return renderManager.camera.getPos().y;
     }
 
     public static double posZ() {
-        return renderManager.renderPosZ();
+        return renderManager.camera.getPos().z;
     }
 
     public static void render(RenderEvent event, PathingBehavior behavior) {
