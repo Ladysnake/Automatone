@@ -77,6 +77,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
      */
     @Override
     public final synchronized void clearAllKeys() {
+        this.ctx.entity().setSprinting(false);
         this.inputForceStateMap.clear();
     }
 
