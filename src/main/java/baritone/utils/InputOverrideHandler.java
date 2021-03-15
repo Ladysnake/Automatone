@@ -23,8 +23,10 @@ import baritone.api.utils.input.Input;
 import baritone.behavior.Behavior;
 import net.minecraft.entity.LivingEntity;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * An interface with the game's control system allowing the ability to
@@ -39,7 +41,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
     /**
      * Maps inputs to whether or not we are forcing their state down.
      */
-    private final Map<Input, Boolean> inputForceStateMap = new HashMap<>();
+    private final Set<Input> inputForceStateMap = EnumSet.noneOf(Input.class);
 
     private final BlockBreakHelper blockBreakHelper;
     private final BlockPlaceHelper blockPlaceHelper;
@@ -58,7 +60,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
      */
     @Override
     public final synchronized boolean isInputForcedDown(Input input) {
-        return input != null && this.inputForceStateMap.getOrDefault(input, false);
+        return input != null && this.inputForceStateMap.contains(input);
     }
 
     /**
@@ -69,7 +71,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
      */
     @Override
     public final synchronized void setInputForceState(Input input, boolean forced) {
-        this.inputForceStateMap.put(input, forced);
+        this.inputForceStateMap.add(input);
     }
 
     /**
