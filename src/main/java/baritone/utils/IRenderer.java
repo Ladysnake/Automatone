@@ -19,15 +19,16 @@ package baritone.utils;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.Settings;
-import baritone.utils.accessor.IEntityRenderManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.Vec3d;
 
 import java.awt.*;
 
@@ -37,7 +38,7 @@ public interface IRenderer {
 
     Tessellator tessellator = Tessellator.getInstance();
     BufferBuilder buffer = tessellator.getBuffer();
-    IEntityRenderManager renderManager = (IEntityRenderManager) MinecraftClient.getInstance().getEntityRenderDispatcher();
+    EntityRenderDispatcher renderManager = MinecraftClient.getInstance().getEntityRenderDispatcher();
     Settings settings = BaritoneAPI.getSettings();
 
     static void glColor(Color color, float alpha) {
@@ -73,7 +74,8 @@ public interface IRenderer {
     }
 
     static void drawAABB(MatrixStack stack, Box aabb) {
-        Box toDraw = aabb.offset(-renderManager.renderPosX(), -renderManager.renderPosY(), -renderManager.renderPosZ());
+        Vec3d cameraPos = renderManager.camera.getPos();
+        Box toDraw = aabb.offset(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
         Matrix4f matrix4f = stack.peek().getModel();
         buffer.begin(GL_LINES, VertexFormats.POSITION);
