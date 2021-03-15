@@ -43,6 +43,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.Packet;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -72,7 +73,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
         super(world.getServer(), world, profile, new ServerPlayerInteractionManager(world));
         ((IEntityAccessor)this).automatone$setType(type);
         // Side effects go brr
-        new ServerPlayNetworkHandler(world.getServer(), new FakeClientConnection(NetworkSide.CLIENTBOUND), this);
+        new ServerPlayNetworkHandler(world.getServer(), new ClientConnection(NetworkSide.CLIENTBOUND), this);
     }
 
     public void selectHotbarSlot(int hotbarSlot) {

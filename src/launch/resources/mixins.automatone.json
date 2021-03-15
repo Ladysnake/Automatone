@@ -20,6 +20,7 @@
     "player.PlayerAdvancementTrackerMixin",
     "player.PlayerEntityMixin",
     "player.ServerPlayerEntityMixin",
-    "player.ServerWorldMixin"
+    "player.ServerWorldMixin",
+    "player.ThreadedAnvilChunkStorageMixin"
   ]
 }
