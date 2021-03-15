@@ -65,6 +65,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
 
     public FakeServerPlayerEntity(EntityType<?> type, ServerWorld world) {
         this(type, world, new GameProfile(UUID.randomUUID(), "FakePlayer"));
+        this.stepHeight = 0.6f; // same step height as LivingEntity
     }
 
     public FakeServerPlayerEntity(EntityType<?> type, ServerWorld world, GameProfile profile) {
