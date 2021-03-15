@@ -174,6 +174,7 @@ public final class DefaultCommands {
 
     private static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("automatone")
+                .requires(s -> s.hasPermissionLevel(2))
                 .then(CommandManager.argument("command", BaritoneArgumentType.baritone()).executes(command ->
                         runCommand(command.getSource().getEntityOrThrow(), BaritoneArgumentType.getCommand(command, "command"))))
                 );
