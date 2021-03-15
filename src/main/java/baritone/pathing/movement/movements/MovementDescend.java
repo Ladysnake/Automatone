@@ -111,11 +111,7 @@ public class MovementDescend extends Movement {
         }
 
         // we walk half the block plus 0.3 to get to the edge, then we walk the other 0.2 while simultaneously falling (math.max because of how it's in parallel)
-        double walk = WALK_OFF_BLOCK_COST;
-        if (fromDown == Blocks.SOUL_SAND) {
-            // use this ratio to apply the soul sand speed penalty to our 0.8 block distance
-            walk *= WALK_ONE_OVER_SOUL_SAND_COST / WALK_ONE_BLOCK_COST;
-        }
+        double walk = WALK_OFF_BLOCK_COST / fromDown.getVelocityMultiplier();
         totalCost += walk + Math.max(FALL_N_BLOCKS_COST[1], CENTER_AFTER_FALL_COST);
         res.x = destX;
         res.y = y - 1;

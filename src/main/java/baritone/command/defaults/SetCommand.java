@@ -183,7 +183,7 @@ public class SetCommand extends Command {
     public Stream<String> tabComplete(String label, IArgConsumer args) throws CommandException {
         if (args.hasAny()) {
             String arg = args.getString();
-            if (args.hasExactlyOne() && !Arrays.asList("s", "save").contains(args.peekString().toLowerCase(Locale.US))) {
+            if (args.hasExactlyOne() && !Arrays.asList("s", "save").contains(args.peekString().toLowerCase(Locale.ROOT))) {
                 if (arg.equalsIgnoreCase("reset")) {
                     return new TabCompleteHelper()
                             .addModifiedSettings()

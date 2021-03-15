@@ -132,11 +132,7 @@ public class MovementAscend extends Movement {
             }
         } else {
             // jumpingFromBottomSlab must be false
-            if (toPlace.getBlock() == Blocks.SOUL_SAND) {
-                walk = WALK_ONE_OVER_SOUL_SAND_COST;
-            } else {
-                walk = Math.max(JUMP_ONE_BLOCK_COST, WALK_ONE_BLOCK_COST);
-            }
+            walk = Math.max(JUMP_ONE_BLOCK_COST, WALK_ONE_BLOCK_COST / toPlace.getBlock().getVelocityMultiplier());
             walk += context.jumpPenalty;
         }
 

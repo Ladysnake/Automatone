@@ -132,20 +132,16 @@ public class MovementDiagonal extends Movement {
                 }
             }
         }
-        double multiplier = WALK_ONE_BLOCK_COST;
-        // For either possible soul sand, that affects half of our walking
-        if (destWalkOn.getBlock() == Blocks.SOUL_SAND) {
-            multiplier += (WALK_ONE_OVER_SOUL_SAND_COST - WALK_ONE_BLOCK_COST) / 2;
-        } else if (destWalkOn.getBlock() == Blocks.WATER) {
+        // For either possible velocity modifying block, that affects half of our walking
+        double multiplier = WALK_ONE_BLOCK_COST / destWalkOn.getBlock().getVelocityMultiplier() / 2;
+        if (destWalkOn.isOf(Blocks.WATER)) {
             multiplier += context.walkOnWaterOnePenalty * SQRT_2;
         }
         Block fromDown = context.get(x, y - 1, z).getBlock();
         if (fromDown == Blocks.LADDER || fromDown == Blocks.VINE) {
             return;
         }
-        if (fromDown == Blocks.SOUL_SAND) {
-            multiplier += (WALK_ONE_OVER_SOUL_SAND_COST - WALK_ONE_BLOCK_COST) / 2;
-        }
+        multiplier += WALK_ONE_BLOCK_COST / fromDown.getVelocityMultiplier() / 2;
         BlockState cuttingOver1 = context.get(x, y - 1, destZ);
         if (cuttingOver1.getBlock() == Blocks.MAGMA_BLOCK || MovementHelper.isLava(cuttingOver1)) {
             return;

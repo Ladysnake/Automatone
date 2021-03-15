@@ -24,8 +24,6 @@ public interface ActionCosts {
      */
     double WALK_ONE_BLOCK_COST = 20 / 4.317; // 4.633
     double WALK_ONE_IN_WATER_COST = 20 / 2.2; // 9.091
-    // TODO use the block's velocity modifier instead of a hardcoded value
-    double WALK_ONE_OVER_SOUL_SAND_COST = WALK_ONE_BLOCK_COST * 2; // 0.4 in BlockSoulSand but effectively about half
     double LADDER_UP_ONE_COST = 20 / 2.35; // 8.511
     double LADDER_DOWN_ONE_COST = 20 / 3.0; // 6.667
     double SNEAK_ONE_BLOCK_COST = 20 / 1.3; // 15.385
@@ -66,7 +64,7 @@ public interface ActionCosts {
 
 
     static double[] generateFallNBlocksCost() {
-        double[] costs = new double[257];
+        double[] costs = new double[257];   // FIXME not cubic chunks friendly
         for (int i = 0; i < 257; i++) {
             costs[i] = distanceToTicks(i);
         }

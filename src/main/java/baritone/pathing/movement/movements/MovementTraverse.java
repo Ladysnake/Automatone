@@ -126,7 +126,7 @@ public class MovementTraverse extends Movement {
         int checkedZ = destZ + checkedZShift;
 
         if (MovementHelper.canWalkOn(context.bsi, destX, y - 1, destZ, destOn)) {//this is a walk, not a bridge
-            double WC = WALK_ONE_BLOCK_COST;
+            double WC = 0;
             boolean water = false;
             for (int dy = 0; dy < context.height; dy++) {
                 if (MovementHelper.isWater(context.get(destX, y+dy, destZ))) {
@@ -136,14 +136,13 @@ public class MovementTraverse extends Movement {
                 }
             }
             if (!water) {
-                if (destOn.getBlock() == Blocks.SOUL_SAND) {
-                    WC += (WALK_ONE_OVER_SOUL_SAND_COST - WALK_ONE_BLOCK_COST) / 2;
-                } else if (destOn.getBlock() == Blocks.WATER) {
-                    WC += context.walkOnWaterOnePenalty;
+                if (destOn.getBlock() == Blocks.WATER) {
+                    WC = context.walkOnWaterOnePenalty;
+                } else {
+                    // we are walking half a block on destOn and half a block on srcOnBlock
+                    WC = WALK_ONE_BLOCK_COST / destOn.getBlock().getVelocityMultiplier() / 2;
                 }
-                if (srcOnBlock == Blocks.SOUL_SAND) {
-                    WC += (WALK_ONE_OVER_SOUL_SAND_COST - WALK_ONE_BLOCK_COST) / 2;
-                }
+                WC += WALK_ONE_BLOCK_COST / srcOnBlock.getVelocityMultiplier() / 2;
             }
 
             double hardness = 0;
@@ -276,8 +275,8 @@ public class MovementTraverse extends Movement {
                 return state;
             }
 
-            float yawToDest = 0;
-            float pitchToBreak = 0;
+            float yawToDest;
+            float pitchToBreak;
 
             // combine the yaw to the center of the destination, and the pitch to the specific block we're trying to break
             // it's safe to do this since the two blocks we break (in a traverse) are right on top of each other and so will have the same yaw
