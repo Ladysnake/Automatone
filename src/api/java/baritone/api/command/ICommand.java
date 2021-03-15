@@ -17,6 +17,7 @@
 
 package baritone.api.command;
 
+import baritone.api.IBaritone;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
 import baritone.api.utils.Helper;
@@ -35,7 +36,7 @@ public interface ICommand extends Helper {
     /**
      * Called when this command is executed.
      */
-    void execute(String label, IArgConsumer args) throws CommandException;
+    void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException;
 
     /**
      * Called when the command needs to tab complete. Return a Stream representing the entries to put in the completions

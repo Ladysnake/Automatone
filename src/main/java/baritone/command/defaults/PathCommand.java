@@ -29,12 +29,12 @@ import java.util.stream.Stream;
 
 public class PathCommand extends Command {
 
-    public PathCommand(IBaritone baritone) {
-        super(baritone, "path");
+    public PathCommand() {
+        super("path");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         ICustomGoalProcess customGoalProcess = baritone.getCustomGoalProcess();
         args.requireMax(0);
         customGoalProcess.path();

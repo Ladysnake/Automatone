@@ -29,12 +29,12 @@ import java.util.stream.Stream;
 
 public class FindCommand extends Command {
 
-    public FindCommand(IBaritone baritone) {
-        super(baritone, "find");
+    public FindCommand() {
+        super("find");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         throw new UnsupportedOperationException();
     }
 

@@ -36,15 +36,15 @@ import java.util.stream.Stream;
 
 public class ChestsCommand extends Command {
 
-    public ChestsCommand(IBaritone baritone) {
-        super(baritone, "chests");
+    public ChestsCommand() {
+        super("chests");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         Set<Map.Entry<BlockPos, IRememberedInventory>> entries =
-                ctx.worldData().getContainerMemory().getRememberedInventories().entrySet();
+                baritone.getPlayerContext().worldData().getContainerMemory().getRememberedInventories().entrySet();
         if (entries.isEmpty()) {
             throw new CommandInvalidStateException("No remembered inventories");
         }

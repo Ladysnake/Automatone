@@ -29,12 +29,12 @@ import java.util.stream.Stream;
 
 public class ForceCancelCommand extends Command {
 
-    public ForceCancelCommand(IBaritone baritone) {
-        super(baritone, "forcecancel");
+    public ForceCancelCommand() {
+        super("forcecancel");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         IPathingBehavior pathingBehavior = baritone.getPathingBehavior();
         pathingBehavior.cancelEverything();

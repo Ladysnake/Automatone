@@ -42,14 +42,16 @@ import java.util.stream.Stream;
  * @author Brady
  * @since 9/21/2019
  */
-public class CommandManager implements ICommandManager {
+public class BaritoneCommandManager implements ICommandManager {
 
-    private final Registry<ICommand> registry = new Registry<>();
-    private final Baritone baritone;
+    static {
+        DefaultCommands.controlCommands.registerCommands();
+    }
 
-    public CommandManager(Baritone baritone) {
+    private final IBaritone baritone;
+
+    public BaritoneCommandManager(Baritone baritone) {
         this.baritone = baritone;
-        DefaultCommands.createAll(baritone).forEach(this.registry::register);
     }
 
     @Override
@@ -59,17 +61,7 @@ public class CommandManager implements ICommandManager {
 
     @Override
     public Registry<ICommand> getRegistry() {
-        return this.registry;
-    }
-
-    @Override
-    public ICommand getCommand(String name) {
-        for (ICommand command : this.registry.entries) {
-            if (command.getNames().contains(name.toLowerCase(Locale.US))) {
-                return command;
-            }
-        }
-        return null;
+        return ICommandManager.registry;
     }
 
     @Override
@@ -99,7 +91,7 @@ public class CommandManager implements ICommandManager {
         List<ICommandArgument> args = pair.getRight();
         if (args.isEmpty()) {
             return new TabCompleteHelper()
-                    .addCommands(this.baritone.getCommandManager())
+                    .addCommands()
                     .filterPrefix(label)
                     .stream();
         } else {
@@ -109,10 +101,10 @@ public class CommandManager implements ICommandManager {
 
     private ExecutionWrapper from(Pair<String, List<ICommandArgument>> expanded) {
         String label = expanded.getLeft();
-        ArgConsumer args = new ArgConsumer(this, expanded.getRight());
+        ArgConsumer args = new ArgConsumer(this, expanded.getRight(), this.getBaritone());
 
-        ICommand command = this.getCommand(label);
-        return command == null ? null : new ExecutionWrapper(command, label, args);
+        ICommand command = ICommandManager.getCommand(label);
+        return command == null ? null : new ExecutionWrapper(baritone, command, label, args);
     }
 
     private static Pair<String, List<ICommandArgument>> expand(String string, boolean preserveEmptyLast) {
@@ -127,11 +119,13 @@ public class CommandManager implements ICommandManager {
 
     private static final class ExecutionWrapper {
 
-        private ICommand command;
-        private String label;
-        private ArgConsumer args;
+        private final IBaritone baritone;
+        private final ICommand command;
+        private final String label;
+        private final ArgConsumer args;
 
-        private ExecutionWrapper(ICommand command, String label, ArgConsumer args) {
+        private ExecutionWrapper(IBaritone baritone, ICommand command, String label, ArgConsumer args) {
+            this.baritone = baritone;
             this.command = command;
             this.label = label;
             this.args = args;
@@ -139,7 +133,7 @@ public class CommandManager implements ICommandManager {
 
         private void execute() {
             try {
-                this.command.execute(this.label, this.args);
+                this.command.execute(this.label, this.args, baritone);
             } catch (Throwable t) {
                 // Create a handleable exception, wrap if needed
                 ICommandException exception = t instanceof ICommandException

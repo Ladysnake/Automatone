@@ -39,12 +39,12 @@ import java.util.stream.Stream;
 
 public class FollowCommand extends Command {
 
-    public FollowCommand(IBaritone baritone) {
-        super(baritone, "follow");
+    public FollowCommand() {
+        super("follow");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMin(1);
         FollowGroup group;
         FollowList list;

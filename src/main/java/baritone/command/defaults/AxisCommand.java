@@ -30,12 +30,12 @@ import java.util.stream.Stream;
 
 public class AxisCommand extends Command {
 
-    public AxisCommand(IBaritone baritone) {
-        super(baritone, "axis", "highway");
+    public AxisCommand() {
+        super("axis", "highway");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         Goal goal = new GoalAxis();
         baritone.getCustomGoalProcess().setGoal(goal);

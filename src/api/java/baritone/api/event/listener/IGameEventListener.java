@@ -36,21 +36,6 @@ public interface IGameEventListener {
     void onTickServer();
 
     /**
-     * Runs whenever the server receives a message from a client.
-     *
-     * @param event The event
-     * @see ClientPlayerEntity#sendChatMessage(String)
-     */
-    void onReceiveChatMessage(ChatEvent event);
-
-    /**
-     * Runs whenever the client player tries to tab complete in chat.
-     *
-     * @param event The event
-     */
-    void onPreTabComplete(TabCompleteEvent event);
-
-    /**
      * Called when the local player interacts with a block, whether it is breaking or opening/placing.
      *
      * @param event The event

@@ -37,21 +37,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ArgConsumer implements IArgConsumer {
+public class ArgConsumer implements IArgConsumer, IDatatypeContext {
+    private final IBaritone baritone;
 
     /**
-     * The parent {@link ICommandManager} for this {@link IArgConsumer}}. Used by {@link #context}.
+     * The parent {@link ICommandManager} for this {@link IArgConsumer}}. Used to implement {@link IDatatypeContext}.
      */
     private final ICommandManager manager;
-
-    /**
-     * The {@link IDatatypeContext} instance for this {@link IArgConsumer}}, passed to
-     * datatypes when an operation is performed upon them.
-     *
-     * @see IDatatype
-     * @see IDatatypeContext
-     */
-    private final IDatatypeContext context;
 
     /**
      * The list of arguments in this ArgConsumer
@@ -63,15 +55,15 @@ public class ArgConsumer implements IArgConsumer {
      */
     private final Deque<ICommandArgument> consumed;
 
-    private ArgConsumer(ICommandManager manager, Deque<ICommandArgument> args, Deque<ICommandArgument> consumed) {
+    private ArgConsumer(ICommandManager manager, Deque<ICommandArgument> args, Deque<ICommandArgument> consumed, IBaritone baritone) {
         this.manager = manager;
-        this.context = this.new Context();
         this.args = new LinkedList<>(args);
         this.consumed = new LinkedList<>(consumed);
+        this.baritone = baritone;
     }
 
-    public ArgConsumer(ICommandManager manager, List<ICommandArgument> args) {
-        this(manager, new LinkedList<>(args), new LinkedList<>());
+    public ArgConsumer(ICommandManager manager, List<ICommandArgument> args, IBaritone baritone) {
+        this(manager, new LinkedList<>(args), new LinkedList<>(), baritone);
     }
 
     @Override
@@ -315,7 +307,7 @@ public class ArgConsumer implements IArgConsumer {
     @Override
     public <T, O, D extends IDatatypePost<T, O>> T getDatatypePost(D datatype, O original) throws CommandInvalidTypeException, CommandNotEnoughArgumentsException {
         try {
-            return datatype.apply(this.context, original);
+            return datatype.apply(this, original);
         } catch (Exception e) {
             if (Baritone.settings().verboseCommandExceptions.value) {
                 e.printStackTrace();
@@ -347,7 +339,7 @@ public class ArgConsumer implements IArgConsumer {
     @Override
     public <T, D extends IDatatypeFor<T>> T getDatatypeFor(D datatype) throws CommandInvalidTypeException, CommandNotEnoughArgumentsException {
         try {
-            return datatype.get(this.context);
+            return datatype.get(this);
         } catch (Exception e) {
             if (Baritone.settings().verboseCommandExceptions.value) {
                 e.printStackTrace();
@@ -379,7 +371,7 @@ public class ArgConsumer implements IArgConsumer {
     @Override
     public <T extends IDatatype> Stream<String> tabCompleteDatatype(T datatype) {
         try {
-            return datatype.tabComplete(this.context);
+            return datatype.tabComplete(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -428,22 +420,16 @@ public class ArgConsumer implements IArgConsumer {
 
     @Override
     public ArgConsumer copy() {
-        return new ArgConsumer(manager, args, consumed);
+        return new ArgConsumer(manager, args, consumed, this.baritone);
     }
 
-    /**
-     * Implementation of {@link IDatatypeContext} which adapts to the parent {@link IArgConsumer}}
-     */
-    private final class Context implements IDatatypeContext {
+    @Override
+    public final IBaritone getBaritone() {
+        return ArgConsumer.this.baritone;
+    }
 
-        @Override
-        public final IBaritone getBaritone() {
-            return ArgConsumer.this.manager.getBaritone();
-        }
-
-        @Override
-        public final ArgConsumer getConsumer() {
-            return ArgConsumer.this;
-        }
+    @Override
+    public final ArgConsumer getConsumer() {
+        return ArgConsumer.this;
     }
 }

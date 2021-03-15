@@ -34,12 +34,12 @@ import java.util.stream.Stream;
 
 public class GoalCommand extends Command {
 
-    public GoalCommand(IBaritone baritone) {
-        super(baritone, "goal");
+    public GoalCommand() {
+        super("goal");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         ICustomGoalProcess goalProcess = baritone.getCustomGoalProcess();
         if (args.hasAny() && Arrays.asList("reset", "clear", "none").contains(args.peekString())) {
             args.requireMax(1);

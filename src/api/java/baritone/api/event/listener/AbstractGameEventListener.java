@@ -34,12 +34,6 @@ public interface AbstractGameEventListener extends IGameEventListener {
     default void onTickServer() {}
 
     @Override
-    default void onReceiveChatMessage(ChatEvent event) {}
-
-    @Override
-    default void onPreTabComplete(TabCompleteEvent event) {}
-
-    @Override
     default void onBlockInteract(BlockInteractEvent event) {}
 
     @Override

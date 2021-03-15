@@ -32,12 +32,12 @@ import java.util.stream.Stream;
 
 public class InvertCommand extends Command {
 
-    public InvertCommand(IBaritone baritone) {
-        super(baritone, "invert");
+    public InvertCommand() {
+        super("invert");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         ICustomGoalProcess customGoalProcess = baritone.getCustomGoalProcess();
         Goal goal;

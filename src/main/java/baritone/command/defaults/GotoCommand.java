@@ -35,12 +35,12 @@ import java.util.stream.Stream;
 
 public class GotoCommand extends Command {
 
-    protected GotoCommand(IBaritone baritone) {
-        super(baritone, "goto");
+    protected GotoCommand() {
+        super("goto");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         // If we have a numeric first argument, then parse arguments as coordinates.
         // Note: There is no reason to want to go where you're already at so there
         // is no need to handle the case of empty arguments.

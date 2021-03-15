@@ -235,11 +235,10 @@ public class TabCompleteHelper {
     /**
      * Appends every command in the specified {@link ICommandManager} to this {@link TabCompleteHelper}
      *
-     * @param manager A command manager
      * @return This {@link TabCompleteHelper}
      */
-    public TabCompleteHelper addCommands(ICommandManager manager) {
-        return append(manager.getRegistry().descendingStream()
+    public TabCompleteHelper addCommands() {
+        return append(ICommandManager.registry.descendingStream()
                 .flatMap(command -> command.getNames().stream())
                 .distinct()
         );

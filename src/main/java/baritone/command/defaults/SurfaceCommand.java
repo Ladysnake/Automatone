@@ -24,6 +24,7 @@ import baritone.api.command.exception.CommandException;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalBlock;
 import baritone.api.utils.BetterBlockPos;
+import baritone.api.utils.IEntityContext;
 import net.minecraft.block.AirBlock;
 
 import java.util.Arrays;
@@ -32,15 +33,16 @@ import java.util.stream.Stream;
 
 public class SurfaceCommand extends Command {
 
-    protected SurfaceCommand(IBaritone baritone) {
-        super(baritone, "surface", "top");
+    protected SurfaceCommand() {
+        super("surface", "top");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
-        final BetterBlockPos playerPos = baritone.getPlayerContext().feetPos();
-        final int surfaceLevel = baritone.getPlayerContext().world().getSeaLevel();
-        final int worldHeight = baritone.getPlayerContext().world().getHeight();
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+        IEntityContext ctx = baritone.getPlayerContext();
+        final BetterBlockPos playerPos = ctx.feetPos();
+        final int surfaceLevel = ctx.world().getSeaLevel();
+        final int worldHeight = ctx.world().getHeight();
 
         // Ensure this command will not run if you are above the surface level and the block above you is air
         // As this would imply that your are already on the open surface

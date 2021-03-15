@@ -35,12 +35,12 @@ import java.util.stream.Stream;
 
 public class ExploreFilterCommand extends Command {
 
-    public ExploreFilterCommand(IBaritone baritone) {
-        super(baritone, "explorefilter");
+    public ExploreFilterCommand() {
+        super("explorefilter");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(2);
         File file = args.getDatatypePost(RelativeFile.INSTANCE, FabricLoader.getInstance().getGameDir().toAbsolutePath().getParent().toFile());
         boolean invert = false;

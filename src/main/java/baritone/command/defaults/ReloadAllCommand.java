@@ -28,12 +28,12 @@ import java.util.stream.Stream;
 
 public class ReloadAllCommand extends Command {
 
-    public ReloadAllCommand(IBaritone baritone) {
-        super(baritone, "reloadall");
+    public ReloadAllCommand() {
+        super("reloadall");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         throw new UnsupportedOperationException();
     }

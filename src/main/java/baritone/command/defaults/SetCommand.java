@@ -44,12 +44,12 @@ import static baritone.api.utils.SettingsUtil.*;
 
 public class SetCommand extends Command {
 
-    public SetCommand(IBaritone baritone) {
-        super(baritone, "set", "setting", "settings");
+    public SetCommand() {
+        super("set", "setting", "settings");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         String arg = args.hasAny() ? args.getString().toLowerCase(Locale.US) : "list";
         if (Arrays.asList("s", "save").contains(arg)) {
             SettingsUtil.save(Baritone.settings());
@@ -88,7 +88,7 @@ public class SetCommand extends Command {
                         hoverComponent.append(String.format("\nType: %s", settingTypeToString(setting)));
                         hoverComponent.append(String.format("\n\nValue:\n%s", settingValueToString(setting)));
                         hoverComponent.append(String.format("\n\nDefault Value:\n%s", settingDefaultToString(setting)));
-                        String commandSuggestion = Baritone.settings().prefix.value + String.format("set %s ", setting.getName());
+                        String commandSuggestion = FORCE_COMMAND_PREFIX + String.format("set %s ", setting.getName());
                         BaseText component = new LiteralText(setting.getName());
                         component.setStyle(component.getStyle().withFormatting(Formatting.GRAY));
                         component.append(typeComponent);
@@ -175,12 +175,6 @@ public class SetCommand extends Command {
                             FORCE_COMMAND_PREFIX + String.format("set %s %s", setting.getName(), oldValue)
                     )));
             logDirect(oldValueComponent);
-            if ((setting.getName().equals("chatControl") && !(Boolean) setting.value && !Baritone.settings().chatControlAnyway.value) ||
-                    setting.getName().equals("chatControlAnyway") && !(Boolean) setting.value && !Baritone.settings().chatControl.value) {
-                logDirect("Warning: Chat commands will no longer work. If you want to revert this change, use prefix control (if enabled) or click the old value listed above.", Formatting.RED);
-            } else if (setting.getName().equals("prefixControl") && !(Boolean) setting.value) {
-                logDirect("Warning: Prefixed commands will no longer work. If you want to revert this change, use chat control (if enabled) or click the old value listed above.", Formatting.RED);
-            }
         }
         SettingsUtil.save(Baritone.settings());
     }

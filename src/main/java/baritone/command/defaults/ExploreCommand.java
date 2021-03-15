@@ -23,6 +23,7 @@ import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.datatypes.RelativeGoalXZ;
 import baritone.api.command.exception.CommandException;
 import baritone.api.pathing.goals.GoalXZ;
+import baritone.api.utils.BetterBlockPos;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,20 +31,21 @@ import java.util.stream.Stream;
 
 public class ExploreCommand extends Command {
 
-    public ExploreCommand(IBaritone baritone) {
-        super(baritone, "explore");
+    public ExploreCommand() {
+        super("explore");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         if (args.hasAny()) {
             args.requireExactly(2);
         } else {
             args.requireMax(0);
         }
+        BetterBlockPos feetPos = baritone.getPlayerContext().feetPos();
         GoalXZ goal = args.hasAny()
-                ? args.getDatatypePost(RelativeGoalXZ.INSTANCE, ctx.feetPos())
-                : new GoalXZ(ctx.feetPos());
+                ? args.getDatatypePost(RelativeGoalXZ.INSTANCE, feetPos)
+                : new GoalXZ(feetPos);
         baritone.getExploreProcess().explore(goal.getX(), goal.getZ());
         logDirect(String.format("Exploring from %s", goal.toString()));
     }

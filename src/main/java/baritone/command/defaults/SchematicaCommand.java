@@ -28,12 +28,12 @@ import java.util.stream.Stream;
 
 public class SchematicaCommand extends Command {
 
-    public SchematicaCommand(IBaritone baritone) {
-        super(baritone, "schematica");
+    public SchematicaCommand() {
+        super("schematica");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         baritone.getBuilderProcess().buildOpenSchematic();
     }

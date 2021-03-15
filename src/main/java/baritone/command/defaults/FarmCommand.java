@@ -32,12 +32,12 @@ import java.util.stream.Stream;
 
 public class FarmCommand extends Command {
 
-    public FarmCommand(IBaritone baritone) {
-        super(baritone, "farm");
+    public FarmCommand() {
+        super("farm");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(2);
         int range = 0;
         BetterBlockPos origin = null;
@@ -48,7 +48,7 @@ public class FarmCommand extends Command {
         //waypoint
         if (args.has(1)) {
             IWaypoint[] waypoints = args.getDatatypeFor(ForWaypoints.INSTANCE);
-            IWaypoint waypoint = null;
+            IWaypoint waypoint;
             switch (waypoints.length) {
                 case 0:
                     throw new CommandInvalidStateException("No waypoints found");

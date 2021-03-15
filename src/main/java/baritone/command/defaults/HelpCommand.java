@@ -25,6 +25,7 @@ import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandNotFoundException;
 import baritone.api.command.helpers.Paginator;
 import baritone.api.command.helpers.TabCompleteHelper;
+import baritone.api.command.manager.ICommandManager;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -40,17 +41,21 @@ import static baritone.api.command.IBaritoneChatControl.FORCE_COMMAND_PREFIX;
 
 public class HelpCommand extends Command {
 
-    public HelpCommand(IBaritone baritone) {
-        super(baritone, "help", "?");
+    public HelpCommand() {
+        super("help", "?");
     }
 
     @Override
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+        execute(label, args);
+    }
+
     public void execute(String label, IArgConsumer args) throws CommandException {
         args.requireMax(1);
         if (!args.hasAny() || args.is(Integer.class)) {
             Paginator.paginate(
                     args, new Paginator<>(
-                            this.baritone.getCommandManager().getRegistry().descendingStream()
+                            ICommandManager.registry.descendingStream()
                                     .filter(command -> !command.hiddenFromHelp())
                                     .collect(Collectors.toList())
                     ),
@@ -80,7 +85,7 @@ public class HelpCommand extends Command {
             );
         } else {
             String commandName = args.getString().toLowerCase();
-            ICommand command = this.baritone.getCommandManager().getCommand(commandName);
+            ICommand command = ICommandManager.getCommand(commandName);
             if (command == null) {
                 throw new CommandNotFoundException(commandName);
             }
@@ -101,7 +106,7 @@ public class HelpCommand extends Command {
     public Stream<String> tabComplete(String label, IArgConsumer args) throws CommandException {
         if (args.hasExactlyOne()) {
             return new TabCompleteHelper()
-                    .addCommands(this.baritone.getCommandManager())
+                    .addCommands()
                     .filterPrefix(args.getString())
                     .stream();
         }

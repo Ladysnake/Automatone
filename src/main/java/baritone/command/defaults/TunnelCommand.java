@@ -23,6 +23,7 @@ import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalStrictDirection;
+import baritone.api.utils.IEntityContext;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
@@ -32,13 +33,15 @@ import java.util.stream.Stream;
 
 public class TunnelCommand extends Command {
 
-    public TunnelCommand(IBaritone baritone) {
-        super(baritone, "tunnel");
+    public TunnelCommand() {
+        super("tunnel");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(3);
+        IEntityContext ctx = baritone.getPlayerContext();
+
         if (args.hasExactly(3)) {
             boolean cont = true;
             int height = Integer.parseInt(args.getArgs().get(0).getValue());

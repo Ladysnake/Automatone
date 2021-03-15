@@ -17,62 +17,170 @@
 
 package baritone.command.defaults;
 
+import baritone.Baritone;
+import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
+import baritone.api.Settings;
 import baritone.api.command.ICommand;
+import baritone.api.command.argument.ICommandArgument;
+import baritone.api.command.exception.CommandNotEnoughArgumentsException;
+import baritone.api.command.manager.ICommandManager;
+import baritone.api.utils.Helper;
+import baritone.command.argument.ArgConsumer;
+import baritone.command.manager.BaritoneArgumentType;
+import baritone.command.manager.BaritoneCommandManager;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+
+import static baritone.api.command.IBaritoneChatControl.FORCE_COMMAND_PREFIX;
 
 public final class DefaultCommands {
 
-    private DefaultCommands() {
+    public static final ExecutionControlCommands controlCommands = new ExecutionControlCommands();
+    private static final HelpCommand helpCommand = new HelpCommand();
+
+    public static void registerAll() {
+        List<ICommand> commands = new ArrayList<>(Arrays.asList(
+                helpCommand,
+                new SetCommand(),
+                new CommandAlias(Arrays.asList("modified", "mod", "baritone", "modifiedsettings"), "List modified settings", "set modified"),
+                new CommandAlias("reset", "Reset all settings or just one", "set reset"),
+                new GoalCommand(),
+                new GotoCommand(),
+                new PathCommand(),
+                new ProcCommand(),
+                new ETACommand(),
+                new VersionCommand(),
+                new RepackCommand(),
+                new BuildCommand(),
+                new SchematicaCommand(),
+                new ComeCommand(),
+                new AxisCommand(),
+                new ForceCancelCommand(),
+                new GcCommand(),
+                new InvertCommand(),
+                new TunnelCommand(),
+                new RenderCommand(),
+                new FarmCommand(),
+                new ChestsCommand(),
+                new FollowCommand(),
+                new ExploreFilterCommand(),
+                new ReloadAllCommand(),
+                new SaveAllCommand(),
+                new ExploreCommand(),
+                new BlacklistCommand(),
+                new FindCommand(),
+                new MineCommand(),
+                new ClickCommand(),
+                new SurfaceCommand(),
+                new ThisWayCommand(),
+                new WaypointsCommand(),
+                new CommandAlias("sethome", "Sets your home waypoint", "waypoints save home"),
+                new CommandAlias("home", "Path to your home waypoint", "waypoints goto home"),
+                new SelCommand()
+        ));
+        for (ICommand command : commands) {
+            ICommandManager.registry.register(command);
+        }
+        CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> register(dispatcher)));
     }
 
-    public static List<ICommand> createAll(IBaritone baritone) {
-        Objects.requireNonNull(baritone);
-        List<ICommand> commands = new ArrayList<>(Arrays.asList(
-                new HelpCommand(baritone),
-                new SetCommand(baritone),
-                new CommandAlias(baritone, Arrays.asList("modified", "mod", "baritone", "modifiedsettings"), "List modified settings", "set modified"),
-                new CommandAlias(baritone, "reset", "Reset all settings or just one", "set reset"),
-                new GoalCommand(baritone),
-                new GotoCommand(baritone),
-                new PathCommand(baritone),
-                new ProcCommand(baritone),
-                new ETACommand(baritone),
-                new VersionCommand(baritone),
-                new RepackCommand(baritone),
-                new BuildCommand(baritone),
-                new SchematicaCommand(baritone),
-                new ComeCommand(baritone),
-                new AxisCommand(baritone),
-                new ForceCancelCommand(baritone),
-                new GcCommand(baritone),
-                new InvertCommand(baritone),
-                new TunnelCommand(baritone),
-                new RenderCommand(baritone),
-                new FarmCommand(baritone),
-                new ChestsCommand(baritone),
-                new FollowCommand(baritone),
-                new ExploreFilterCommand(baritone),
-                new ReloadAllCommand(baritone),
-                new SaveAllCommand(baritone),
-                new ExploreCommand(baritone),
-                new BlacklistCommand(baritone),
-                new FindCommand(baritone),
-                new MineCommand(baritone),
-                new ClickCommand(baritone),
-                new SurfaceCommand(baritone),
-                new ThisWayCommand(baritone),
-                new WaypointsCommand(baritone),
-                new CommandAlias(baritone, "sethome", "Sets your home waypoint", "waypoints save home"),
-                new CommandAlias(baritone, "home", "Path to your home waypoint", "waypoints goto home"),
-                new SelCommand(baritone)
-        ));
-        ExecutionControlCommands prc = new ExecutionControlCommands(baritone);
-        commands.add(prc.pauseCommand);
-        commands.add(prc.resumeCommand);
-        commands.add(prc.pausedCommand);
-        commands.add(prc.cancelCommand);
-        return Collections.unmodifiableList(commands);
+    private static void logRanCommand(String command, String rest) {
+        if (BaritoneAPI.getSettings().echoCommands.value) {
+            String msg = command + rest;
+            String toDisplay = BaritoneAPI.getSettings().censorRanCommands.value ? command + " ..." : msg;
+            BaseText component = new LiteralText(String.format("> %s", toDisplay));
+            component.setStyle(component.getStyle()
+                    .withFormatting(Formatting.WHITE)
+                    .withHoverEvent(new HoverEvent(
+                            HoverEvent.Action.SHOW_TEXT,
+                            new LiteralText("Click to rerun command")
+                    ))
+                    .withClickEvent(new ClickEvent(
+                            ClickEvent.Action.RUN_COMMAND,
+                            FORCE_COMMAND_PREFIX + msg
+                    )));
+            Helper.HELPER.logDirect(component);
+        }
+    }
+
+    public static boolean runCommand(String msg, IBaritone baritone) {
+        if (msg.trim().equalsIgnoreCase("damn")) {
+            Helper.HELPER.logDirect("daniel");
+            return false;
+        } else if (msg.trim().equalsIgnoreCase("orderpizza")) {
+            Baritone.LOGGER.fatal("No pizza :(");
+            return false;
+        }
+        if (msg.isEmpty()) {
+            return runCommand("help", baritone);
+        }
+        Pair<String, List<ICommandArgument>> pair = BaritoneCommandManager.expand(msg);
+        String command = pair.getLeft();
+        String rest = msg.substring(pair.getLeft().length());
+        ArgConsumer argc = new ArgConsumer(baritone.getCommandManager(), pair.getRight(), baritone);
+        if (!argc.hasAny()) {
+            Settings.Setting<?> setting = BaritoneAPI.getSettings().byLowerName.get(command.toLowerCase(Locale.ROOT));
+            if (setting != null) {
+                logRanCommand(command, rest);
+                if (setting.getValueClass() == Boolean.class) {
+                    baritone.getCommandManager().execute(String.format("set toggle %s", setting.getName()));
+                } else {
+                    baritone.getCommandManager().execute(String.format("set %s", setting.getName()));
+                }
+                return true;
+            }
+        } else if (argc.hasExactlyOne()) {
+            for (Settings.Setting<?> setting : BaritoneAPI.getSettings().allSettings) {
+                if (setting.getName().equals("logger")) {
+                    continue;
+                }
+                if (setting.getName().equalsIgnoreCase(pair.getLeft())) {
+                    logRanCommand(command, rest);
+                    try {
+                        baritone.getCommandManager().execute(String.format("set %s %s", setting.getName(), argc.getString()));
+                    } catch (CommandNotEnoughArgumentsException ignored) {
+                    } // The operation is safe
+                    return true;
+                }
+            }
+        }
+
+        // If the command exists, then handle echoing the input
+        if (ICommandManager.getCommand(pair.getLeft()) != null) {
+            logRanCommand(command, rest);
+        }
+
+        return baritone.getCommandManager().execute(pair);
+    }
+
+    private static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+        dispatcher.register(CommandManager.literal("automatone")
+                .then(CommandManager.argument("command", BaritoneArgumentType.baritone()).executes(command ->
+                        runCommand(command.getSource().getEntityOrThrow(), BaritoneArgumentType.getCommand(command, "command"))))
+                );
+    }
+
+    private static int runCommand(Entity target, String command) throws CommandSyntaxException {
+        if (!(target instanceof LivingEntity)) throw EntityArgumentType.ENTITY_NOT_FOUND_EXCEPTION.create();
+        return runCommand(command, BaritoneAPI.getProvider().getBaritone((LivingEntity) target)) ? Command.SINGLE_SUCCESS : 0;
     }
 }

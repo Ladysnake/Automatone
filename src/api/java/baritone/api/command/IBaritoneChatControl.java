@@ -35,8 +35,7 @@ public interface IBaritoneChatControl {
      * prefix that forces a command to run, regardless of the current prefix, chat/prefix control being enabled, etc.
      * <p>
      * If used right (by both developers and users), it should be impossible to expose a command accidentally to the
-     * server. As a rule of thumb, if you have a clickable chat component, always use this prefix. If you're suggesting
-     * a command (a component that puts text into your text box, or something else), use {@link Settings#prefix}.
+     * server. As a rule of thumb, if you have a clickable chat component, always use this prefix.
      */
-    String FORCE_COMMAND_PREFIX = String.format("<<%s>>", UUID.randomUUID().toString());
+    String FORCE_COMMAND_PREFIX = "/automatone ";
 }

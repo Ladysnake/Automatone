@@ -17,8 +17,10 @@
 
 package baritone;
 
+import baritone.command.defaults.DefaultCommands;
 import baritone.entity.fakeplayer.FakeServerPlayerEntity;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
@@ -29,6 +31,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 public final class Automatone implements ModInitializer {
+    public static final String MOD_ID = "automatone";
     public static final EntityType<FakeServerPlayerEntity> FAKE_PLAYER = FabricEntityTypeBuilder.<FakeServerPlayerEntity>createLiving()
             .spawnGroup(SpawnGroup.MISC)
             .entityFactory((type, world) -> new FakeServerPlayerEntity(type, (ServerWorld) world))
@@ -39,8 +42,13 @@ public final class Automatone implements ModInitializer {
             .forceTrackedVelocityUpdates(true)
             .build();
 
+    public static Identifier id(String path) {
+        return new Identifier(MOD_ID, path);
+    }
+
     @Override
     public void onInitialize() {
+        DefaultCommands.registerAll();
         Registry.register(Registry.ENTITY_TYPE, new Identifier("automatone", "fake_player"), FAKE_PLAYER);
     }
 }

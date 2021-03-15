@@ -44,19 +44,22 @@ import net.minecraft.world.RaycastContext;
 import java.awt.*;
 import java.util.Collections;
 import java.util.Objects;
+import java.util.UUID;
 
 import static baritone.api.command.IBaritoneChatControl.FORCE_COMMAND_PREFIX;
 import static org.lwjgl.opengl.GL11.*;
 
 public class GuiClick extends Screen implements Helper {
 
+    private final UUID callerUuid;
     private Matrix4f projectionViewMatrix;
 
     private BlockPos clickStart;
     private BlockPos currentMouseOver;
 
-    public GuiClick() {
+    public GuiClick(UUID callerUuid) {
         super(new LiteralText("CLICK"));
+        this.callerUuid = callerUuid;
     }
 
     @Override
@@ -94,20 +97,20 @@ public class GuiClick extends Screen implements Helper {
                 if (clickStart != null && !clickStart.equals(currentMouseOver)) {
                     BaritoneProvider.getSelectionManager().removeAllSelections();
                     BaritoneProvider.getSelectionManager().addSelection(BetterBlockPos.from(clickStart), BetterBlockPos.from(currentMouseOver));
-                    BaseText component = new LiteralText("Selection made! For usage: " + Baritone.settings().prefix.value + "help sel");
+                    BaseText component = new LiteralText("Selection made! For usage: " + FORCE_COMMAND_PREFIX + "help sel");
                     component.setStyle(component.getStyle()
                             .withFormatting(Formatting.WHITE)
                             .withClickEvent(new ClickEvent(
                                     ClickEvent.Action.RUN_COMMAND,
-                                    FORCE_COMMAND_PREFIX + "help sel"
+                                    FORCE_COMMAND_PREFIX + "sel"
                             )));
                     Helper.HELPER.logDirect(component);
                     clickStart = null;
                 } else {
-                    MinecraftClient.getInstance().player.sendChatMessage(String.format("#goto %d %d %d", currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));
+                    MinecraftClient.getInstance().player.sendChatMessage(String.format("/execute as %s run automatone goto %d %d %d", callerUuid, currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));
                 }
             } else if (mouseButton == 1) {
-                MinecraftClient.getInstance().player.sendChatMessage(String.format("#goto %d %d %d", currentMouseOver.getX(), currentMouseOver.getY() + 1, currentMouseOver.getZ()));
+                MinecraftClient.getInstance().player.sendChatMessage(String.format("/execute as %s run automatone goto %d %d %d", callerUuid, currentMouseOver.getX(), currentMouseOver.getY() + 1, currentMouseOver.getZ()));
             }
         }
         clickStart = null;

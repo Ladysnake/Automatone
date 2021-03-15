@@ -29,12 +29,12 @@ import java.util.stream.Stream;
 
 public class VersionCommand extends Command {
 
-    public VersionCommand(IBaritone baritone) {
-        super(baritone, "version");
+    public VersionCommand() {
+        super("version");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         String version = getClass().getPackage().getImplementationVersion();
         if (version == null) {

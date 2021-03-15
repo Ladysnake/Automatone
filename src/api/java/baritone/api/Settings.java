@@ -549,17 +549,6 @@ public final class Settings {
     public final Setting<Boolean> chatDebug = new Setting<>(false);
 
     /**
-     * Allow chat based control of Baritone. Most likely should be disabled when Baritone is imported for use in
-     * something else
-     */
-    public final Setting<Boolean> chatControl = new Setting<>(true);
-
-    /**
-     * Some clients like Impact try to force chatControl to off, so here's a second setting to do it anyway
-     */
-    public final Setting<Boolean> chatControlAnyway = new Setting<>(false);
-
-    /**
      * Render the path
      */
     public final Setting<Boolean> renderPath = new Setting<>(true);
@@ -667,16 +656,6 @@ public final class Settings {
      * 1.0f = fully opaque
      */
     public final Setting<Float> cachedChunksOpacity = new Setting<>(0.5f);
-
-    /**
-     * Whether or not to allow you to run Baritone commands with the prefix
-     */
-    public final Setting<Boolean> prefixControl = new Setting<>(true);
-
-    /**
-     * The command prefix for chat control
-     */
-    public final Setting<String> prefix = new Setting<>("#");
 
     /**
      * Use a short Baritone prefix [B] instead of [Baritone] when logging to chat

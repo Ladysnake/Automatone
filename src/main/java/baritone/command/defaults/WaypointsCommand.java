@@ -44,12 +44,12 @@ import static baritone.api.command.IBaritoneChatControl.FORCE_COMMAND_PREFIX;
 
 public class WaypointsCommand extends Command {
 
-    public WaypointsCommand(IBaritone baritone) {
-        super(baritone, "waypoints", "waypoint", "wp");
+    public WaypointsCommand() {
+        super("waypoints", "waypoint", "wp");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         Action action = args.hasAny() ? Action.getByName(args.getString()) : Action.LIST;
         if (action == null) {
             throw new CommandInvalidTypeException(args.consumed(), "an action");
@@ -92,8 +92,8 @@ public class WaypointsCommand extends Command {
                 args.get();
             }
             IWaypoint[] waypoints = tag != null
-                    ? ForWaypoints.getWaypointsByTag(this.baritone, tag)
-                    : ForWaypoints.getWaypoints(this.baritone);
+                    ? ForWaypoints.getWaypointsByTag(baritone, tag)
+                    : ForWaypoints.getWaypoints(baritone);
             if (waypoints.length > 0) {
                 args.requireMax(1);
                 Paginator.paginate(
@@ -128,11 +128,11 @@ public class WaypointsCommand extends Command {
             }
             String name = args.hasAny() ? args.getString() : "";
             BetterBlockPos pos = args.hasAny()
-                    ? args.getDatatypePost(RelativeBlockPos.INSTANCE, ctx.feetPos())
-                    : ctx.feetPos();
+                    ? args.getDatatypePost(RelativeBlockPos.INSTANCE, baritone.getPlayerContext().feetPos())
+                    : baritone.getPlayerContext().feetPos();
             args.requireMax(0);
             IWaypoint waypoint = new Waypoint(name, tag, pos);
-            ForWaypoints.waypoints(this.baritone).addWaypoint(waypoint);
+            ForWaypoints.waypoints(baritone).addWaypoint(waypoint);
             BaseText component = new LiteralText("Waypoint added: ");
             component.setStyle(component.getStyle().withFormatting(Formatting.GRAY));
             component.append(toComponent.apply(waypoint, Action.INFO));
@@ -140,9 +140,9 @@ public class WaypointsCommand extends Command {
         } else if (action == Action.CLEAR) {
             args.requireMax(1);
             IWaypoint.Tag tag = IWaypoint.Tag.getByName(args.getString());
-            IWaypoint[] waypoints = ForWaypoints.getWaypointsByTag(this.baritone, tag);
+            IWaypoint[] waypoints = ForWaypoints.getWaypointsByTag(baritone, tag);
             for (IWaypoint waypoint : waypoints) {
-                ForWaypoints.waypoints(this.baritone).removeWaypoint(waypoint);
+                ForWaypoints.waypoints(baritone).removeWaypoint(waypoint);
             }
             logDirect(String.format("Cleared %d waypoints", waypoints.length));
         } else {
@@ -226,7 +226,7 @@ public class WaypointsCommand extends Command {
                     logDirect(goalComponent);
                     logDirect(backComponent);
                 } else if (action == Action.DELETE) {
-                    ForWaypoints.waypoints(this.baritone).removeWaypoint(waypoint);
+                    ForWaypoints.waypoints(baritone).removeWaypoint(waypoint);
                     logDirect("That waypoint has successfully been deleted");
                 } else if (action == Action.GOAL) {
                     Goal goal = new GoalBlock(waypoint.getLocation());

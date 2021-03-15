@@ -38,17 +38,17 @@ public class BuildCommand extends Command {
 
     private static final File schematicsDir = FabricLoader.getInstance().getGameDir().resolve("schematics").toFile();
 
-    public BuildCommand(IBaritone baritone) {
-        super(baritone, "build");
+    public BuildCommand() {
+        super("build");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         File file = args.getDatatypePost(RelativeFile.INSTANCE, schematicsDir).getAbsoluteFile();
         if (FilenameUtils.getExtension(file.getAbsolutePath()).isEmpty()) {
             file = new File(file.getAbsolutePath() + "." + Baritone.settings().schematicFallbackExtension.value);
         }
-        BetterBlockPos origin = ctx.feetPos();
+        BetterBlockPos origin = baritone.getPlayerContext().feetPos();
         BetterBlockPos buildOrigin;
         if (args.hasAny()) {
             args.requireMax(3);

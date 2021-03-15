@@ -37,6 +37,7 @@ import baritone.api.utils.BlockOptionalMeta;
 import baritone.api.utils.BlockOptionalMetaLookup;
 import baritone.utils.IRenderer;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -50,11 +51,11 @@ import java.util.stream.Stream;
 
 public class SelCommand extends Command {
 
-    private ISelectionManager manager = BaritoneProvider.getSelectionManager();
+    private final ISelectionManager manager = BaritoneProvider.getSelectionManager();
     private BetterBlockPos pos1 = null;
 
-    public SelCommand(IBaritone baritone) {
-        super(baritone, "sel", "selection", "s");
+    public SelCommand() {
+        super("sel", "selection", "s");
         // FIXME this will big crash on servers
         BaritoneProvider.extraRenderers.add(event -> {
             if (!Baritone.settings().renderSelectionCorners.value || pos1 == null) {
@@ -71,7 +72,7 @@ public class SelCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         Action action = Action.getByName(args.getString());
         if (action == null) {
             throw new CommandInvalidTypeException(args.consumed(), "an action");
@@ -80,7 +81,8 @@ public class SelCommand extends Command {
             if (action == Action.POS2 && pos1 == null) {
                 throw new CommandInvalidStateException("Set pos1 first before using pos2");
             }
-            BetterBlockPos playerPos = ((ServerPlayerEntity) ctx.entity()).getCameraEntity() != null ? BetterBlockPos.from(((ServerPlayerEntity) ctx.entity()).getCameraEntity().getBlockPos()) : ctx.feetPos();
+            LivingEntity entity = baritone.getPlayerContext().entity();
+            BetterBlockPos playerPos = entity instanceof ServerPlayerEntity && ((ServerPlayerEntity) entity).getCameraEntity() != null ? BetterBlockPos.from(((ServerPlayerEntity) entity).getCameraEntity().getBlockPos()) : baritone.getPlayerContext().feetPos();
             BetterBlockPos pos = args.hasAny() ? args.getDatatypePost(RelativeBlockPos.INSTANCE, playerPos) : playerPos;
             args.requireMax(0);
             if (action == Action.POS1) {

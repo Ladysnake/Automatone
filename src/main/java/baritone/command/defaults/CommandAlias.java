@@ -30,26 +30,28 @@ public class CommandAlias extends Command {
     private final String shortDesc;
     public final String target;
 
-    public CommandAlias(IBaritone baritone, List<String> names, String shortDesc, String target) {
-        super(baritone, names.toArray(new String[0]));
+    public CommandAlias(List<String> names, String shortDesc, String target) {
+        super(names.toArray(new String[0]));
         this.shortDesc = shortDesc;
         this.target = target;
     }
 
-    public CommandAlias(IBaritone baritone, String name, String shortDesc, String target) {
-        super(baritone, name);
+    public CommandAlias(String name, String shortDesc, String target) {
+        super(name);
         this.shortDesc = shortDesc;
         this.target = target;
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) {
-        this.baritone.getCommandManager().execute(String.format("%s %s", target, args.rawRest()));
+    public void execute(String label, IArgConsumer args, IBaritone baritone) {
+        baritone.getCommandManager().execute(String.format("%s %s", target, args.rawRest()));
     }
 
     @Override
     public Stream<String> tabComplete(String label, IArgConsumer args) {
-        return this.baritone.getCommandManager().tabComplete(String.format("%s %s", target, args.rawRest()));
+        // FIXME
+        // return baritone.getCommandManager().tabComplete(String.format("%s %s", target, args.rawRest()));
+        return Stream.empty();
     }
 
     @Override

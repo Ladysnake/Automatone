@@ -28,12 +28,12 @@ import java.util.stream.Stream;
 
 public class ClickCommand extends Command {
 
-    public ClickCommand(IBaritone baritone) {
-        super(baritone, "click");
+    public ClickCommand() {
+        super("click");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         baritone.openClick();
         logDirect("aight dude");

@@ -29,14 +29,14 @@ import java.util.stream.Stream;
 
 public class RepackCommand extends Command {
 
-    public RepackCommand(IBaritone baritone) {
-        super(baritone, "repack", "rescan");
+    public RepackCommand() {
+        super("repack", "rescan");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
-        logDirect(String.format("Queued %d chunks for repacking", WorldScanner.INSTANCE.repack(ctx)));
+        logDirect(String.format("Queued %d chunks for repacking", WorldScanner.INSTANCE.repack(baritone.getPlayerContext())));
     }
 
     @Override

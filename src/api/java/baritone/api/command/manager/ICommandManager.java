@@ -24,6 +24,7 @@ import baritone.api.command.registry.Registry;
 import net.minecraft.util.Pair;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 /**
@@ -32,15 +33,24 @@ import java.util.stream.Stream;
  */
 public interface ICommandManager {
 
-    IBaritone getBaritone();
-
-    Registry<ICommand> getRegistry();
+    Registry<ICommand> registry = new Registry<>();
 
     /**
      * @param name The command name to search for.
      * @return The command, if found.
      */
-    ICommand getCommand(String name);
+    static ICommand getCommand(String name) {
+        for (ICommand command : registry.entries) {
+            if (command.getNames().contains(name.toLowerCase(Locale.ROOT))) {
+                return command;
+            }
+        }
+        return null;
+    }
+
+    IBaritone getBaritone();
+
+    Registry<ICommand> getRegistry();
 
     boolean execute(String string);
 

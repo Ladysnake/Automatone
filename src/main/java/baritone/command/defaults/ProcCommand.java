@@ -32,12 +32,12 @@ import java.util.stream.Stream;
 
 public class ProcCommand extends Command {
 
-    public ProcCommand(IBaritone baritone) {
-        super(baritone, "proc");
+    public ProcCommand() {
+        super("proc");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         IPathingControlManager pathingControlManager = baritone.getPathingControlManager();
         IBaritoneProcess process = pathingControlManager.mostRecentInControl().orElse(null);

@@ -28,12 +28,12 @@ import java.util.stream.Stream;
 
 public class GcCommand extends Command {
 
-    public GcCommand(IBaritone baritone) {
-        super(baritone, "gc");
+    public GcCommand() {
+        super("gc");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         System.gc();
         logDirect("ok called System.gc()");

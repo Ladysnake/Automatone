@@ -22,6 +22,7 @@ import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
 import baritone.api.pathing.goals.GoalXZ;
+import baritone.api.utils.IEntityContext;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,13 +30,14 @@ import java.util.stream.Stream;
 
 public class ThisWayCommand extends Command {
 
-    public ThisWayCommand(IBaritone baritone) {
-        super(baritone, "thisway", "forward");
+    public ThisWayCommand() {
+        super("thisway", "forward");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireExactly(1);
+        IEntityContext ctx = baritone.getPlayerContext();
         GoalXZ goal = GoalXZ.fromDirection(
                 ctx.feetPosAsVec(),
                 ctx.entity().headYaw,

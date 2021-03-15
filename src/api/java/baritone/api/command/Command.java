@@ -39,9 +39,6 @@ import java.util.stream.Stream;
  */
 public abstract class Command implements ICommand {
 
-    protected IBaritone baritone;
-    protected IEntityContext ctx;
-
     /**
      * The names of this command. This is what you put after the command prefix.
      */
@@ -52,12 +49,10 @@ public abstract class Command implements ICommand {
      *
      * @param names The names of this command. This is what you put after the command prefix.
      */
-    protected Command(IBaritone baritone, String... names) {
+    protected Command(String... names) {
         this.names = Collections.unmodifiableList(Stream.of(names)
                 .map(s -> s.toLowerCase(Locale.US))
                 .collect(Collectors.toList()));
-        this.baritone = baritone;
-        this.ctx = baritone.getPlayerContext();
     }
 
     @Override

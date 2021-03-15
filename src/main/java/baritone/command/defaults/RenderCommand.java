@@ -30,16 +30,16 @@ import java.util.stream.Stream;
 
 public class RenderCommand extends Command {
 
-    public RenderCommand(IBaritone baritone) {
-        super(baritone, "render");
+    public RenderCommand() {
+        super("render");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         MinecraftClient mc = MinecraftClient.getInstance();
         mc.execute(() -> {
-            BetterBlockPos origin = ctx.feetPos();
+            BetterBlockPos origin = baritone.getPlayerContext().feetPos();
             int renderDistance = (mc.options.viewDistance + 1) * 16;
             mc.worldRenderer.scheduleBlockRenders(
                     origin.x - renderDistance,

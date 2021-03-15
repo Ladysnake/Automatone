@@ -32,12 +32,12 @@ import java.util.stream.Stream;
 
 public class MineCommand extends Command {
 
-    public MineCommand(IBaritone baritone) {
-        super(baritone, "mine");
+    public MineCommand() {
+        super("mine");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         int quantity = args.getAsOrDefault(Integer.class, 0);
         args.requireMin(1);
         List<BlockOptionalMeta> boms = new ArrayList<>();

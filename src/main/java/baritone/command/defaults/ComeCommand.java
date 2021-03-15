@@ -35,19 +35,19 @@ import java.util.stream.Stream;
 
 public class ComeCommand extends Command {
 
-    public ComeCommand(IBaritone baritone) {
-        super(baritone, "come");
+    public ComeCommand() {
+        super("come");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
-        List<Entity> entities = ((ServerWorld) ctx.world()).getEntitiesByType(EntityType.HUSK, e -> true);
+        List<Entity> entities = ((ServerWorld) baritone.getPlayerContext().world()).getEntitiesByType(EntityType.HUSK, e -> true);
         if (entities.isEmpty()) {
             throw new CommandInvalidStateException("no entity found");
         }
         LivingEntity entity = (LivingEntity) entities.get(0);
-        BaritoneAPI.getProvider().getBaritone(entity).getCustomGoalProcess().setGoalAndPath(new GoalBlock(ctx.entity().getBlockPos()));
+        BaritoneAPI.getProvider().getBaritone(entity).getCustomGoalProcess().setGoalAndPath(new GoalBlock(baritone.getPlayerContext().entity().getBlockPos()));
         logDirect("Coming");
     }
 

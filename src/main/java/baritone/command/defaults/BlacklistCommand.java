@@ -30,12 +30,12 @@ import java.util.stream.Stream;
 
 public class BlacklistCommand extends Command {
 
-    public BlacklistCommand(IBaritone baritone) {
-        super(baritone, "blacklist");
+    public BlacklistCommand() {
+        super("blacklist");
     }
 
     @Override
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         IGetToBlockProcess proc = baritone.getGetToBlockProcess();
         if (!proc.isActive()) {
