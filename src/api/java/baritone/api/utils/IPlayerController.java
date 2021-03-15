@@ -17,10 +17,14 @@
 
 package baritone.api.utils;
 
+import dev.onyxstudios.cca.api.v3.component.ComponentKey;
+import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
+import dev.onyxstudios.cca.api.v3.component.TransientComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import baritone.api.BaritoneAPI;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -31,7 +35,8 @@ import net.minecraft.world.World;
  * @author Brady
  * @since 12/14/2018
  */
-public interface IPlayerController {
+public interface IPlayerController extends TransientComponent {
+    ComponentKey<IPlayerController> KEY = ComponentRegistry.getOrCreate(new Identifier("automatone", "controller"), IPlayerController.class);
 
     boolean hasBrokenBlock();
 

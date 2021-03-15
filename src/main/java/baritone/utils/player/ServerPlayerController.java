@@ -18,6 +18,7 @@
 package baritone.utils.player;
 
 import baritone.api.utils.Helper;
+import baritone.api.utils.IPlayerController;
 import baritone.utils.accessor.IServerPlayerInteractionManager;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -33,12 +34,12 @@ import net.minecraft.world.World;
 
 
 /**
- * Implementation of {@link baritone.api.utils.IPlayerController} that chains to the primary player controller's methods
+ * Implementation of {@link IPlayerController} that chains to the primary player controller's methods
  *
  * @author Brady
  * @since 12/14/2018
  */
-public class ServerPlayerController implements baritone.api.utils.IPlayerController, Helper {
+public class ServerPlayerController implements IPlayerController, Helper {
     private final ServerPlayerEntity player;
 
     public ServerPlayerController(ServerPlayerEntity player) {

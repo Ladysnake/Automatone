@@ -25,7 +25,8 @@
   ],
   "custom": {
     "cardinal-components": [
-      "automatone:core"
+      "automatone:core",
+      "automatone:controller"
     ]
   }
 }

@@ -33,13 +33,9 @@ import org.jetbrains.annotations.Nullable;
 public class EntityContext implements IEntityContext {
 
     private final LivingEntity entity;
-    private final IPlayerController controller;
 
     public EntityContext(LivingEntity entity) {
         this.entity = entity;
-        this.controller = entity instanceof ServerPlayerEntity
-                ? new ServerPlayerController((ServerPlayerEntity) entity)
-                : DummyEntityController.INSTANCE;
     }
 
     @Override
@@ -54,7 +50,7 @@ public class EntityContext implements IEntityContext {
 
     @Override
     public IPlayerController playerController() {
-        return this.controller;
+        return IPlayerController.KEY.get(this.entity);
     }
 
     @Override
