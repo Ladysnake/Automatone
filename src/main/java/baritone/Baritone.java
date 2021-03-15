@@ -20,6 +20,7 @@ package baritone;
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
+import baritone.api.cache.IWorldProvider;
 import baritone.api.event.listener.IEventBus;
 import baritone.api.process.IBaritoneProcess;
 import baritone.api.utils.IEntityContext;
@@ -30,8 +31,11 @@ import baritone.event.GameEventHandler;
 import baritone.process.*;
 import baritone.utils.*;
 import baritone.command.manager.BaritoneCommandManager;
+import baritone.utils.player.EntityContext;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -91,11 +95,11 @@ public class Baritone implements IBaritone {
 
     public BlockStateInterface bsi;
 
-    Baritone(IEntityContext player, WorldProvider worldProvider) {
+    public Baritone(LivingEntity player) {
         this.gameEventHandler = new GameEventHandler(this);
 
         // Define this before behaviors try and get it, or else it will be null and the builds will fail!
-        this.playerContext = player;
+        this.playerContext = new EntityContext(player);
 
         {
             // the Behavior constructor calls baritone.registerBehavior(this) so this populates the behaviors arraylist
@@ -118,7 +122,7 @@ public class Baritone implements IBaritone {
             this.pathingControlManager.registerProcess(farmProcess = new FarmProcess(this));
         }
 
-        this.worldProvider = worldProvider;
+        this.worldProvider = (WorldProvider) IWorldProvider.KEY.get(player.world);
         this.commandManager = new BaritoneCommandManager(this);
         this.execControlProcess = DefaultCommands.controlCommands.registerProcess(this);
     }

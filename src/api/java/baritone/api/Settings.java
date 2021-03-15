@@ -39,6 +39,7 @@ import java.util.function.Consumer;
  *
  * @author leijurv
  */
+// TODO split into global and per-entity settings
 public final class Settings {
 
     /**
@@ -608,7 +609,7 @@ public final class Settings {
     /**
      * Move without having to force the client-sided rotations
      */
-    public final Setting<Boolean> freeLook = new Setting<>(true);
+    public final Setting<Boolean> freeLook = new Setting<>(false);
 
     /**
      * Will cause some minor behavioral differences to ensure that Baritone works on anticheats.

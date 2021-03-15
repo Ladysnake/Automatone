@@ -87,7 +87,7 @@ public final class AutomatoneClient implements ClientModInitializer {
             double z = buf.readDouble();
             float yaw = (float)(buf.readByte() * 360) / 256.0F;
             float pitch = (float)(buf.readByte() * 360) / 256.0F;
-            GameProfile profile = readShellProfile(buf);
+            GameProfile profile = readProfile(buf);
             client.execute(() -> {
                 ClientWorld world = MinecraftClient.getInstance().world;
                 assert world != null;
@@ -103,7 +103,7 @@ public final class AutomatoneClient implements ClientModInitializer {
         });
         ClientPlayNetworking.registerGlobalReceiver(AutomatoneNetworking.PLAYER_PROFILE_SET, (client, handler, buf, responseSender) -> {
             int entityId = buf.readVarInt();
-            GameProfile profile = readShellProfile(buf);
+            GameProfile profile = readProfile(buf);
             client.execute(() -> {
                         Entity entity = Objects.requireNonNull(client.world).getEntityById(entityId);
                         if (entity instanceof AutomatoneFakePlayer) {
@@ -115,7 +115,7 @@ public final class AutomatoneClient implements ClientModInitializer {
     }
 
     @Nullable
-    private static GameProfile readShellProfile(PacketByteBuf buf) {
+    private static GameProfile readProfile(PacketByteBuf buf) {
         boolean hasProfile = buf.readBoolean();
         return hasProfile ? new GameProfile(buf.readUuid(), buf.readString()) : null;
     }

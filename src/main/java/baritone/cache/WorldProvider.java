@@ -20,6 +20,7 @@ package baritone.cache;
 import baritone.api.cache.IWorldProvider;
 import baritone.api.utils.Helper;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.WorldSavePath;
@@ -97,5 +98,15 @@ public class WorldProvider implements IWorldProvider, Helper {
         if (world != null) {
             world.onClose();
         }
+    }
+
+    @Override
+    public void readFromNbt(CompoundTag tag) {
+        // NO-OP
+    }
+
+    @Override
+    public void writeToNbt(CompoundTag tag) {
+        // NO-OP
     }
 }

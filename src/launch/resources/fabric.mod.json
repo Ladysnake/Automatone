@@ -5,7 +5,7 @@
   "name": "Automatone",
   "description": "A serverside Minecraft pathfinder bot.",
   "entrypoints": {
-    "main": ["baritone.BaritoneProvider::INSTANCE", "baritone.Automatone"],
+    "main": ["baritone.Automatone"],
     "client": ["baritone.AutomatoneClient"],
     "cardinal-components": ["baritone.AutomatoneComponents"]
   },

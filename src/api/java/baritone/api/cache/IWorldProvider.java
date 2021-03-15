@@ -17,11 +17,18 @@
 
 package baritone.api.cache;
 
+import dev.onyxstudios.cca.api.v3.component.Component;
+import dev.onyxstudios.cca.api.v3.component.ComponentKey;
+import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
+import dev.onyxstudios.cca.api.v3.component.TransientComponent;
+import net.minecraft.util.Identifier;
+
 /**
  * @author Brady
  * @since 9/24/2018
  */
-public interface IWorldProvider {
+public interface IWorldProvider extends Component {
+    ComponentKey<IWorldProvider> KEY = ComponentRegistry.getOrCreate(new Identifier("automatone", "world_data_provider"), IWorldProvider.class);
 
     /**
      * Returns the data of the currently loaded world

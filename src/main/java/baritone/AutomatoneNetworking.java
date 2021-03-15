@@ -26,6 +26,7 @@ import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import org.jetbrains.annotations.Nullable;
 
 public final class AutomatoneNetworking {
     public static final Identifier FAKE_PLAYER_SPAWN = new Identifier("automatone", "fake_player_spawn");
@@ -42,14 +43,14 @@ public final class AutomatoneNetworking {
         buf.writeDouble(player.getZ());
         buf.writeByte((byte)((int)(player.yaw * 256.0F / 360.0F)));
         buf.writeByte((byte)((int)(player.pitch * 256.0F / 360.0F)));
-        writePlayerProfile(player, buf);
+        writeProfile(buf, player.getOwnerProfile());
         return new CustomPayloadS2CPacket(FAKE_PLAYER_SPAWN, buf);
     }
 
     public static void sendFakePlayerUpdatePacket(FakeServerPlayerEntity player) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeVarInt(player.getEntityId());
-        writePlayerProfile(player, buf);
+        writeProfile(buf, player.getOwnerProfile());
 
         CustomPayloadS2CPacket packet = new CustomPayloadS2CPacket(PLAYER_PROFILE_SET, buf);
 
@@ -58,13 +59,12 @@ public final class AutomatoneNetworking {
         }
     }
 
-    private static void writePlayerProfile(FakeServerPlayerEntity player, PacketByteBuf buf) {
-        GameProfile ownerProfile = player.getOwnerProfile();
-        buf.writeBoolean(ownerProfile != null);
+    private static void writeProfile(PacketByteBuf buf, @Nullable GameProfile profile) {
+        buf.writeBoolean(profile != null);
 
-        if (ownerProfile != null) {
-            buf.writeUuid(ownerProfile.getId());
-            buf.writeString(ownerProfile.getName());
+        if (profile != null) {
+            buf.writeUuid(profile.getId());
+            buf.writeString(profile.getName());
         }
     }
 }

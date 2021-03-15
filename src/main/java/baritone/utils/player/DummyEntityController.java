@@ -27,6 +27,9 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 
+/**
+ * A stubbed controller implementation for entities that cannot break or place blocks
+ */
 public class DummyEntityController implements IPlayerController {
     public static final DummyEntityController INSTANCE = new DummyEntityController();
 

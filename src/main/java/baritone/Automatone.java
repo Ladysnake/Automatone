@@ -17,10 +17,15 @@
 
 package baritone;
 
+import baritone.api.cache.IWorldProvider;
+import baritone.cache.WorldProvider;
 import baritone.command.defaults.DefaultCommands;
 import baritone.entity.fakeplayer.FakeServerPlayerEntity;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
@@ -49,6 +54,12 @@ public final class Automatone implements ModInitializer {
     @Override
     public void onInitialize() {
         DefaultCommands.registerAll();
-        Registry.register(Registry.ENTITY_TYPE, new Identifier("automatone", "fake_player"), FAKE_PLAYER);
+        Registry.register(Registry.ENTITY_TYPE, id("fake_player"), FAKE_PLAYER);
+        ServerWorldEvents.LOAD.register((minecraftServer, serverWorld) ->
+                ((WorldProvider) IWorldProvider.KEY.get(serverWorld)).initWorld(serverWorld));
+        ServerWorldEvents.UNLOAD.register((minecraftServer, serverWorld) ->
+                ((WorldProvider) IWorldProvider.KEY.get(serverWorld)).closeWorld());
+        ServerTickEvents.START_SERVER_TICK.register(minecraftServer -> BaritoneProvider.INSTANCE.tick());
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> BaritoneProvider.INSTANCE.shutdown());
     }
 }

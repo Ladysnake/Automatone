@@ -19,6 +19,7 @@ package baritone;
 
 import baritone.api.IBaritone;
 import baritone.api.IBaritoneProvider;
+import baritone.api.cache.IWorldProvider;
 import baritone.api.cache.IWorldScanner;
 import baritone.api.command.ICommandSystem;
 import baritone.api.schematic.ISchematicSystem;
@@ -43,35 +44,23 @@ import java.util.*;
  * @author Brady
  * @since 9/29/2018
  */
-public final class BaritoneProvider implements IBaritoneProvider, ModInitializer {
+public final class BaritoneProvider implements IBaritoneProvider {
 
     public static final BaritoneProvider INSTANCE = new BaritoneProvider();
 
     private final Set<IBaritone> activeBaritones = new ReferenceOpenHashSet<>();
-    private final Map<RegistryKey<World>, WorldProvider> worldProviders = new HashMap<>();
 
-    public WorldProvider getWorldProvider(RegistryKey<World> id) {
-        return this.worldProviders.get(id);
+    public void tick() {
+        for (IBaritone baritone : this.activeBaritones) {
+            baritone.getGameEventHandler().onTickServer();
+        }
     }
 
-    public void onInitialize() {
-        ServerTickEvents.START_SERVER_TICK.register(minecraftServer -> {
-            for (IBaritone baritone : this.activeBaritones) {
-                baritone.getGameEventHandler().onTickServer();
-            }
-        });
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            for (Iterator<IBaritone> iterator = this.activeBaritones.iterator(); iterator.hasNext(); ) {
-                ((PathingBehavior) iterator.next().getPathingBehavior()).shutdown();
-                iterator.remove();
-            }
-        });
-        ServerWorldEvents.LOAD.register((minecraftServer, serverWorld) ->
-                worldProviders.computeIfAbsent(serverWorld.getRegistryKey(), r -> new WorldProvider()).initWorld(serverWorld));
-        ServerWorldEvents.UNLOAD.register((minecraftServer, serverWorld) -> {
-            WorldProvider worldProvider = this.worldProviders.remove(serverWorld.getRegistryKey());
-            if (worldProvider != null) worldProvider.closeWorld();
-        });
+    public void shutdown() {
+        for (Iterator<IBaritone> iterator = this.activeBaritones.iterator(); iterator.hasNext(); ) {
+            ((PathingBehavior) iterator.next().getPathingBehavior()).shutdown();
+            iterator.remove();
+        }
     }
 
     public void activate(IBaritone baritone) {
