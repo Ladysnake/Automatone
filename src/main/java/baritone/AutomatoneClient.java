@@ -19,6 +19,7 @@ package baritone;
 
 import baritone.api.IBaritone;
 import baritone.api.event.events.RenderEvent;
+import baritone.api.selection.ISelectionManager;
 import baritone.behavior.PathingBehavior;
 import baritone.command.defaults.DefaultCommands;
 import baritone.entity.fakeplayer.AutomatoneFakePlayer;
@@ -57,7 +58,7 @@ public final class AutomatoneClient implements ClientModInitializer {
             return;
         }
 
-        SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), BaritoneProvider.getSelectionManager().getSelections());
+        SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), ISelectionManager.KEY.get(mc.world).getSelections());
 
         // FIXME BOOM REACHING ACROSS SIDES
         Collection<IBaritone> activeBaritones = BaritoneProvider.INSTANCE.getActiveBaritones();

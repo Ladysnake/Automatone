@@ -21,32 +21,23 @@ import baritone.api.IBaritone;
 import baritone.api.IBaritoneProvider;
 import baritone.api.cache.IWorldScanner;
 import baritone.api.command.ICommandSystem;
-import baritone.api.event.events.RenderEvent;
 import baritone.api.schematic.ISchematicSystem;
-import baritone.api.selection.ISelectionManager;
 import baritone.behavior.PathingBehavior;
 import baritone.cache.WorldProvider;
 import baritone.cache.WorldScanner;
 import baritone.command.CommandSystem;
-import baritone.selection.SelectionManager;
-import baritone.selection.SelectionRenderer;
-import baritone.utils.GuiClick;
-import baritone.utils.PathRenderer;
 import baritone.utils.schematic.SchematicSystem;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
 
 /**
  * @author Brady
@@ -54,16 +45,10 @@ import java.util.function.Consumer;
  */
 public final class BaritoneProvider implements IBaritoneProvider, ModInitializer {
 
-    private static final SelectionManager selectionManager = new SelectionManager();
     public static final BaritoneProvider INSTANCE = new BaritoneProvider();
 
     private final Set<IBaritone> activeBaritones = new ReferenceOpenHashSet<>();
     private final Map<RegistryKey<World>, WorldProvider> worldProviders = new HashMap<>();
-
-    // FIXME bad singleton
-    public static ISelectionManager getSelectionManager() {
-        return selectionManager;
-    }
 
     public WorldProvider getWorldProvider(RegistryKey<World> id) {
         return this.worldProviders.get(id);

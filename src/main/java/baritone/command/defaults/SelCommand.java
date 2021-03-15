@@ -53,7 +53,6 @@ import java.util.stream.Stream;
 
 public class SelCommand extends Command {
 
-    private final ISelectionManager manager = BaritoneProvider.getSelectionManager();
     private BetterBlockPos pos1 = null;
 
     public SelCommand() {
@@ -66,6 +65,7 @@ public class SelCommand extends Command {
         if (action == null) {
             throw new CommandInvalidTypeException(args.consumed(), "an action");
         }
+        ISelectionManager manager = ISelectionManager.KEY.get(baritone.getPlayerContext().world());
         if (action == Action.POS1 || action == Action.POS2) {
             if (action == Action.POS2 && pos1 == null) {
                 throw new CommandInvalidStateException("Set pos1 first before using pos2");
