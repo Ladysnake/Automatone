@@ -17,11 +17,14 @@
 
 package baritone.command.defaults;
 
+import baritone.Automatone;
 import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidStateException;
+import baritone.utils.GuiClick;
+import net.minecraft.client.MinecraftClient;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,10 +39,12 @@ public class ClickCommand extends Command {
     @Override
     public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
-        if (baritone.getPlayerContext().world().getServer().isDedicated()) {
-            throw new CommandInvalidStateException("Click only works on integrated servers right now");
+        try {
+            // TODO obviously make it work on dedi
+            MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().openScreen(new GuiClick(baritone.getPlayerContext().entity().getUuid())));
+        } catch (Throwable t) {
+            Automatone.LOGGER.error("Failed to open click screen, is this a dedicated server?", t);
         }
-        baritone.openClick();
         logDirect("aight dude");
     }
 

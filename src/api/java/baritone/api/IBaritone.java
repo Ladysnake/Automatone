@@ -132,11 +132,6 @@ public interface IBaritone extends Component {
     ICommandManager getCommandManager();
 
     /**
-     * Open click
-     */
-    void openClick();
-
-    /**
      * Make this baritone start ticking and running processes
      */
     void activate();

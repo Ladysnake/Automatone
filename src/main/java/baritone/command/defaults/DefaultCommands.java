@@ -35,7 +35,9 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -93,7 +95,6 @@ public final class DefaultCommands {
                 new BlacklistCommand(),
                 new FindCommand(),
                 new MineCommand(),
-                new ClickCommand(),
                 new SurfaceCommand(),
                 new ThisWayCommand(),
                 new WaypointsCommand(),
@@ -101,6 +102,9 @@ public final class DefaultCommands {
                 new CommandAlias("home", "Path to your home waypoint", "waypoints goto home"),
                 selCommand
         ));
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
+            commands.add(new ClickCommand());
+        }
         for (ICommand command : commands) {
             ICommandManager.registry.register(command);
         }
