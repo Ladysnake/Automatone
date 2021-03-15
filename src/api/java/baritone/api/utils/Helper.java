@@ -51,7 +51,7 @@ public interface Helper {
         // Inner text component
         final Calendar now = Calendar.getInstance();
         final boolean xd = now.get(Calendar.MONTH) == Calendar.APRIL && now.get(Calendar.DAY_OF_MONTH) <= 3;
-        BaseText baritone = new LiteralText(xd ? "Baritoe" : BaritoneAPI.getSettings().shortBaritonePrefix.value ? "B" : "Baritone");
+        BaseText baritone = new LiteralText(xd ? "Automatoe" : BaritoneAPI.getSettings().shortBaritonePrefix.value ? "A" : "Automatone");
         baritone.setStyle(baritone.getStyle().withFormatting(Formatting.LIGHT_PURPLE));
 
         // Outer brackets
