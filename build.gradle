@@ -16,22 +16,13 @@
  */
 import net.fabricmc.loom.LoomGradlePlugin
 
+plugins {
+    id 'fabric-loom' version '0.6-SNAPSHOT'
+    id 'maven-publish'
+}
+
 group 'ladysnake'
 version '0.1.0'
-
-buildscript {
-    repositories {
-        jcenter()
-        maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
-        }
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath "net.fabricmc:fabric-loom:0.5-SNAPSHOT"
-    }
-}
 
 import baritone.gradle.task.CreateDistTask
 import baritone.gradle.task.ProguardTask
@@ -108,6 +99,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:0.31.0+1.16"
     modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${cca_version}"
     modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${cca_version}"
+    modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-world:${cca_version}"
 
     testImplementation 'junit:junit:4.12'
 
