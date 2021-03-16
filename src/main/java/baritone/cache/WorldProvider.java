@@ -39,7 +39,7 @@ import java.util.Map;
  * @author Brady
  * @since 8/4/2018
  */
-public class WorldProvider implements IWorldProvider, Helper {
+public class WorldProvider implements IWorldProvider {
 
     private static final Map<Path, WorldData> worldCache = new HashMap<>(); // this is how the bots have the same cached world
 

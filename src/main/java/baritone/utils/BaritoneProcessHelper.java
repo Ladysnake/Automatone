@@ -21,8 +21,10 @@ import baritone.Baritone;
 import baritone.api.process.IBaritoneProcess;
 import baritone.api.utils.Helper;
 import baritone.api.utils.IEntityContext;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
-public abstract class BaritoneProcessHelper implements IBaritoneProcess, Helper {
+public abstract class BaritoneProcessHelper implements IBaritoneProcess {
 
     protected final Baritone baritone;
     protected final IEntityContext ctx;
@@ -35,5 +37,17 @@ public abstract class BaritoneProcessHelper implements IBaritoneProcess, Helper 
     @Override
     public boolean isTemporary() {
         return false;
+    }
+
+    public void logDirect(Text... components) {
+        baritone.logDirect(components);
+    }
+
+    public void logDirect(String message, Formatting color) {
+        baritone.logDirect(message, color);
+    }
+
+    public void logDirect(String message) {
+        baritone.logDirect(message);
     }
 }

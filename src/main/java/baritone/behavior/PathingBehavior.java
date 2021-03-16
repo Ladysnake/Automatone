@@ -45,7 +45,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public final class PathingBehavior extends Behavior implements IPathingBehavior, Helper {
+public final class PathingBehavior extends Behavior implements IPathingBehavior {
 
     private PathExecutor current;
     private PathExecutor next;
@@ -510,7 +510,7 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
                     } else {
                         //throw new IllegalStateException("I have no idea what to do with this path");
                         // no point in throwing an exception here, and it gets it stuck with inProgress being not null
-                        logDirect("Warning: PathingBehaivor illegal state! Discarding invalid path!");
+                        baritone.logDirect("Warning: PathingBehavior illegal state! Discarding invalid path!");
                     }
                 }
                 if (talkAboutIt && current != null && current.getPath() != null) {
@@ -537,6 +537,10 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
         }
         Favoring favoring = new Favoring(context.getBaritone().getPlayerContext(), previous, context);
         return new AStarPathFinder(start.getX(), start.getY(), start.getZ(), transformed, favoring, context);
+    }
+
+    private void logDebug(String message) {
+        this.baritone.logDebug(message);
     }
 
     public void writeToPacket(PacketByteBuf buf) {

@@ -26,6 +26,7 @@ import baritone.api.pathing.goals.GoalBlock;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.IEntityContext;
 import net.minecraft.block.AirBlock;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +39,7 @@ public class SurfaceCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         IEntityContext ctx = baritone.getPlayerContext();
         final BetterBlockPos playerPos = ctx.feetPos();
         final int surfaceLevel = ctx.world().getSeaLevel();
@@ -47,7 +48,7 @@ public class SurfaceCommand extends Command {
         // Ensure this command will not run if you are above the surface level and the block above you is air
         // As this would imply that your are already on the open surface
         if (playerPos.getY() > surfaceLevel && ctx.world().getBlockState(playerPos.up()).getBlock() instanceof AirBlock) {
-            logDirect("Already at surface");
+            logDirect(source, "Already at surface");
             return;
         }
 
@@ -58,12 +59,12 @@ public class SurfaceCommand extends Command {
 
             if (!(ctx.world().getBlockState(newPos).getBlock() instanceof AirBlock) && newPos.getY() > playerPos.getY()) {
                 Goal goal = new GoalBlock(newPos.up());
-                logDirect(String.format("Going to: %s", goal.toString()));
+                logDirect(source, String.format("Going to: %s", goal.toString()));
                 baritone.getCustomGoalProcess().setGoalAndPath(goal);
                 return;
             }
         }
-        logDirect("No higher location found");
+        logDirect(source, "No higher location found");
     }
 
     @Override

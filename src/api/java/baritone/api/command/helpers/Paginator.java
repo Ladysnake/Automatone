@@ -21,6 +21,7 @@ import baritone.api.utils.Helper;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidTypeException;
 import baritone.api.command.argument.IArgConsumer;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
@@ -28,13 +29,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-public class Paginator<E> implements Helper {
+public class Paginator<E> {
 
+    private final ServerCommandSource source;
     public final List<E> entries;
     public int pageSize = 8;
     public int page = 1;
 
-    public Paginator(List<E> entries) {
+    public Paginator(ServerCommandSource source, List<E> entries) {
+        this.source = source;
         this.entries = entries;
     }
 
@@ -60,9 +63,9 @@ public class Paginator<E> implements Helper {
         int offset = (page - 1) * pageSize;
         for (int i = offset; i < offset + pageSize; i++) {
             if (i < entries.size()) {
-                logDirect(transform.apply(entries.get(i)));
+                source.sendFeedback(transform.apply(entries.get(i)), false);
             } else {
-                logDirect("--", Formatting.DARK_GRAY);
+                source.sendFeedback(new LiteralText("--").formatted(Formatting.DARK_GRAY), false);
             }
         }
         boolean hasPrevPage = commandPrefix != null && validPage(page - 1);
@@ -101,11 +104,7 @@ public class Paginator<E> implements Helper {
         pagerComponent.append(" | ");
         pagerComponent.append(nextPageComponent);
         pagerComponent.append(String.format(" %d/%d", page, getMaxPage()));
-        logDirect(pagerComponent);
-    }
-
-    public void display(Function<E, Text> transform) {
-        display(transform, null);
+        source.sendFeedback(pagerComponent, false);
     }
 
     public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Runnable pre, Function<T, Text> transform, String commandPrefix) throws CommandException {
@@ -131,47 +130,47 @@ public class Paginator<E> implements Helper {
         pagi.display(transform, commandPrefix);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Runnable pre, Function<T, Text> transform, String commandPrefix) throws CommandException {
-        paginate(consumer, new Paginator<>(elems), pre, transform, commandPrefix);
+    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Runnable pre, Function<T, Text> transform, String commandPrefix, ServerCommandSource source) throws CommandException {
+        paginate(consumer, new Paginator<>(source, elems), pre, transform, commandPrefix);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, T[] elems, Runnable pre, Function<T, Text> transform, String commandPrefix) throws CommandException {
-        paginate(consumer, Arrays.asList(elems), pre, transform, commandPrefix);
+    public static <T> void paginate(IArgConsumer consumer, T[] elems, Runnable pre, Function<T, Text> transform, String commandPrefix, ServerCommandSource source) throws CommandException {
+        paginate(consumer, Arrays.asList(elems), pre, transform, commandPrefix, source);
     }
 
     public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Function<T, Text> transform, String commandPrefix) throws CommandException {
         paginate(consumer, pagi, null, transform, commandPrefix);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Function<T, Text> transform, String commandPrefix) throws CommandException {
-        paginate(consumer, new Paginator<>(elems), null, transform, commandPrefix);
+    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Function<T, Text> transform, String commandPrefix, ServerCommandSource source) throws CommandException {
+        paginate(consumer, new Paginator<>(source, elems), null, transform, commandPrefix);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, T[] elems, Function<T, Text> transform, String commandPrefix) throws CommandException {
-        paginate(consumer, Arrays.asList(elems), null, transform, commandPrefix);
+    public static <T> void paginate(IArgConsumer consumer, T[] elems, Function<T, Text> transform, String commandPrefix, ServerCommandSource source) throws CommandException {
+        paginate(consumer, Arrays.asList(elems), null, transform, commandPrefix, source);
     }
 
     public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Runnable pre, Function<T, Text> transform) throws CommandException {
         paginate(consumer, pagi, pre, transform, null);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Runnable pre, Function<T, Text> transform) throws CommandException {
-        paginate(consumer, new Paginator<>(elems), pre, transform, null);
+    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Runnable pre, Function<T, Text> transform, ServerCommandSource source) throws CommandException {
+        paginate(consumer, new Paginator<>(source, elems), pre, transform, null);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, T[] elems, Runnable pre, Function<T, Text> transform) throws CommandException {
-        paginate(consumer, Arrays.asList(elems), pre, transform, null);
+    public static <T> void paginate(IArgConsumer consumer, T[] elems, Runnable pre, Function<T, Text> transform, ServerCommandSource source) throws CommandException {
+        paginate(consumer, Arrays.asList(elems), pre, transform, null, source);
     }
 
     public static <T> void paginate(IArgConsumer consumer, Paginator<T> pagi, Function<T, Text> transform) throws CommandException {
         paginate(consumer, pagi, null, transform, null);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Function<T, Text> transform) throws CommandException {
-        paginate(consumer, new Paginator<>(elems), null, transform, null);
+    public static <T> void paginate(IArgConsumer consumer, List<T> elems, Function<T, Text> transform, ServerCommandSource source) throws CommandException {
+        paginate(consumer, new Paginator<>(source, elems), null, transform, null);
     }
 
-    public static <T> void paginate(IArgConsumer consumer, T[] elems, Function<T, Text> transform) throws CommandException {
-        paginate(consumer, Arrays.asList(elems), null, transform, null);
+    public static <T> void paginate(IArgConsumer consumer, T[] elems, Function<T, Text> transform, ServerCommandSource source) throws CommandException {
+        paginate(consumer, Arrays.asList(elems), null, transform, null, source);
     }
 }

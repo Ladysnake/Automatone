@@ -24,6 +24,7 @@ import baritone.api.command.exception.CommandException;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalStrictDirection;
 import baritone.api.utils.IEntityContext;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
@@ -38,7 +39,7 @@ public class TunnelCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(3);
         IEntityContext ctx = baritone.getPlayerContext();
 
@@ -49,7 +50,7 @@ public class TunnelCommand extends Command {
             int depth = Integer.parseInt(args.getArgs().get(2).getValue());
 
             if (width < 1 || height < 2 || depth < 1 || height > 255) {
-                logDirect("Width and depth must at least be 1 block; Height must at least be 2 blocks, and cannot be greater than the build limit.");
+                logDirect(source, "Width and depth must at least be 1 block; Height must at least be 2 blocks, and cannot be greater than the build limit.");
                 cont = false;
             }
 
@@ -80,7 +81,7 @@ public class TunnelCommand extends Command {
                     default:
                         throw new IllegalStateException("Unexpected value: " + enumFacing);
                 }
-                logDirect(String.format("Creating a tunnel %s block(s) high, %s block(s) wide, and %s block(s) deep", height + 1, width + 1, depth));
+                logDirect(source, String.format("Creating a tunnel %s block(s) high, %s block(s) wide, and %s block(s) deep", height + 1, width + 1, depth));
                 baritone.getBuilderProcess().clearArea(corner1, corner2);
             }
         } else {
@@ -89,7 +90,7 @@ public class TunnelCommand extends Command {
                     ctx.entity().getHorizontalFacing()
             );
             baritone.getCustomGoalProcess().setGoalAndPath(goal);
-            logDirect(String.format("Goal: %s", goal.toString()));
+            logDirect(source, String.format("Goal: %s", goal.toString()));
         }
     }
 

@@ -27,7 +27,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 
-public class BlockPlaceHelper implements Helper {
+public class BlockPlaceHelper {
 
     private final IEntityContext ctx;
     private int rightClickTimer;

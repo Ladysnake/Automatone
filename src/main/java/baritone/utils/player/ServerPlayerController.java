@@ -39,7 +39,7 @@ import net.minecraft.world.World;
  * @author Brady
  * @since 12/14/2018
  */
-public class ServerPlayerController implements IPlayerController, Helper {
+public class ServerPlayerController implements IPlayerController {
     private final ServerPlayerEntity player;
 
     public ServerPlayerController(ServerPlayerEntity player) {

@@ -21,6 +21,7 @@ import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,10 +34,10 @@ public class GcCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         System.gc();
-        logDirect("ok called System.gc()");
+        logDirect(source, "ok called System.gc()");
     }
 
     @Override

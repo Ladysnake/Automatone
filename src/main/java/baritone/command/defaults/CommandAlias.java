@@ -21,6 +21,7 @@ import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,8 +45,8 @@ public class CommandAlias extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
-        baritone.getCommandManager().execute(String.format("%s %s", target, args.rawRest()));
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+        baritone.getCommandManager().execute(source, String.format("%s %s", target, args.rawRest()));
     }
 
     @Override

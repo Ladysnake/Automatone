@@ -125,7 +125,7 @@ class Path extends PathBase {
             }
         }
         // this is no longer called from bestPathSoFar, now it's in postprocessing
-        Helper.HELPER.logDebug("Movement became impossible during calculation " + src + " " + dest + " " + dest.subtract(src));
+        context.baritone.logDebug("Movement became impossible during calculation " + src + " " + dest + " " + dest.subtract(src));
         return null;
     }
 

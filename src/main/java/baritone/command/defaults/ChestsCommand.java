@@ -25,6 +25,7 @@ import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidStateException;
 import baritone.api.utils.BetterBlockPos;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.math.BlockPos;
 
@@ -41,7 +42,7 @@ public class ChestsCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         Set<Map.Entry<BlockPos, IRememberedInventory>> entries =
                 baritone.getPlayerContext().worldData().getContainerMemory().getRememberedInventories().entrySet();
@@ -52,11 +53,11 @@ public class ChestsCommand extends Command {
             // betterblockpos has censoring
             BetterBlockPos pos = new BetterBlockPos(entry.getKey());
             IRememberedInventory inv = entry.getValue();
-            logDirect(pos.toString());
+            logDirect(source, pos.toString());
             for (ItemStack item : inv.getContents()) {
                 MutableText component = (MutableText) item.getName();
                 component.append(String.format(" x %d", item.getCount()));
-                logDirect(component);
+                logDirect(source, component);
             }
         }
     }

@@ -17,15 +17,9 @@
 
 package baritone.api.command.exception;
 
-import baritone.api.command.ICommand;
-import baritone.api.command.argument.ICommandArgument;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-
-import java.util.List;
-
-import static baritone.api.utils.Helper.HELPER;
 
 public class CommandNotFoundException extends CommandException {
 

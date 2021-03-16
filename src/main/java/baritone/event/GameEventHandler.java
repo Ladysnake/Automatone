@@ -31,7 +31,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Brady
  * @since 7/31/2018
  */
-public final class GameEventHandler implements IEventBus, Helper {
+public final class GameEventHandler implements IEventBus {
 
     private final Baritone baritone;
 

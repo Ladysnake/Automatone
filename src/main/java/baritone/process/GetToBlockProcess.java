@@ -149,7 +149,7 @@ public final class GetToBlockProcess extends BaritoneProcessHelper implements IG
                     break outer;
             }
         }
-        logDebug("Blacklisting unreachable locations " + newBlacklist);
+        baritone.logDebug("Blacklisting unreachable locations " + newBlacklist);
         blacklist.addAll(newBlacklist);
         return !newBlacklist.isEmpty();
     }

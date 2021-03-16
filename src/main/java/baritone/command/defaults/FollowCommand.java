@@ -30,6 +30,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -44,7 +45,7 @@ public class FollowCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMin(1);
         FollowGroup group;
         FollowList list;
@@ -72,19 +73,19 @@ public class FollowCommand extends Command {
             );
         }
         if (group != null) {
-            logDirect(String.format("Following all %s", group.name().toLowerCase(Locale.US)));
+            logDirect(source, String.format("Following all %s", group.name().toLowerCase(Locale.US)));
         } else {
-            logDirect("Following these types of entities:");
+            logDirect(source, "Following these types of entities:");
             if (classes.isEmpty()) {
                 entities.stream()
                         .map(Entity::toString)
-                        .forEach(this::logDirect);
+                        .forEach(message -> logDirect(source, message));
             } else {
                 classes.stream()
                         .map(Registry.ENTITY_TYPE::getId)
                         .map(Objects::requireNonNull)
                         .map(Identifier::toString)
-                        .forEach(this::logDirect);
+                        .forEach(message -> logDirect(source, message));
             }
         }
     }

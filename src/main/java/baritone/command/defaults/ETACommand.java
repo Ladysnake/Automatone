@@ -25,6 +25,7 @@ import baritone.api.command.Command;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidStateException;
 import baritone.api.command.argument.IArgConsumer;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +38,7 @@ public class ETACommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         IPathingControlManager pathingControlManager = baritone.getPathingControlManager();
         IBaritoneProcess process = pathingControlManager.mostRecentInControl().orElse(null);
@@ -45,7 +46,7 @@ public class ETACommand extends Command {
             throw new CommandInvalidStateException("No process in control");
         }
         IPathingBehavior pathingBehavior = baritone.getPathingBehavior();
-        logDirect(String.format(
+        logDirect(source, String.format(
                 "Next segment: %.2f\n" +
                 "Goal: %.2f",
                 pathingBehavior.ticksRemainingInSegment().orElse(-1.0),

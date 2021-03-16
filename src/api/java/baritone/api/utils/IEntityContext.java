@@ -21,8 +21,11 @@ import baritone.api.cache.IWorldData;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
@@ -108,5 +111,10 @@ public interface IEntityContext {
 
     default boolean isLookingAt(BlockPos pos) {
         return getSelectedBlock().equals(Optional.of(pos));
+    }
+
+    default void logDebug(String message) {
+        LivingEntity entity = entity();
+        if (entity instanceof PlayerEntity) ((PlayerEntity) entity).sendMessage(new LiteralText(message).formatted(Formatting.GRAY), false);
     }
 }

@@ -32,7 +32,11 @@ import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.movements.*;
 import baritone.utils.BlockStateInterface;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -47,7 +51,7 @@ import static baritone.api.pathing.movement.MovementStatus.*;
  *
  * @author leijurv
  */
-public class PathExecutor implements IPathExecutor, Helper {
+public class PathExecutor implements IPathExecutor {
 
     private static final double MAX_MAX_DIST_FROM_PATH = 3;
     private static final double MAX_DIST_FROM_PATH = 2;
@@ -83,6 +87,10 @@ public class PathExecutor implements IPathExecutor, Helper {
         this.ctx = behavior.ctx;
         this.path = path;
         this.pathPosition = 0;
+    }
+
+    public void logDebug(String message) {
+        this.ctx.logDebug(message);
     }
 
     /**

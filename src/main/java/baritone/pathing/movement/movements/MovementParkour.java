@@ -232,7 +232,7 @@ public class MovementParkour extends Movement {
         }
         if (ctx.feetPos().y < src.y) {
             // we have fallen
-            logDebug("sorry");
+            baritone.logDebug("sorry");
             return state.setStatus(MovementStatus.UNREACHABLE);
         }
         if (dist >= 4 || ascend) {

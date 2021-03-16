@@ -23,6 +23,7 @@ import baritone.api.command.Command;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.argument.IArgConsumer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +36,7 @@ public class RenderCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         MinecraftClient mc = MinecraftClient.getInstance();
         mc.execute(() -> {
@@ -49,7 +50,7 @@ public class RenderCommand extends Command {
                     255,
                     origin.z + renderDistance
             );
-            logDirect("Done");
+            logDirect(source, "Done");
         });
     }
 

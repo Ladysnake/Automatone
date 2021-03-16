@@ -324,7 +324,7 @@ public class MovementTraverse extends Movement {
         boolean isTheBridgeBlockThere = MovementHelper.canWalkOn(ctx, positionToPlace) || ladder;
         BlockPos feet = ctx.feetPos();
         if (feet.getY() != dest.getY() && !ladder) {
-            logDebug("Wrong Y coordinate");
+            baritone.logDebug("Wrong Y coordinate");
             if (feet.getY() < dest.getY()) {
                 return state.setInput(Input.JUMP, true);
             }
@@ -357,7 +357,7 @@ public class MovementTraverse extends Movement {
             if (feet.getY() != dest.getY() && ladder && (destDown.getBlock() == Blocks.VINE || destDown.getBlock() == Blocks.LADDER)) {
                 against = destDown.getBlock() == Blocks.VINE ? MovementPillar.getAgainst(new CalculationContext(baritone), dest.down()) : dest.offset(destDown.get(LadderBlock.FACING).getOpposite());
                 if (against == null) {
-                    logDirect("Unable to climb vines. Consider disabling allowVines.");
+                    baritone.logDirect("Unable to climb vines. Consider disabling allowVines.");
                     return state.setStatus(MovementStatus.UNREACHABLE);
                 }
             }

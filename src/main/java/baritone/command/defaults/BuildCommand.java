@@ -27,6 +27,7 @@ import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidStateException;
 import baritone.api.utils.BetterBlockPos;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.command.ServerCommandSource;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -43,7 +44,7 @@ public class BuildCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         File file = args.getDatatypePost(RelativeFile.INSTANCE, schematicsDir).getAbsoluteFile();
         if (FilenameUtils.getExtension(file.getAbsolutePath()).isEmpty()) {
             file = new File(file.getAbsolutePath() + "." + Baritone.settings().schematicFallbackExtension.value);
@@ -61,7 +62,7 @@ public class BuildCommand extends Command {
         if (!success) {
             throw new CommandInvalidStateException("Couldn't load the schematic. Make sure to use the FULL file name, including the extension (e.g. blah.schematic).");
         }
-        logDirect(String.format("Successfully loaded schematic for building\nOrigin: %s", buildOrigin));
+        logDirect(source, String.format("Successfully loaded schematic for building\nOrigin: %s", buildOrigin));
     }
 
     @Override

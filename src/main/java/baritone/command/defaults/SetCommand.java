@@ -27,6 +27,7 @@ import baritone.api.command.exception.CommandInvalidTypeException;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.helpers.Paginator;
 import baritone.api.command.helpers.TabCompleteHelper;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -49,11 +50,11 @@ public class SetCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         String arg = args.hasAny() ? args.getString().toLowerCase(Locale.US) : "list";
         if (Arrays.asList("s", "save").contains(arg)) {
             SettingsUtil.save(Baritone.settings());
-            logDirect("Settings saved");
+            logDirect(source, "Settings saved");
             return;
         }
         boolean viewModified = Arrays.asList("m", "mod", "modified").contains(arg);
@@ -70,9 +71,9 @@ public class SetCommand extends Command {
                             .collect(Collectors.toList());
             Paginator.paginate(
                     args,
-                    new Paginator<>(toPaginate),
+                    new Paginator<>(source, toPaginate),
                     () -> logDirect(
-                            !search.isEmpty()
+                            source, !search.isEmpty()
                                     ? String.format("All %ssettings containing the string '%s':", viewModified ? "modified " : "", search)
                                     : String.format("All %ssettings:", viewModified ? "modified " : "")
                     ),
@@ -107,12 +108,12 @@ public class SetCommand extends Command {
         boolean doingSomething = resetting || toggling;
         if (resetting) {
             if (!args.hasAny()) {
-                logDirect("Please specify 'all' as an argument to reset to confirm you'd really like to do this");
-                logDirect("ALL settings will be reset. Use the 'set modified' or 'modified' commands to see what will be reset.");
-                logDirect("Specify a setting name instead of 'all' to only reset one setting");
+                logDirect(source, "Please specify 'all' as an argument to reset to confirm you'd really like to do this");
+                logDirect(source, "ALL settings will be reset. Use the 'set modified' or 'modified' commands to see what will be reset.");
+                logDirect(source, "Specify a setting name instead of 'all' to only reset one setting");
             } else if (args.peekString().equalsIgnoreCase("all")) {
                 SettingsUtil.modifiedSettings(Baritone.settings()).forEach(Settings.Setting::reset);
-                logDirect("All settings have been reset to their default values");
+                logDirect(source, "All settings have been reset to their default values");
                 SettingsUtil.save(Baritone.settings());
                 return;
             }
@@ -129,8 +130,8 @@ public class SetCommand extends Command {
             throw new CommandInvalidTypeException(args.consumed(), "a valid setting");
         }
         if (!doingSomething && !args.hasAny()) {
-            logDirect(String.format("Value of setting %s:", setting.getName()));
-            logDirect(settingValueToString(setting));
+            logDirect(source, String.format("Value of setting %s:", setting.getName()));
+            logDirect(source, settingValueToString(setting));
         } else {
             String oldValue = settingValueToString(setting);
             if (resetting) {
@@ -141,7 +142,7 @@ public class SetCommand extends Command {
                 }
                 @SuppressWarnings("unchecked") Settings.Setting<Boolean> toggle = (Settings.Setting<Boolean>) setting;
                 toggle.value ^= true;
-                logDirect(String.format(
+                logDirect(source, String.format(
                         "Toggled setting %s to %s",
                         toggle.getName(),
                         toggle.value
@@ -156,7 +157,7 @@ public class SetCommand extends Command {
                 }
             }
             if (!toggling) {
-                logDirect(String.format(
+                logDirect(source, String.format(
                         "Successfully %s %s to %s",
                         resetting ? "reset" : "set",
                         setting.getName(),
@@ -174,7 +175,7 @@ public class SetCommand extends Command {
                             ClickEvent.Action.RUN_COMMAND,
                             FORCE_COMMAND_PREFIX + String.format("set %s %s", setting.getName(), oldValue)
                     )));
-            logDirect(oldValueComponent);
+            logDirect(source, oldValueComponent);
         }
         SettingsUtil.save(Baritone.settings());
     }

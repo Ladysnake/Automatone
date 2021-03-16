@@ -23,13 +23,13 @@ import baritone.api.command.ICommand;
 import baritone.api.command.argument.ICommandArgument;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandUnhandledException;
-import baritone.api.command.exception.ICommandException;
 import baritone.api.command.helpers.TabCompleteHelper;
 import baritone.api.command.manager.ICommandManager;
 import baritone.api.command.registry.Registry;
 import baritone.command.argument.ArgConsumer;
 import baritone.command.argument.CommandArguments;
 import baritone.command.defaults.DefaultCommands;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Pair;
 
 import java.util.List;
@@ -65,15 +65,15 @@ public class BaritoneCommandManager implements ICommandManager {
     }
 
     @Override
-    public boolean execute(String string) throws CommandException {
-        return this.execute(expand(string));
+    public boolean execute(ServerCommandSource source, String string) throws CommandException {
+        return this.execute(source, expand(string));
     }
 
     @Override
-    public boolean execute(Pair<String, List<ICommandArgument>> expanded) throws CommandException {
+    public boolean execute(ServerCommandSource source, Pair<String, List<ICommandArgument>> expanded) throws CommandException {
         ExecutionWrapper execution = this.from(expanded);
         if (execution != null) {
-            execution.execute();
+            execution.execute(source);
         }
         return execution != null;
     }
@@ -130,9 +130,9 @@ public class BaritoneCommandManager implements ICommandManager {
             this.args = args;
         }
 
-        private void execute() throws CommandException {
+        private void execute(ServerCommandSource source) throws CommandException {
             try {
-                this.command.execute(this.label, this.args, baritone);
+                this.command.execute(source, this.label, this.args, baritone);
             } catch (Throwable t) {
                 // Create a handleable exception, wrap if needed
                 throw t instanceof CommandException

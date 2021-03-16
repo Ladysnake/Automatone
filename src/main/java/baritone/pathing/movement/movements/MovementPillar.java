@@ -211,7 +211,7 @@ public class MovementPillar extends Movement {
         boolean blockIsThere = MovementHelper.canWalkOn(ctx, src) || ladder;
         if (ladder) {
             if (ctx.entity().getWidth() > 1) {
-                logDirect("Large entities cannot climb ladders :/");
+                baritone.logDirect("Large entities cannot climb ladders :/");
                 return state.setStatus(MovementStatus.UNREACHABLE);
             }
             BlockPos supportingBlock;

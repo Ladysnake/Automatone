@@ -26,11 +26,19 @@ import baritone.api.process.*;
 import baritone.api.utils.IEntityContext;
 import baritone.api.utils.IInputOverrideHandler;
 import baritone.api.command.manager.ICommandManager;
-import dev.onyxstudios.cca.api.v3.component.Component;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * @author Brady
@@ -131,6 +139,64 @@ public interface IBaritone extends AutoSyncedComponent {
      * @see ICommandManager
      */
     ICommandManager getCommandManager();
+
+    /**
+     * Send a message to chat only if chatDebug is on
+     *
+     * @param message The message to display in chat
+     */
+    default void logDebug(String message) {
+        if (!BaritoneAPI.getSettings().chatDebug.value) {
+            //System.out.println("Suppressed debug message:");
+            //System.out.println(message);
+            return;
+        }
+        // We won't log debug chat into toasts
+        // Because only a madman would want that extreme spam -_-
+        logDirect(message);
+    }
+
+    /**
+     * Send components to chat with the [Automatone] prefix
+     *
+     * @param components The components to send
+     */
+    default void logDirect(Text... components) {
+        BaseText component = new LiteralText("");
+        // If we are not logging as a Toast
+        // Append the prefix to the base component line
+        component.append(BaritoneAPI.getPrefix());
+        component.append(new LiteralText(" "));
+        Arrays.asList(components).forEach(component::append);
+        IEntityContext playerContext = this.getPlayerContext();
+        LivingEntity entity = playerContext.entity();
+        if (entity instanceof PlayerEntity) ((PlayerEntity) entity).sendMessage(component, false);
+    }
+
+    /**
+     * Send a message to chat regardless of chatDebug (should only be used for critically important messages, or as a
+     * direct response to a chat command)
+     *
+     * @param message The message to display in chat
+     * @param color   The color to print that message in
+     */
+    default void logDirect(String message, Formatting color) {
+        Stream.of(message.split("\n")).forEach(line -> {
+            BaseText component = new LiteralText(line.replace("\t", "    "));
+            component.setStyle(component.getStyle().withFormatting(color));
+            logDirect(component);
+        });
+    }
+
+    /**
+     * Send a message to chat regardless of chatDebug (should only be used for critically important messages, or as a
+     * direct response to a chat command)
+     *
+     * @param message The message to display in chat
+     */
+    default void logDirect(String message) {
+        logDirect(message, Formatting.GRAY);
+    }
 
     /**
      * Make this baritone start ticking and running processes

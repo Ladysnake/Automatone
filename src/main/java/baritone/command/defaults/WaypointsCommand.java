@@ -32,6 +32,7 @@ import baritone.api.command.exception.CommandInvalidTypeException;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.helpers.Paginator;
 import baritone.api.command.helpers.TabCompleteHelper;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
@@ -49,7 +50,7 @@ public class WaypointsCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         Action action = args.hasAny() ? Action.getByName(args.getString()) : Action.LIST;
         if (action == null) {
             throw new CommandInvalidTypeException(args.consumed(), "an action");
@@ -100,7 +101,7 @@ public class WaypointsCommand extends Command {
                         args,
                         waypoints,
                         () -> logDirect(
-                                tag != null
+                                source, tag != null
                                         ? String.format("All waypoints by tag %s:", tag.name())
                                         : "All waypoints:"
                         ),
@@ -111,7 +112,7 @@ public class WaypointsCommand extends Command {
                                 label,
                                 action.names[0],
                                 tag != null ? " " + tag.getName() : ""
-                        )
+                        ), source
                 );
             } else {
                 args.requireMax(0);
@@ -136,7 +137,7 @@ public class WaypointsCommand extends Command {
             BaseText component = new LiteralText("Waypoint added: ");
             component.setStyle(component.getStyle().withFormatting(Formatting.GRAY));
             component.append(toComponent.apply(waypoint, Action.INFO));
-            logDirect(component);
+            logDirect(source, component);
         } else if (action == Action.CLEAR) {
             args.requireMax(1);
             IWaypoint.Tag tag = IWaypoint.Tag.getByName(args.getString());
@@ -144,7 +145,7 @@ public class WaypointsCommand extends Command {
             for (IWaypoint waypoint : waypoints) {
                 ForWaypoints.waypoints(baritone).removeWaypoint(waypoint);
             }
-            logDirect(String.format("Cleared %d waypoints", waypoints.length));
+            logDirect(source, String.format("Cleared %d waypoints", waypoints.length));
         } else {
             IWaypoint[] waypoints = args.getDatatypeFor(ForWaypoints.INSTANCE);
             IWaypoint waypoint = null;
@@ -177,7 +178,7 @@ public class WaypointsCommand extends Command {
                 Paginator.paginate(
                         args,
                         waypoints,
-                        () -> logDirect("Multiple waypoints were found:"),
+                        () -> logDirect(source, "Multiple waypoints were found:"),
                         transform,
                         String.format(
                                 "%s%s %s %s",
@@ -185,12 +186,12 @@ public class WaypointsCommand extends Command {
                                 label,
                                 action.names[0],
                                 args.consumedString()
-                        )
+                        ), source
                 );
             } else {
                 if (action == Action.INFO) {
-                    logDirect(transform.apply(waypoint));
-                    logDirect(String.format("Position: %s", waypoint.getLocation()));
+                    logDirect(source, transform.apply(waypoint));
+                    logDirect(source, String.format("Position: %s", waypoint.getLocation()));
                     BaseText deleteComponent = new LiteralText("Click to delete this waypoint");
                     deleteComponent.setStyle(deleteComponent.getStyle().withClickEvent(new ClickEvent(
                             ClickEvent.Action.RUN_COMMAND,
@@ -222,20 +223,20 @@ public class WaypointsCommand extends Command {
                                     label
                             )
                     )));
-                    logDirect(deleteComponent);
-                    logDirect(goalComponent);
-                    logDirect(backComponent);
+                    logDirect(source, deleteComponent);
+                    logDirect(source, goalComponent);
+                    logDirect(source, backComponent);
                 } else if (action == Action.DELETE) {
                     ForWaypoints.waypoints(baritone).removeWaypoint(waypoint);
-                    logDirect("That waypoint has successfully been deleted");
+                    logDirect(source, "That waypoint has successfully been deleted");
                 } else if (action == Action.GOAL) {
                     Goal goal = new GoalBlock(waypoint.getLocation());
                     baritone.getCustomGoalProcess().setGoal(goal);
-                    logDirect(String.format("Goal: %s", goal));
+                    logDirect(source, String.format("Goal: %s", goal));
                 } else if (action == Action.GOTO) {
                     Goal goal = new GoalBlock(waypoint.getLocation());
                     baritone.getCustomGoalProcess().setGoalAndPath(goal);
-                    logDirect(String.format("Going to: %s", goal));
+                    logDirect(source, String.format("Going to: %s", goal));
                 }
             }
         }

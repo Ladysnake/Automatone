@@ -23,6 +23,7 @@ import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidStateException;
 import baritone.api.process.IGetToBlockProcess;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,14 +36,14 @@ public class BlacklistCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         IGetToBlockProcess proc = baritone.getGetToBlockProcess();
         if (!proc.isActive()) {
             throw new CommandInvalidStateException("GetToBlockProcess is not currently active");
         }
         if (proc.blacklistClosest()) {
-            logDirect("Blacklisted closest instances");
+            logDirect(source, "Blacklisted closest instances");
         } else {
             throw new CommandInvalidStateException("No known locations, unable to blacklist");
         }

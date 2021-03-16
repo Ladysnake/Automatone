@@ -53,7 +53,7 @@ import static org.lwjgl.opengl.GL11.*;
  * @author Brady
  * @since 8/9/2018
  */
-public final class PathRenderer implements IRenderer, Helper {
+public final class PathRenderer implements IRenderer {
 
     private static final Identifier TEXTURE_BEACON_BEAM = new Identifier("textures/entity/beacon_beam.png");
 

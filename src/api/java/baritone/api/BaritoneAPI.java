@@ -18,6 +18,12 @@
 package baritone.api;
 
 import baritone.api.utils.SettingsUtil;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+
+import java.util.Calendar;
 
 /**
  * Exposes the {@link IBaritoneProvider} instance and the {@link Settings} instance for API usage.
@@ -47,5 +53,22 @@ public final class BaritoneAPI {
 
     public static Settings getSettings() {
         return BaritoneAPI.settings;
+    }
+
+    public static Text getPrefix() {
+        // Inner text component
+        final Calendar now = Calendar.getInstance();
+        final boolean xd = now.get(Calendar.MONTH) == Calendar.APRIL && now.get(Calendar.DAY_OF_MONTH) <= 3;
+        BaseText baritone = new LiteralText(xd ? "Automatoe" : getSettings().shortBaritonePrefix.value ? "A" : "Automatone");
+        baritone.setStyle(baritone.getStyle().withFormatting(Formatting.LIGHT_PURPLE));
+
+        // Outer brackets
+        BaseText prefix = new LiteralText("");
+        prefix.setStyle(baritone.getStyle().withFormatting(Formatting.DARK_PURPLE));
+        prefix.append("[");
+        prefix.append(baritone);
+        prefix.append("]");
+
+        return prefix;
     }
 }

@@ -31,7 +31,7 @@ import java.util.Objects;
  * @author Brady
  * @since 8/25/2018
  */
-public final class BlockBreakHelper implements Helper {
+public final class BlockBreakHelper {
 
     private final IEntityContext ctx;
     private @Nullable BlockPos lastPos;

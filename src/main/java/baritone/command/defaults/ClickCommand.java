@@ -22,9 +22,9 @@ import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
-import baritone.api.command.exception.CommandInvalidStateException;
 import baritone.utils.GuiClick;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -37,7 +37,7 @@ public class ClickCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         try {
             // TODO obviously make it work on dedi
@@ -45,7 +45,7 @@ public class ClickCommand extends Command {
         } catch (Throwable t) {
             Automatone.LOGGER.error("Failed to open click screen, is this a dedicated server?", t);
         }
-        logDirect("aight dude");
+        logDirect(source, "aight dude");
     }
 
     @Override

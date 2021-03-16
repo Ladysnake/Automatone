@@ -24,6 +24,7 @@ import baritone.api.command.datatypes.BlockById;
 import baritone.api.command.datatypes.ForBlockOptionalMeta;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.argument.IArgConsumer;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,14 +38,14 @@ public class MineCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         int quantity = args.getAsOrDefault(Integer.class, 0);
         args.requireMin(1);
         List<BlockOptionalMeta> boms = new ArrayList<>();
         while (args.hasAny()) {
             boms.add(args.getDatatypeFor(ForBlockOptionalMeta.INSTANCE));
         }
-        logDirect(String.format("Mining %s", boms.toString()));
+        logDirect(source, String.format("Mining %s", boms.toString()));
         baritone.getMineProcess().mine(quantity, boms.toArray(new BlockOptionalMeta[0]));
     }
 

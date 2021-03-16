@@ -101,7 +101,7 @@ public final class ExploreProcess extends BaritoneProcessHelper implements IExpl
         }
         Goal[] closestUncached = closestUncachedChunks(explorationOrigin, filter);
         if (closestUncached == null) {
-            logDebug("awaiting region load from disk");
+            baritone.logDebug("awaiting region load from disk");
             return new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
         }
         return new PathingCommand(new GoalComposite(closestUncached), PathingCommandType.FORCE_REVALIDATE_GOAL_AND_PATH);

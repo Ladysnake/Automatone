@@ -17,9 +17,7 @@
 
 package baritone.command.defaults;
 
-import baritone.AutomatoneClient;
 import baritone.Baritone;
-import baritone.BaritoneProvider;
 import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
@@ -40,6 +38,7 @@ import baritone.api.utils.BlockOptionalMetaLookup;
 import baritone.utils.IRenderer;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -60,7 +59,7 @@ public class SelCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         Action action = Action.getByName(args.getString());
         if (action == null) {
             throw new CommandInvalidTypeException(args.consumed(), "an action");
@@ -76,28 +75,28 @@ public class SelCommand extends Command {
             args.requireMax(0);
             if (action == Action.POS1) {
                 pos1 = pos;
-                logDirect("Position 1 has been set");
+                logDirect(source, "Position 1 has been set");
             } else {
                 manager.addSelection(pos1, pos);
                 pos1 = null;
-                logDirect("Selection added");
+                logDirect(source, "Selection added");
             }
         } else if (action == Action.CLEAR) {
             args.requireMax(0);
             pos1 = null;
-            logDirect(String.format("Removed %d selections", manager.removeAllSelections().length));
+            logDirect(source, String.format("Removed %d selections", manager.removeAllSelections().length));
         } else if (action == Action.UNDO) {
             args.requireMax(0);
             if (pos1 != null) {
                 pos1 = null;
-                logDirect("Undid pos1");
+                logDirect(source, "Undid pos1");
             } else {
                 ISelection[] selections = manager.getSelections();
                 if (selections.length < 1) {
                     throw new CommandInvalidStateException("Nothing to undo!");
                 } else {
                     pos1 = manager.removeSelection(selections[selections.length - 1]).pos1();
-                    logDirect("Undid pos2");
+                    logDirect(source, "Undid pos2");
                 }
             }
         } else if (action == Action.SET || action == Action.WALLS || action == Action.SHELL || action == Action.CLEARAREA || action == Action.REPLACE) {
@@ -145,7 +144,7 @@ public class SelCommand extends Command {
                 composite.put(schematic, min.x - origin.x, min.y - origin.y, min.z - origin.z);
             }
             baritone.getBuilderProcess().build("Fill", composite, origin);
-            logDirect("Filling now");
+            logDirect(source, "Filling now");
         } else if (action == Action.EXPAND || action == Action.CONTRACT || action == Action.SHIFT) {
             args.requireExactly(3);
             TransformTarget transformTarget = TransformTarget.getByName(args.getString());
@@ -168,7 +167,7 @@ public class SelCommand extends Command {
                     manager.shift(selection, direction, blocks);
                 }
             }
-            logDirect(String.format("Transformed %d selections", selections.length));
+            logDirect(source, String.format("Transformed %d selections", selections.length));
         }
     }
 

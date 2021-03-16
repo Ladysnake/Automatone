@@ -26,7 +26,6 @@ import baritone.api.command.argument.ICommandArgument;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandNotEnoughArgumentsException;
 import baritone.api.command.manager.ICommandManager;
-import baritone.api.utils.Helper;
 import baritone.command.argument.ArgConsumer;
 import baritone.command.manager.BaritoneArgumentType;
 import baritone.command.manager.BaritoneCommandManager;
@@ -111,7 +110,7 @@ public final class DefaultCommands {
         CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> register(dispatcher)));
     }
 
-    private static void logRanCommand(String command, String rest) {
+    private static void logRanCommand(ServerCommandSource source, String command, String rest) {
         if (BaritoneAPI.getSettings().echoCommands.value) {
             String msg = command + rest;
             String toDisplay = BaritoneAPI.getSettings().censorRanCommands.value ? command + " ..." : msg;
@@ -126,20 +125,20 @@ public final class DefaultCommands {
                             ClickEvent.Action.RUN_COMMAND,
                             FORCE_COMMAND_PREFIX + msg
                     )));
-            Helper.HELPER.logDirect(component);
+            source.sendFeedback(component, false);
         }
     }
 
-    public static boolean runCommand(String msg, IBaritone baritone) throws CommandException {
+    public static boolean runCommand(ServerCommandSource source, String msg, IBaritone baritone) throws CommandException {
         if (msg.trim().equalsIgnoreCase("damn")) {
-            Helper.HELPER.logDirect("daniel");
+            source.sendFeedback(new LiteralText("daniel"), false);
             return false;
         } else if (msg.trim().equalsIgnoreCase("orderpizza")) {
             Automatone.LOGGER.fatal("No pizza :(");
             return false;
         }
         if (msg.isEmpty()) {
-            return runCommand("help", baritone);
+            return runCommand(source, "help", baritone);
         }
         Pair<String, List<ICommandArgument>> pair = BaritoneCommandManager.expand(msg);
         String command = pair.getLeft();
@@ -148,11 +147,11 @@ public final class DefaultCommands {
         if (!argc.hasAny()) {
             Settings.Setting<?> setting = BaritoneAPI.getSettings().byLowerName.get(command.toLowerCase(Locale.ROOT));
             if (setting != null) {
-                logRanCommand(command, rest);
+                logRanCommand(source, command, rest);
                 if (setting.getValueClass() == Boolean.class) {
-                    baritone.getCommandManager().execute(String.format("set toggle %s", setting.getName()));
+                    baritone.getCommandManager().execute(source, String.format("set toggle %s", setting.getName()));
                 } else {
-                    baritone.getCommandManager().execute(String.format("set %s", setting.getName()));
+                    baritone.getCommandManager().execute(source, String.format("set %s", setting.getName()));
                 }
                 return true;
             }
@@ -162,9 +161,9 @@ public final class DefaultCommands {
                     continue;
                 }
                 if (setting.getName().equalsIgnoreCase(pair.getLeft())) {
-                    logRanCommand(command, rest);
+                    logRanCommand(source, command, rest);
                     try {
-                        baritone.getCommandManager().execute(String.format("set %s %s", setting.getName(), argc.getString()));
+                        baritone.getCommandManager().execute(source, String.format("set %s %s", setting.getName(), argc.getString()));
                     } catch (CommandNotEnoughArgumentsException ignored) {
                     } // The operation is safe
                     return true;
@@ -174,24 +173,24 @@ public final class DefaultCommands {
 
         // If the command exists, then handle echoing the input
         if (ICommandManager.getCommand(pair.getLeft()) != null) {
-            logRanCommand(command, rest);
+            logRanCommand(source, command, rest);
         }
 
-        return baritone.getCommandManager().execute(pair);
+        return baritone.getCommandManager().execute(source, pair);
     }
 
     private static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("automatone")
                 .requires(s -> s.hasPermissionLevel(2))
                 .then(CommandManager.argument("command", BaritoneArgumentType.baritone()).executes(command ->
-                        runCommand(command.getSource().getEntityOrThrow(), BaritoneArgumentType.getCommand(command, "command"))))
+                        runCommand(command.getSource(), command.getSource().getEntityOrThrow(), BaritoneArgumentType.getCommand(command, "command"))))
         );
     }
 
-    private static int runCommand(Entity target, String command) throws CommandSyntaxException {
+    private static int runCommand(ServerCommandSource source, Entity target, String command) throws CommandSyntaxException {
         if (!(target instanceof LivingEntity)) throw EntityArgumentType.ENTITY_NOT_FOUND_EXCEPTION.create();
         try {
-            return runCommand(command, BaritoneAPI.getProvider().getBaritone((LivingEntity) target)) ? Command.SINGLE_SUCCESS : 0;
+            return runCommand(source, command, BaritoneAPI.getProvider().getBaritone((LivingEntity) target)) ? Command.SINGLE_SUCCESS : 0;
         } catch (baritone.api.command.exception.CommandException e) {
             throw BARITONE_COMMAND_FAILED_EXCEPTION.create(e.handle());
         }

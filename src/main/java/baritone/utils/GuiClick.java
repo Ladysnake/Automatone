@@ -18,10 +18,8 @@
 package baritone.utils;
 
 import baritone.Baritone;
-import baritone.BaritoneProvider;
-import baritone.api.selection.ISelectionManager;
+import baritone.api.BaritoneAPI;
 import baritone.api.utils.BetterBlockPos;
-import baritone.api.utils.Helper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -50,7 +48,7 @@ import java.util.UUID;
 import static baritone.api.command.IBaritoneChatControl.FORCE_COMMAND_PREFIX;
 import static org.lwjgl.opengl.GL11.*;
 
-public class GuiClick extends Screen implements Helper {
+public class GuiClick extends Screen {
 
     private final UUID callerUuid;
     private Matrix4f projectionViewMatrix;
@@ -103,14 +101,14 @@ public class GuiClick extends Screen implements Helper {
                     client.player.sendChatMessage("/automatone sel clear");
                     client.player.sendChatMessage(String.format("/automatone sel 1 %d %d %d", clickStart.getX(), clickStart.getY(), clickStart.getZ()));
                     client.player.sendChatMessage(String.format("/automatone sel 2 %d %d %d", currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));
-                    BaseText component = new LiteralText("Selection made! For usage: " + FORCE_COMMAND_PREFIX + "help sel");
+                    BaseText component = new LiteralText(BaritoneAPI.getPrefix() + " Selection made! For usage: " + FORCE_COMMAND_PREFIX + "help sel");
                     component.setStyle(component.getStyle()
                             .withFormatting(Formatting.WHITE)
                             .withClickEvent(new ClickEvent(
                                     ClickEvent.Action.RUN_COMMAND,
                                     FORCE_COMMAND_PREFIX + "sel"
                             )));
-                    Helper.HELPER.logDirect(component);
+                    client.inGameHud.getChatHud().addMessage(component);
                     clickStart = null;
                 } else {
                     client.player.sendChatMessage(String.format("/execute as %s run automatone goto %d %d %d", callerUuid, currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));

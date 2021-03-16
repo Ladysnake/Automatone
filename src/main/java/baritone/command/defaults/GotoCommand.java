@@ -28,6 +28,7 @@ import baritone.api.command.exception.CommandException;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.BlockOptionalMeta;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +41,7 @@ public class GotoCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         // If we have a numeric first argument, then parse arguments as coordinates.
         // Note: There is no reason to want to go where you're already at so there
         // is no need to handle the case of empty arguments.
@@ -48,7 +49,7 @@ public class GotoCommand extends Command {
             args.requireMax(3);
             BetterBlockPos origin = baritone.getPlayerContext().feetPos();
             Goal goal = args.getDatatypePost(RelativeGoal.INSTANCE, origin);
-            logDirect(String.format("Going to: %s", goal.toString()));
+            logDirect(source, String.format("Going to: %s", goal.toString()));
             baritone.getCustomGoalProcess().setGoalAndPath(goal);
             return;
         }

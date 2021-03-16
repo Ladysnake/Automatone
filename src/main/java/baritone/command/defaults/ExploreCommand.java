@@ -24,6 +24,7 @@ import baritone.api.command.datatypes.RelativeGoalXZ;
 import baritone.api.command.exception.CommandException;
 import baritone.api.pathing.goals.GoalXZ;
 import baritone.api.utils.BetterBlockPos;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +37,7 @@ public class ExploreCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         if (args.hasAny()) {
             args.requireExactly(2);
         } else {
@@ -47,7 +48,7 @@ public class ExploreCommand extends Command {
                 ? args.getDatatypePost(RelativeGoalXZ.INSTANCE, feetPos)
                 : new GoalXZ(feetPos);
         baritone.getExploreProcess().explore(goal.getX(), goal.getZ());
-        logDirect(String.format("Exploring from %s", goal.toString()));
+        logDirect(source, String.format("Exploring from %s", goal.toString()));
     }
 
     @Override

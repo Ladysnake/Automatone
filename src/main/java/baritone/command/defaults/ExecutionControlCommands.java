@@ -27,6 +27,7 @@ import baritone.api.command.manager.ICommandManager;
 import baritone.api.process.IBaritoneProcess;
 import baritone.api.process.PathingCommand;
 import baritone.api.process.PathingCommandType;
+import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,14 +50,14 @@ public class ExecutionControlCommands {
     public ExecutionControlCommands() {
         pauseCommand = new Command("pause", "p") {
             @Override
-            public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+            public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
                 args.requireMax(0);
                 ExecControlProcess controlProcess = (ExecControlProcess) ((Baritone) baritone).getExecControlProcess();
                 if (controlProcess.paused) {
                     throw new CommandInvalidStateException("Already paused");
                 }
                 controlProcess.paused = true;
-                logDirect("Paused");
+                logDirect(source, "Paused");
             }
 
             @Override
@@ -83,7 +84,7 @@ public class ExecutionControlCommands {
         };
         resumeCommand = new Command("resume", "r") {
             @Override
-            public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+            public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
                 args.requireMax(0);
                 baritone.getBuilderProcess().resume();
                 ExecControlProcess controlProcess = (ExecControlProcess) ((Baritone) baritone).getExecControlProcess();
@@ -91,7 +92,7 @@ public class ExecutionControlCommands {
                     throw new CommandInvalidStateException("Not paused");
                 }
                 controlProcess.paused = false;
-                logDirect("Resumed");
+                logDirect(source, "Resumed");
             }
 
             @Override
@@ -116,10 +117,10 @@ public class ExecutionControlCommands {
         };
         pausedCommand = new Command("paused") {
             @Override
-            public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+            public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
                 args.requireMax(0);
                 boolean paused = ((ExecControlProcess) ((Baritone) baritone).getExecControlProcess()).paused;
-                logDirect(String.format("Baritone is %spaused", paused ? "" : "not "));
+                logDirect(source, String.format("Baritone is %spaused", paused ? "" : "not "));
             }
 
             @Override
@@ -144,11 +145,11 @@ public class ExecutionControlCommands {
         };
         cancelCommand = new Command("cancel", "c", "stop") {
             @Override
-            public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+            public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
                 args.requireMax(0);
                 ((ExecControlProcess) ((Baritone) baritone).getExecControlProcess()).paused = false;
                 baritone.getPathingBehavior().cancelEverything();
-                logDirect("ok canceled");
+                logDirect(source, "ok canceled");
             }
 
             @Override

@@ -27,6 +27,7 @@ import baritone.api.pathing.goals.GoalBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 
 import java.util.Arrays;
@@ -40,7 +41,7 @@ public class ComeCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
         List<Entity> entities = ((ServerWorld) baritone.getPlayerContext().world()).getEntitiesByType(EntityType.HUSK, e -> true);
         if (entities.isEmpty()) {
@@ -48,7 +49,7 @@ public class ComeCommand extends Command {
         }
         LivingEntity entity = (LivingEntity) entities.get(0);
         BaritoneAPI.getProvider().getBaritone(entity).getCustomGoalProcess().setGoalAndPath(new GoalBlock(baritone.getPlayerContext().entity().getBlockPos()));
-        logDirect("Coming");
+        logDirect(source, "Coming");
     }
 
     @Override

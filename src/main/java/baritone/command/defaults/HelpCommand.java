@@ -26,6 +26,7 @@ import baritone.api.command.exception.CommandNotFoundException;
 import baritone.api.command.helpers.Paginator;
 import baritone.api.command.helpers.TabCompleteHelper;
 import baritone.api.command.manager.ICommandManager;
+import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -46,20 +47,20 @@ public class HelpCommand extends Command {
     }
 
     @Override
-    public void execute(String label, IArgConsumer args, IBaritone baritone) throws CommandException {
-        execute(label, args);
+    public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
+        execute(source, label, args);
     }
 
-    public void execute(String label, IArgConsumer args) throws CommandException {
+    public void execute(ServerCommandSource source, String label, IArgConsumer args) throws CommandException {
         args.requireMax(1);
         if (!args.hasAny() || args.is(Integer.class)) {
             Paginator.paginate(
                     args, new Paginator<>(
-                            ICommandManager.registry.descendingStream()
+                            source, ICommandManager.registry.descendingStream()
                                     .filter(command -> !command.hiddenFromHelp())
                                     .collect(Collectors.toList())
                     ),
-                    () -> logDirect("All Baritone commands (clickable):"),
+                    () -> logDirect(source, "All Baritone commands (clickable):"),
                     command -> {
                         String names = String.join("/", command.getNames());
                         String name = command.getNames().get(0);
@@ -89,16 +90,16 @@ public class HelpCommand extends Command {
             if (command == null) {
                 throw new CommandNotFoundException(commandName);
             }
-            logDirect(String.format("%s - %s", String.join(" / ", command.getNames()), command.getShortDesc()));
-            logDirect("");
-            command.getLongDesc().forEach(this::logDirect);
-            logDirect("");
+            logDirect(source, String.format("%s - %s", String.join(" / ", command.getNames()), command.getShortDesc()));
+            logDirect(source, "");
+            command.getLongDesc().forEach(message -> logDirect(source, message));
+            logDirect(source, "");
             BaseText returnComponent = new LiteralText("Click to return to the help menu");
             returnComponent.setStyle(returnComponent.getStyle().withClickEvent(new ClickEvent(
                     ClickEvent.Action.RUN_COMMAND,
                     FORCE_COMMAND_PREFIX + label
             )));
-            logDirect(returnComponent);
+            logDirect(source, returnComponent);
         }
     }
 
