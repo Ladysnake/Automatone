@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "automatone",
-  "version": "1.6.1",
+  "version": "${version}",
   "name": "Automatone",
   "description": "A serverside Minecraft pathfinder bot.",
   "entrypoints": {

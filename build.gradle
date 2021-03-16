@@ -110,7 +110,7 @@ dependencies {
     compile 'net.sf.jopt-simple:jopt-simple:5.0.3'
 }
 
-processResources {
+processLaunchResources {
     inputs.property "version", project.version
     from(sourceSets.launch.resources.srcDirs) {
         include "fabric.mod.json"
