@@ -74,7 +74,6 @@ public class BaritoneArgumentType implements ArgumentType<String> {
                 if (argc.hasExactly(1)) {
                     return new TabCompleteHelper()
                             .addCommands()
-                            .addSettings()
                             .filterPrefix(argc.getString())
                             .stream();
                 }
