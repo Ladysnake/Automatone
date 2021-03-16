@@ -79,7 +79,8 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
      */
     @Override
     public final synchronized void clearAllKeys() {
-        this.ctx.entity().setSprinting(false);
+        // Note that calling setSprinting before entity attributes are initialized will crash the game
+        if (this.ctx.entity().isSprinting()) this.ctx.entity().setSprinting(false);
         this.inputForceStateMap.clear();
     }
 
