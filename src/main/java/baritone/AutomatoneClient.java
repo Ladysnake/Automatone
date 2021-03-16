@@ -20,7 +20,6 @@ package baritone;
 import baritone.api.IBaritone;
 import baritone.api.event.events.RenderEvent;
 import baritone.api.selection.ISelectionManager;
-import baritone.behavior.PathingBehavior;
 import baritone.command.defaults.DefaultCommands;
 import baritone.entity.fakeplayer.AutomatoneFakePlayer;
 import baritone.entity.fakeplayer.FakeClientPlayerEntity;
@@ -29,6 +28,7 @@ import baritone.utils.GuiClick;
 import baritone.utils.PathRenderer;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
 import net.minecraft.client.MinecraftClient;
@@ -40,11 +40,10 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public final class AutomatoneClient implements ClientModInitializer {
+    public static final Set<Baritone> renderList = Collections.newSetFromMap(new WeakHashMap<>());
 
     public static void onRenderPass(RenderEvent renderEvent) {
         MinecraftClient mc = MinecraftClient.getInstance();
@@ -53,23 +52,16 @@ public final class AutomatoneClient implements ClientModInitializer {
             ((GuiClick) mc.currentScreen).onRender(renderEvent.getModelViewStack(), renderEvent.getProjectionMatrix());
         }
 
+        for (Baritone baritone : renderList) {
+            PathRenderer.render(renderEvent, baritone.getClientPathingBehaviour());
+        }
+
         if (!mc.isIntegratedServerRunning()) {
             // FIXME we should really be able to render stuff in multiplayer
             return;
         }
 
         SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), ISelectionManager.KEY.get(mc.world).getSelections());
-
-        // FIXME BOOM REACHING ACROSS SIDES
-        Collection<IBaritone> activeBaritones = BaritoneProvider.INSTANCE.getActiveBaritones();
-        if (!activeBaritones.isEmpty()) {
-            // Copy to avoid concurrency issues
-            for (IBaritone b : activeBaritones.toArray(new IBaritone[0])) {
-                if (!b.getPlayerContext().world().isClient()) {
-                    PathRenderer.render(renderEvent, (PathingBehavior) b.getPathingBehavior());
-                }
-            }
-        }
 
         DefaultCommands.selCommand.renderSelectionBox(renderEvent);
     }
@@ -112,6 +104,9 @@ public final class AutomatoneClient implements ClientModInitializer {
                     }
             );
         });
+        //yes, it is normal to remove an IBaritone from a Baritone set
+        //noinspection SuspiciousMethodCalls
+        ClientEntityEvents.ENTITY_UNLOAD.register((entity, world) -> renderList.remove(IBaritone.KEY.getNullable(entity)));
     }
 
     @Nullable

@@ -58,8 +58,9 @@ public final class BaritoneProvider implements IBaritoneProvider {
 
     public void shutdown() {
         for (Iterator<IBaritone> iterator = this.activeBaritones.iterator(); iterator.hasNext(); ) {
-            ((PathingBehavior) iterator.next().getPathingBehavior()).shutdown();
-            iterator.remove();
+            IBaritone b = iterator.next();
+            iterator.remove();  // remove first, so that the instance sees itself as deactivated
+            ((PathingBehavior) b.getPathingBehavior()).shutdown();
         }
     }
 

@@ -18,13 +18,12 @@
 package baritone.utils;
 
 import baritone.api.event.events.RenderEvent;
-import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.goals.*;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.Helper;
 import baritone.api.utils.interfaces.IGoalRenderPos;
-import baritone.behavior.PathingBehavior;
-import baritone.pathing.path.PathExecutor;
+import baritone.render.RenderedPath;
+import baritone.render.ClientPathingBehaviour;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
@@ -73,12 +72,12 @@ public final class PathRenderer implements IRenderer, Helper {
         return renderManager.camera.getPos().z;
     }
 
-    public static void render(RenderEvent event, PathingBehavior behavior) {
+    public static void render(RenderEvent event, ClientPathingBehaviour behavior) {
         float partialTicks = event.getPartialTicks();
         Goal goal = behavior.getGoal();
         MinecraftClient mc = MinecraftClient.getInstance();
 
-        DimensionType thisPlayerDimension = behavior.baritone.getPlayerContext().world().getDimension();
+        DimensionType thisPlayerDimension = behavior.entity.world.getDimension();
         World world = Objects.requireNonNull(MinecraftClient.getInstance().world);
         DimensionType currentRenderViewDimension = world.getDimension();
 
@@ -104,8 +103,8 @@ public final class PathRenderer implements IRenderer, Helper {
             return;
         }
 
-        PathExecutor current = behavior.getCurrent(); // this should prevent most race conditions?
-        PathExecutor next = behavior.getNext(); // like, now it's not possible for current!=null to be true, then suddenly false because of another thread
+        RenderedPath current = behavior.getCurrent(); // this should prevent most race conditions?
+        RenderedPath next = behavior.getNext(); // like, now it's not possible for current!=null to be true, then suddenly false because of another thread
         if (current != null && settings.renderSelectionBoxes.value) {
             drawManySelectionBoxes(event.getModelViewStack(), renderView, current.toBreak(), settings.colorBlocksToBreak.value);
             drawManySelectionBoxes(event.getModelViewStack(), renderView, current.toPlace(), settings.colorBlocksToPlace.value);
@@ -115,45 +114,44 @@ public final class PathRenderer implements IRenderer, Helper {
         //drawManySelectionBoxes(player, Collections.singletonList(behavior.pathStart()), partialTicks, Color.WHITE);
 
         // Render the current path, if there is one
-        if (current != null && current.getPath() != null) {
+        if (current != null && current.pathPositions() != null) {
             int renderBegin = Math.max(current.getPosition() - 3, 0);
-            drawPath(event.getModelViewStack(), current.getPath(), renderBegin, settings.colorCurrentPath.value, settings.fadePath.value, 10, 20);
+            drawPath(event.getModelViewStack(), current.pathPositions(), renderBegin, settings.colorCurrentPath.value, settings.fadePath.value, 10, 20);
         }
 
-        if (next != null && next.getPath() != null) {
-            drawPath(event.getModelViewStack(), next.getPath(), 0, settings.colorNextPath.value, settings.fadePath.value, 10, 20);
+        if (next != null && next.pathPositions() != null) {
+            drawPath(event.getModelViewStack(), next.pathPositions(), 0, settings.colorNextPath.value, settings.fadePath.value, 10, 20);
         }
 
         // If there is a path calculation currently running, render the path calculation process
         behavior.getInProgress().ifPresent(currentlyRunning -> {
-            currentlyRunning.bestPathSoFar().ifPresent(p -> drawPath(event.getModelViewStack(), p, 0, settings.colorBestPathSoFar.value, settings.fadePath.value, 10, 20));
+            currentlyRunning.bestPathSoFar().ifPresent(p -> drawPath(event.getModelViewStack(), p.positions(), 0, settings.colorBestPathSoFar.value, settings.fadePath.value, 10, 20));
 
             currentlyRunning.pathToMostRecentNodeConsidered().ifPresent(mr -> {
-                drawPath(event.getModelViewStack(), mr, 0, settings.colorMostRecentConsidered.value, settings.fadePath.value, 10, 20);
+                drawPath(event.getModelViewStack(), mr.positions(), 0, settings.colorMostRecentConsidered.value, settings.fadePath.value, 10, 20);
                 drawManySelectionBoxes(event.getModelViewStack(), renderView, Collections.singletonList(mr.getDest()), settings.colorMostRecentConsidered.value);
             });
         });
     }
 
-    public static void drawPath(MatrixStack stack, IPath path, int startIndex, Color color, boolean fadeOut, int fadeStart0, int fadeEnd0) {
+    public static void drawPath(MatrixStack stack, List<? extends BlockPos> positions, int startIndex, Color color, boolean fadeOut, int fadeStart0, int fadeEnd0) {
         IRenderer.startLines(color, settings.pathRenderLineWidthPixels.value, settings.renderPathIgnoreDepth.value);
 
         int fadeStart = fadeStart0 + startIndex;
         int fadeEnd = fadeEnd0 + startIndex;
 
-        List<BetterBlockPos> positions = path.positions();
         for (int i = startIndex, next; i < positions.size() - 1; i = next) {
-            BetterBlockPos start = positions.get(i);
-            BetterBlockPos end = positions.get(next = i + 1);
+            BlockPos start = positions.get(i);
+            BlockPos end = positions.get(next = i + 1);
 
-            int dirX = end.x - start.x;
-            int dirY = end.y - start.y;
-            int dirZ = end.z - start.z;
+            int dirX = end.getX() - start.getX();
+            int dirY = end.getY() - start.getY();
+            int dirZ = end.getZ() - start.getZ();
 
             while (next + 1 < positions.size() && (!fadeOut || next + 1 < fadeStart) &&
-                    (dirX == positions.get(next + 1).x - end.x &&
-                            dirY == positions.get(next + 1).y - end.y &&
-                            dirZ == positions.get(next + 1).z - end.z)) {
+                    (dirX == positions.get(next + 1).getX() - end.getX() &&
+                            dirY == positions.get(next + 1).getY() - end.getY() &&
+                            dirZ == positions.get(next + 1).getZ() - end.getZ())) {
                 end = positions.get(++next);
             }
 
@@ -171,7 +169,7 @@ public final class PathRenderer implements IRenderer, Helper {
                 IRenderer.glColor(color, alpha);
             }
 
-            drawLine(stack, start.x, start.y, start.z, end.x, end.y, end.z);
+            drawLine(stack, start.getX(), start.getY(), start.getZ(), end.getX(), end.getY(), end.getZ());
 
             tessellator.draw();
         }

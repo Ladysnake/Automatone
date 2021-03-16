@@ -18,6 +18,7 @@
 package baritone.behavior;
 
 import baritone.Baritone;
+import baritone.api.IBaritone;
 import baritone.api.behavior.IPathingBehavior;
 import baritone.api.event.events.*;
 import baritone.api.pathing.calc.IPath;
@@ -35,6 +36,7 @@ import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.path.PathExecutor;
 import baritone.utils.PathingCommandContext;
 import baritone.utils.pathing.Favoring;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -96,11 +98,14 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
         tickPath();
         ticksElapsedSoFar++;
         dispatchEvents();
+        // Fuck it, synchronizing every tick for now
+        IBaritone.KEY.sync(this.baritone.getPlayerContext().entity());
     }
 
     public void shutdown() {
         secretInternalSegmentCancel();
         baritone.getPathingControlManager().cancelEverything();
+        IBaritone.KEY.sync(this.baritone.getPlayerContext().entity());
     }
 
     private void tickPath() {
@@ -532,5 +537,9 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior,
         }
         Favoring favoring = new Favoring(context.getBaritone().getPlayerContext(), previous, context);
         return new AStarPathFinder(start.getX(), start.getY(), start.getZ(), transformed, favoring, context);
+    }
+
+    public void writeToPacket(PacketByteBuf buf) {
+        PathExecutor.writeToPacket(this.current, buf);
     }
 }

@@ -32,6 +32,7 @@ import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.movements.*;
 import baritone.utils.BlockStateInterface;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -630,5 +631,25 @@ public class PathExecutor implements IPathExecutor, Helper {
 
     public boolean isSprinting() {
         return sprintNextTick;
+    }
+
+    public static void writeToPacket(PathExecutor p, PacketByteBuf buf) {
+        if (p == null) {
+            buf.writeInt(-1);
+            return;
+        }
+        buf.writeInt(p.pathPosition);
+        writePositions(p.getPath().positions(), buf);
+        writePositions(p.toBreak(), buf);
+        writePositions(p.toPlace(), buf);
+        writePositions(p.toWalkInto(), buf);
+    }
+
+    private static void writePositions(Collection<? extends BlockPos> positions, PacketByteBuf buf) {
+        buf.writeVarInt(positions.size());
+
+        for (BlockPos position : positions) {
+            buf.writeBlockPos(position);
+        }
     }
 }

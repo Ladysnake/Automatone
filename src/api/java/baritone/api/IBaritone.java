@@ -29,13 +29,14 @@ import baritone.api.command.manager.ICommandManager;
 import dev.onyxstudios.cca.api.v3.component.Component;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
+import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.util.Identifier;
 
 /**
  * @author Brady
  * @since 9/29/2018
  */
-public interface IBaritone extends Component {
+public interface IBaritone extends AutoSyncedComponent {
     ComponentKey<IBaritone> KEY = ComponentRegistry.getOrCreate(new Identifier("automatone", "core"), IBaritone.class);
 
     /**

@@ -29,6 +29,7 @@ import baritone.cache.WorldProvider;
 import baritone.command.defaults.DefaultCommands;
 import baritone.event.GameEventHandler;
 import baritone.process.*;
+import baritone.render.ClientPathingBehaviour;
 import baritone.utils.*;
 import baritone.command.manager.BaritoneCommandManager;
 import baritone.utils.player.EntityContext;
@@ -36,6 +37,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.network.ServerPlayerEntity;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,6 +95,8 @@ public class Baritone implements IBaritone {
     private final IEntityContext playerContext;
     private final WorldProvider worldProvider;
 
+    private final @Nullable ClientPathingBehaviour clientPathingBehaviour;
+
     public BlockStateInterface bsi;
 
     public Baritone(LivingEntity player) {
@@ -123,6 +129,7 @@ public class Baritone implements IBaritone {
         this.worldProvider = (WorldProvider) IWorldProvider.KEY.get(player.world);
         this.commandManager = new BaritoneCommandManager(this);
         this.execControlProcess = DefaultCommands.controlCommands.registerProcess(this);
+        this.clientPathingBehaviour = player.world.isClient ? new ClientPathingBehaviour(player) : null;
     }
 
     @Override
@@ -214,6 +221,11 @@ public class Baritone implements IBaritone {
         return execControlProcess;
     }
 
+    public ClientPathingBehaviour getClientPathingBehaviour() {
+        if (this.clientPathingBehaviour == null) throw new IllegalStateException("Not a clientside baritone instance");
+        return this.clientPathingBehaviour;
+    }
+
     @Override
     public void activate() {
         BaritoneProvider.INSTANCE.activate(this);
@@ -237,6 +249,29 @@ public class Baritone implements IBaritone {
     @Override
     public void writeToNbt(CompoundTag tag) {
         // NO-OP
+    }
+
+    @Override
+    public boolean shouldSyncWith(ServerPlayerEntity player) {
+        return player.server.getPermissionLevel(player.getGameProfile()) >= 2;
+    }
+
+    @Override
+    public void writeSyncPacket(PacketByteBuf buf, ServerPlayerEntity recipient) {
+        buf.writeBoolean(this.isActive());
+        this.pathingBehavior.writeToPacket(buf);
+    }
+
+    @Override
+    public void applySyncPacket(PacketByteBuf buf) {
+        assert this.clientPathingBehaviour != null : "applySyncPacket called on a server world";
+        boolean active = buf.readBoolean();
+        if (active) {
+            AutomatoneClient.renderList.add(this);
+        } else {
+            AutomatoneClient.renderList.remove(this);
+        }
+        this.clientPathingBehaviour.readFromPacket(buf);
     }
 
     public static Settings settings() {
