@@ -21,7 +21,6 @@ import baritone.api.BaritoneAPI;
 import baritone.api.Settings;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
@@ -29,7 +28,6 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
@@ -40,7 +38,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,21 +55,9 @@ public class SettingsUtil {
         return line.startsWith("#") || line.startsWith("//");
     }
 
-    private static void forEachLine(Path file, Consumer<String> consumer) throws IOException {
-        try (BufferedReader scan = Files.newBufferedReader(file)) {
-            String line;
-            while ((line = scan.readLine()) != null) {
-                if (line.isEmpty() || isComment(line)) {
-                    continue;
-                }
-                consumer.accept(line);
-            }
-        }
-    }
-
     public static void readAndApply(Settings settings) {
         try {
-            forEachLine(SETTINGS_PATH, line -> {
+            Files.lines(SETTINGS_PATH).filter(line -> !line.trim().isEmpty() && !isComment(line)).forEach(line -> {
                 Matcher matcher = SETTING_PATTERN.matcher(line);
                 if (!matcher.matches()) {
                     System.out.println("Invalid syntax in setting file: " + line);
@@ -88,10 +73,13 @@ public class SettingsUtil {
                     ex.printStackTrace();
                 }
             });
-        } catch (NoSuchFileException ignored) {
-            System.out.println("Baritone settings file not found, resetting.");
+        } catch (NoSuchFileException e) {
+            System.out.println("Automatone settings file not found, resetting.");
+            try {
+                Files.createFile(SETTINGS_PATH);
+            } catch (IOException ignored) { }
         } catch (Exception ex) {
-            System.out.println("Exception while reading Baritone settings, some settings may be reset to default values!");
+            System.out.println("Exception while reading Automatone settings, some settings may be reset to default values!");
             ex.printStackTrace();
         }
     }

@@ -79,10 +79,10 @@ public class WorldProvider implements IWorldProvider, Helper {
             Files.createDirectories(dir);
             // lol wtf is this baritone folder in my minecraft save?
             // good thing we have a readme
-            Files.write(readme, "https://github.com/cabaletta/baritone\n".getBytes());
+            Files.write(readme, "https://github.com/Ladysnake/Automatone\n".getBytes());
         } catch (IOException ignored) {}
 
-        System.out.println("Baritone world data dir: " + dir);
+        System.out.println("Automatone world data dir: " + dir);
         synchronized (worldCache) {
             this.currentWorld = worldCache.computeIfAbsent(dir, d -> new WorldData(d, world.getRegistryKey()));
         }
