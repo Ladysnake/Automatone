@@ -25,7 +25,6 @@ import baritone.behavior.InventoryBehavior;
 import baritone.cache.WorldData;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.ToolSet;
-import baritone.utils.pathing.BetterWorldBorder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -77,11 +76,12 @@ public class CalculationContext {
     public double backtrackCostFavoringCoefficient;
     public double jumpPenalty;
     public final double walkOnWaterOnePenalty;
-    public final BetterWorldBorder worldBorder;
     public final int worldHeight;
     public final int width;
     public final int requiredSideSpace;
     public final int height;
+    private final PlayerEntity player;
+    private final BlockPos.Mutable blockPos;
 
     public CalculationContext(IBaritone baritone) {
         this(baritone, false);
@@ -91,7 +91,7 @@ public class CalculationContext {
         this.safeForThreadedUse = forUseOnAnotherThread;
         this.baritone = baritone;
         LivingEntity entity = baritone.getPlayerContext().entity();
-        PlayerEntity player = entity instanceof PlayerEntity ? (PlayerEntity) entity : null;
+        this.player = entity instanceof PlayerEntity ? (PlayerEntity) entity : null;
         this.world = baritone.getPlayerContext().world();
         this.worldData = (WorldData) baritone.getWorldProvider().getCurrentWorld();
         this.bsi = new BlockStateInterface(world);
@@ -124,13 +124,13 @@ public class CalculationContext {
         // why cache these things here, why not let the movements just get directly from settings?
         // because if some movements are calculated one way and others are calculated another way,
         // then you get a wildly inconsistent path that isn't optimal for either scenario.
-        this.worldBorder = new BetterWorldBorder(world.getWorldBorder());
         this.worldHeight = world.getHeight();
         EntityDimensions dimensions = entity.getDimensions(EntityPose.STANDING);
         this.width = MathHelper.ceil(dimensions.width);
         // Note: if width is less than 1 (but not negative), we get side space of 0
         this.requiredSideSpace = getRequiredSideSpace(dimensions);
         this.height = MathHelper.ceil(dimensions.height);
+        this.blockPos = new BlockPos.Mutable();
     }
 
     public static int getRequiredSideSpace(EntityDimensions dimensions) {
@@ -161,11 +161,7 @@ public class CalculationContext {
         if (!hasThrowaway) { // only true if allowPlace is true, see constructor
             return COST_INF;
         }
-        if (isPossiblyProtected(x, y, z)) {
-            return COST_INF;
-        }
-        if (!worldBorder.canPlaceAt(x, z)) {
-            // TODO perhaps MovementHelper.canPlaceAgainst could also use this?
+        if (isProtected(x, y, z)) {
             return COST_INF;
         }
         return placeBlockCost;
@@ -175,7 +171,7 @@ public class CalculationContext {
         if (!allowBreak) {
             return COST_INF;
         }
-        if (isPossiblyProtected(x, y, z)) {
+        if (isProtected(x, y, z)) {
             return COST_INF;
         }
         return 1;
@@ -185,8 +181,20 @@ public class CalculationContext {
         return placeBlockCost; // shrug
     }
 
-    public boolean isPossiblyProtected(int x, int y, int z) {
-        // TODO more protection logic here; see #220
-        return false;
+    public boolean canPlaceAgainst(BlockPos pos) {
+        return this.canPlaceAgainst(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    public boolean canPlaceAgainst(int againstX, int againstY, int againstZ) {
+        return this.canPlaceAgainst(againstX, againstY, againstZ, this.bsi.get0(againstX, againstY, againstZ));
+    }
+
+    public boolean canPlaceAgainst(int againstX, int againstY, int againstZ, BlockState state) {
+        return !this.isProtected(againstX, againstY, againstZ) && MovementHelper.canPlaceAgainst(this.bsi, againstX, againstY, againstZ, state);
+    }
+
+    public boolean isProtected(int x, int y, int z) {
+        this.blockPos.set(x, y, z);
+        return this.player != null && !world.canPlayerModifyAt(this.player, this.blockPos);
     }
 }

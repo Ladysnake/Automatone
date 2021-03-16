@@ -84,7 +84,7 @@ public class MovementAscend extends Movement {
                 if (againstX == x && againstZ == z) { // we might be able to backplace now, but it doesn't matter because it will have been broken by the time we'd need to use it
                     continue;
                 }
-                if (MovementHelper.canPlaceAgainst(context.bsi, againstX, againstY, againstZ)) {
+                if (context.canPlaceAgainst(againstX, againstY, againstZ)) {
                     foundPlaceOption = true;
                     break;
                 }

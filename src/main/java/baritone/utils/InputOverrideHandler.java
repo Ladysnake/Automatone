@@ -71,7 +71,11 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
      */
     @Override
     public final synchronized void setInputForceState(Input input, boolean forced) {
-        this.inputForceStateMap.add(input);
+        if (forced) {
+            this.inputForceStateMap.add(input);
+        } else {
+            this.inputForceStateMap.remove(input);
+        }
     }
 
     /**
