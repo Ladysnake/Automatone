@@ -15,6 +15,7 @@
     "MixinEntity",
     "MixinItemStack",
     "MixinMobEntity",
+    "MixinServerCommandSource",
     "MixinServerPlayerInteractionManager",
     "MixinServerWorld",
     "MixinUtil",

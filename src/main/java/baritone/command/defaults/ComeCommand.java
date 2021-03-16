@@ -17,18 +17,13 @@
 
 package baritone.command.defaults;
 
-import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
-import baritone.api.command.exception.CommandInvalidStateException;
 import baritone.api.pathing.goals.GoalBlock;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,12 +38,7 @@ public class ComeCommand extends Command {
     @Override
     public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
-        List<Entity> entities = ((ServerWorld) baritone.getPlayerContext().world()).getEntitiesByType(EntityType.HUSK, e -> true);
-        if (entities.isEmpty()) {
-            throw new CommandInvalidStateException("no entity found");
-        }
-        LivingEntity entity = (LivingEntity) entities.get(0);
-        BaritoneAPI.getProvider().getBaritone(entity).getCustomGoalProcess().setGoalAndPath(new GoalBlock(baritone.getPlayerContext().entity().getBlockPos()));
+        baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(new BlockPos(source.getPosition())));
         logDirect(source, "Coming");
     }
 
@@ -65,9 +55,9 @@ public class ComeCommand extends Command {
     @Override
     public List<String> getLongDesc() {
         return Arrays.asList(
-                "The come command tells Automatone to head towards the source of the command.",
+                "The come command tells Automatone to head towards the position at which the command was executed.",
                 "",
-                "This can be useful alongside redirection commands like \"/execute as\".",
+                "This can be useful alongside redirection commands like \"/execute\".",
                 "",
                 "Usage:",
                 "> come"
