@@ -20,12 +20,15 @@ package baritone;
 import baritone.api.cache.IWorldProvider;
 import baritone.cache.WorldProvider;
 import baritone.command.defaults.DefaultCommands;
+import baritone.command.manager.BaritoneArgumentType;
 import baritone.entity.fakeplayer.FakeServerPlayerEntity;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.minecraft.command.argument.ArgumentTypes;
+import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
@@ -56,6 +59,7 @@ public final class Automatone implements ModInitializer {
     @Override
     public void onInitialize() {
         DefaultCommands.registerAll();
+        ArgumentTypes.register("automatone:command", BaritoneArgumentType.class, new ConstantArgumentSerializer<>(BaritoneArgumentType::baritone));
         Registry.register(Registry.ENTITY_TYPE, id("fake_player"), FAKE_PLAYER);
         ServerWorldEvents.LOAD.register((minecraftServer, serverWorld) ->
                 ((WorldProvider) IWorldProvider.KEY.get(serverWorld)).initWorld(serverWorld));
