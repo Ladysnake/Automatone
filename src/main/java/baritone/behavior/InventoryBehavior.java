@@ -25,6 +25,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.*;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.tag.Tag;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
@@ -201,5 +203,15 @@ public final class InventoryBehavior extends Behavior {
             }
         }
         return false;
+    }
+
+    public static int getSlotWithStack(PlayerInventory inv, Tag<Item> tag) {
+        for(int i = 0; i < inv.main.size(); ++i) {
+            if (!inv.main.get(i).isEmpty() && tag.contains(inv.main.get(i).getItem())) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 }

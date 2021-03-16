@@ -17,9 +17,11 @@
 
 package baritone.pathing.movement;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.pathing.movement.ActionCosts;
+import baritone.behavior.InventoryBehavior;
 import baritone.cache.WorldData;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.ToolSet;
@@ -95,7 +97,7 @@ public class CalculationContext {
         this.bsi = new BlockStateInterface(world);
         this.toolSet = player == null ? null : new ToolSet(player);
         this.hasThrowaway = Baritone.settings().allowPlace.value && ((Baritone) baritone).getInventoryBehavior().hasGenericThrowaway();
-        this.hasWaterBucket = player != null && Baritone.settings().allowWaterBucketFall.value && PlayerInventory.isValidHotbarIndex(player.inventory.getSlotWithStack(STACK_BUCKET_WATER)) && !world.getDimension().isUltrawarm();
+        this.hasWaterBucket = player != null && Baritone.settings().allowWaterBucketFall.value && PlayerInventory.isValidHotbarIndex(InventoryBehavior.getSlotWithStack(player.inventory, Automatone.WATER_BUCKETS)) && !world.getDimension().isUltrawarm();
         this.canSprint = player != null && Baritone.settings().allowSprint.value && player.getHungerManager().getFoodLevel() > 6;
         this.placeBlockCost = Baritone.settings().blockPlacementPenalty.value;
         this.allowBreak = Baritone.settings().allowBreak.value;

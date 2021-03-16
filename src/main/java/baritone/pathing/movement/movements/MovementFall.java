@@ -17,6 +17,7 @@
 
 package baritone.pathing.movement.movements;
 
+import baritone.Automatone;
 import baritone.api.IBaritone;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
@@ -24,6 +25,7 @@ import baritone.api.utils.Rotation;
 import baritone.api.utils.RotationUtils;
 import baritone.api.utils.VecUtils;
 import baritone.api.utils.input.Input;
+import baritone.behavior.InventoryBehavior;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
@@ -49,9 +51,6 @@ import java.util.Optional;
 import java.util.Set;
 
 public class MovementFall extends Movement {
-
-    private static final ItemStack STACK_BUCKET_WATER = new ItemStack(Items.WATER_BUCKET);
-    private static final ItemStack STACK_BUCKET_EMPTY = new ItemStack(Items.BUCKET);
 
     public MovementFall(IBaritone baritone, BetterBlockPos src, BetterBlockPos dest) {
         super(baritone, src, dest, MovementFall.buildPositionsToBreak(src, dest));
@@ -98,12 +97,12 @@ public class MovementFall extends Movement {
         boolean isWater = destState.getFluidState().getFluid() instanceof WaterFluid;
         if (!isWater && willPlaceBucket() && !playerFeet.equals(dest)) {
             PlayerInventory inventory = ctx.inventory();
-            if (inventory == null || !PlayerInventory.isValidHotbarIndex(inventory.getSlotWithStack(STACK_BUCKET_WATER)) || ctx.world().getRegistryKey() == World.NETHER) {
+            if (inventory == null || !PlayerInventory.isValidHotbarIndex(InventoryBehavior.getSlotWithStack(inventory, Automatone.WATER_BUCKETS)) || ctx.world().getRegistryKey() == World.NETHER) {
                 return state.setStatus(MovementStatus.UNREACHABLE);
             }
 
             if (ctx.entity().getY() - dest.getY() < ctx.playerController().getBlockReachDistance() && !ctx.entity().isOnGround()) {
-                inventory.selectedSlot = inventory.getSlotWithStack(STACK_BUCKET_WATER);
+                inventory.selectedSlot = InventoryBehavior.getSlotWithStack(inventory, Automatone.WATER_BUCKETS);
 
                 targetRotation = new Rotation(toDest.getYaw(), 90.0F);
 
@@ -121,8 +120,8 @@ public class MovementFall extends Movement {
             if (isWater) { // only match water, not flowing water (which we cannot pick up with a bucket)
                 PlayerInventory inventory = ctx.inventory();
 
-                if (inventory != null && PlayerInventory.isValidHotbarIndex(inventory.getSlotWithStack(STACK_BUCKET_EMPTY))) {
-                    inventory.selectedSlot = inventory.getSlotWithStack(STACK_BUCKET_EMPTY);
+                if (inventory != null && PlayerInventory.isValidHotbarIndex(InventoryBehavior.getSlotWithStack(inventory, Automatone.EMPTY_BUCKETS))) {
+                    inventory.selectedSlot = InventoryBehavior.getSlotWithStack(inventory, Automatone.EMPTY_BUCKETS);
                     if (ctx.entity().getVelocity().y >= 0) {
                         return state.setInput(Input.CLICK_RIGHT, true);
                     } else {

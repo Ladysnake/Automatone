@@ -27,13 +27,16 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.minecraft.command.argument.ArgumentTypes;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
@@ -42,6 +45,10 @@ import org.apache.logging.log4j.Logger;
 public final class Automatone implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("Automatone");
     public static final String MOD_ID = "automatone";
+
+    public static final Tag<Item> EMPTY_BUCKETS = TagRegistry.item(id("empty_buckets"));
+    public static final Tag<Item> WATER_BUCKETS = TagRegistry.item(id("water_buckets"));
+
     public static final EntityType<FakeServerPlayerEntity> FAKE_PLAYER = FabricEntityTypeBuilder.<FakeServerPlayerEntity>createLiving()
             .spawnGroup(SpawnGroup.MISC)
             .entityFactory((type, world) -> new FakeServerPlayerEntity(type, (ServerWorld) world))
