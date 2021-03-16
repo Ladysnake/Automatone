@@ -67,7 +67,7 @@ public class ExploreCommand extends Command {
     @Override
     public List<String> getLongDesc() {
         return Arrays.asList(
-                "Tell Baritone to explore randomly. If you used explorefilter before this, it will be applied.",
+                "Tell Automatone to explore randomly. If you used explorefilter before this, it will be applied.",
                 "",
                 "Usage:",
                 "> explore - Explore from your current position.",

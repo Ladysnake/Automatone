@@ -67,7 +67,7 @@ public class InvertCommand extends Command {
     @Override
     public List<String> getLongDesc() {
         return Arrays.asList(
-                "The invert command tells Baritone to head away from the current goal rather than towards it.",
+                "The invert command tells Automatone to head away from the current goal rather than towards it.",
                 "",
                 "Usage:",
                 "> invert - Invert the current goal."

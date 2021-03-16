@@ -18,12 +18,12 @@
 package baritone.command.defaults;
 
 import baritone.api.IBaritone;
-import baritone.api.utils.BlockOptionalMeta;
 import baritone.api.command.Command;
+import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.datatypes.BlockById;
 import baritone.api.command.datatypes.ForBlockOptionalMeta;
 import baritone.api.command.exception.CommandException;
-import baritone.api.command.argument.IArgConsumer;
+import baritone.api.utils.BlockOptionalMeta;
 import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class MineCommand extends Command {
     @Override
     public List<String> getLongDesc() {
         return Arrays.asList(
-                "The mine command allows you to tell Baritone to search for and mine individual blocks.",
+                "The mine command allows you to tell Automatone to search for and mine individual blocks.",
                 "",
                 "The specified blocks can be ores (which are commonly cached), or any other block.",
                 "",

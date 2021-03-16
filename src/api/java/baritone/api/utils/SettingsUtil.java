@@ -90,7 +90,7 @@ public class SettingsUtil {
                 out.write(settingToString(setting) + "\n");
             }
         } catch (Exception ex) {
-            System.out.println("Exception thrown while saving Baritone settings!");
+            System.out.println("Exception thrown while saving Automatone settings!");
             ex.printStackTrace();
         }
     }

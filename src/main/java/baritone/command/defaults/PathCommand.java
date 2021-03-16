@@ -55,7 +55,7 @@ public class PathCommand extends Command {
     @Override
     public List<String> getLongDesc() {
         return Arrays.asList(
-                "The path command tells Baritone to head towards the current goal.",
+                "The path command makes the targeted entity head towards the current goal.",
                 "",
                 "Usage:",
                 "> path - Start the pathing."

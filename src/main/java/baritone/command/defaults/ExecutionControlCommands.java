@@ -67,13 +67,13 @@ public class ExecutionControlCommands {
 
             @Override
             public String getShortDesc() {
-                return "Pauses Baritone until you use resume";
+                return "Pauses Automatone until you use resume";
             }
 
             @Override
             public List<String> getLongDesc() {
                 return Arrays.asList(
-                        "The pause command tells Baritone to temporarily stop whatever it's doing.",
+                        "The pause command tells Automatone to temporarily stop whatever it's doing.",
                         "",
                         "This can be used to pause pathing, building, following, whatever. A single use of the resume command will start it right back up again!",
                         "",
@@ -102,13 +102,13 @@ public class ExecutionControlCommands {
 
             @Override
             public String getShortDesc() {
-                return "Resumes Baritone after a pause";
+                return "Resumes Automatone processes after a pause";
             }
 
             @Override
             public List<String> getLongDesc() {
                 return Arrays.asList(
-                        "The resume command tells Baritone to resume whatever it was doing when you last used pause.",
+                        "The resume command tells Automatone to resume whatever it was doing when you last used pause.",
                         "",
                         "Usage:",
                         "> resume"
@@ -120,7 +120,7 @@ public class ExecutionControlCommands {
             public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
                 args.requireMax(0);
                 boolean paused = ((ExecControlProcess) ((Baritone) baritone).getExecControlProcess()).paused;
-                logDirect(source, String.format("Baritone is %spaused", paused ? "" : "not "));
+                logDirect(source, String.format("Automatone is %spaused", paused ? "" : "not "));
             }
 
             @Override
@@ -165,7 +165,7 @@ public class ExecutionControlCommands {
             @Override
             public List<String> getLongDesc() {
                 return Arrays.asList(
-                        "The cancel command tells Baritone to stop whatever it's currently doing.",
+                        "The cancel command tells Automatone to stop whatever it's currently doing.",
                         "",
                         "Usage:",
                         "> cancel"

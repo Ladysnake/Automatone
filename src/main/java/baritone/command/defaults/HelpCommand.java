@@ -60,7 +60,7 @@ public class HelpCommand extends Command {
                                     .filter(command -> !command.hiddenFromHelp())
                                     .collect(Collectors.toList())
                     ),
-                    () -> logDirect(source, "All Baritone commands (clickable):"),
+                    () -> logDirect(source, "All Automatone commands (clickable):"),
                     command -> {
                         String names = String.join("/", command.getNames());
                         String name = command.getNames().get(0);

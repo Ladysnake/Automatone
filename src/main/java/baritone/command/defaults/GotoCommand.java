@@ -73,7 +73,7 @@ public class GotoCommand extends Command {
     @Override
     public List<String> getLongDesc() {
         return Arrays.asList(
-                "The goto command tells Baritone to head towards a given goal or block.",
+                "The goto command tells Automatone to head towards a given goal or block.",
                 "",
                 "Wherever a coordinate is expected, you can use ~ just like in regular Minecraft commands. Or, you can just use regular numbers.",
                 "",

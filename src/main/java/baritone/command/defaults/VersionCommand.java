@@ -17,6 +17,7 @@
 
 package baritone.command.defaults;
 
+import baritone.Automatone;
 import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
@@ -52,13 +53,13 @@ public class VersionCommand extends Command {
 
     @Override
     public String getShortDesc() {
-        return "View the Baritone version";
+        return "View Automatone's version";
     }
 
     @Override
     public List<String> getLongDesc() {
         return Arrays.asList(
-                "The version command prints the version of Baritone you're currently running.",
+                "The version command prints the version of Automatone you're currently running.",
                 "",
                 "Usage:",
                 "> version - View version information, if present"

@@ -27,14 +27,15 @@ import baritone.api.utils.IEntityContext;
 import baritone.behavior.*;
 import baritone.cache.WorldProvider;
 import baritone.command.defaults.DefaultCommands;
+import baritone.command.manager.BaritoneCommandManager;
 import baritone.event.GameEventHandler;
 import baritone.process.*;
 import baritone.render.ClientPathingBehaviour;
-import baritone.utils.*;
-import baritone.command.manager.BaritoneCommandManager;
+import baritone.utils.BlockStateInterface;
+import baritone.utils.InputOverrideHandler;
+import baritone.utils.PathingControlManager;
 import baritone.utils.player.EntityContext;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
@@ -44,7 +45,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +61,7 @@ public class Baritone implements IBaritone {
 
     static {
         AtomicInteger threadCounter = new AtomicInteger(0);
-        threadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> new Thread(r, "Baritone Worker " + threadCounter.incrementAndGet()));
+        threadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> new Thread(r, "Automatone Worker " + threadCounter.incrementAndGet()));
 
         dir = FabricLoader.getInstance().getGameDir().resolve("baritone").toFile();
         if (!Files.exists(dir.toPath())) {
