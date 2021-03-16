@@ -44,6 +44,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Brady
@@ -55,7 +56,8 @@ public class Baritone implements IBaritone {
     private static final File dir;
 
     static {
-        threadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>());
+        AtomicInteger threadCounter = new AtomicInteger(0);
+        threadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> new Thread(r, "Baritone Worker " + threadCounter.incrementAndGet()));
 
         dir = FabricLoader.getInstance().getGameDir().resolve("baritone").toFile();
         if (!Files.exists(dir.toPath())) {
@@ -228,18 +230,6 @@ public class Baritone implements IBaritone {
     }
 
     @Override
-    public void openClick() {
-        new Thread(() -> {
-            try {
-                Thread.sleep(100);
-                MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().openScreen(new GuiClick(getPlayerContext().entity().getUuid())));
-            } catch (Exception e) {
-                Automatone.LOGGER.error("Failed to open click screen, is this a dedicated server?", e);
-            }
-        }).start();
-    }
-
-    @Override
     public void readFromNbt(CompoundTag tag) {
         // NO-OP
     }
@@ -257,7 +247,7 @@ public class Baritone implements IBaritone {
         return dir;
     }
 
-    public static Executor getExecutor() {
+    public static ThreadPoolExecutor getExecutor() {
         return threadPool;
     }
 }
