@@ -83,7 +83,7 @@ public final class BaritoneProvider implements IBaritoneProvider {
 
     @Override
     public @Nullable IBaritone getActiveBaritone(LivingEntity entity) {
-        IBaritone baritone = this.getBaritone(entity);
+        IBaritone baritone = IBaritone.KEY.getNullable(entity);
         return this.isActive(baritone) ? baritone : null;
     }
 

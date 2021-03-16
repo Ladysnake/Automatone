@@ -22,7 +22,6 @@ import baritone.cache.WorldProvider;
 import baritone.command.defaults.DefaultCommands;
 import baritone.entity.fakeplayer.FakeServerPlayerEntity;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
