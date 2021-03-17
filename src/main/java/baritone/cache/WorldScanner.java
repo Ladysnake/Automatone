@@ -157,6 +157,11 @@ public enum WorldScanner implements IWorldScanner {
             if (section == null || ChunkSection.isEmpty(section)) {
                 continue;
             }
+            // No need to waste CPU cycles if the section does not contain any block of the right kind
+            // PERF: maybe check the size of the palette too ? Like if there are as many states as positions in the chunk, scanning both is redundant
+            if (!section.hasAny(filter::has)) {
+                continue;
+            }
             int yReal = y0 << 4;
             PalettedContainer<BlockState> bsc = section.getContainer();
             for (int yy = 0; yy < 16; yy++) {
