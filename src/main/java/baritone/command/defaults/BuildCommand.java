@@ -28,6 +28,7 @@ import baritone.api.command.exception.CommandInvalidStateException;
 import baritone.api.utils.BetterBlockPos;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.util.math.BlockPos;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
@@ -49,7 +50,7 @@ public class BuildCommand extends Command {
         if (FilenameUtils.getExtension(file.getAbsolutePath()).isEmpty()) {
             file = new File(file.getAbsolutePath() + "." + Baritone.settings().schematicFallbackExtension.value);
         }
-        BetterBlockPos origin = baritone.getPlayerContext().feetPos();
+        BetterBlockPos origin = new BetterBlockPos(new BlockPos(source.getPosition()));
         BetterBlockPos buildOrigin;
         if (args.hasAny()) {
             args.requireMax(3);
