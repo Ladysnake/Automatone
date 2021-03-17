@@ -27,10 +27,10 @@ import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.util.math.Direction;
 
 import java.util.Set;
@@ -139,15 +139,23 @@ public class MovementAscend extends Movement {
         double totalCost = walk + additionalPlacementCost;
         // start with srcUp2 since we already have its state
         // includeFalling isn't needed because of the falling check above -- if srcUp3 is falling we will have already exited with COST_INF if we'd actually have to break it
-        totalCost += MovementHelper.getMiningDurationTicks(context, x, y + 2, z, srcUp2, false);
-        if (totalCost >= COST_INF) {
+        double miningTicks = MovementHelper.getMiningDurationTicks(context, x, y + 2, z, srcUp2, false);
+        totalCost += miningTicks;
+        // Not mining anything in water
+        boolean inLiquid = MovementHelper.isLiquid(srcDown);
+        if (totalCost >= COST_INF || (miningTicks > 0 && inLiquid)) {
             return COST_INF;
         }
-        totalCost += MovementHelper.getMiningDurationTicks(context, destX, y + 1, destZ, false);
-        if (totalCost >= COST_INF) {
+        miningTicks = MovementHelper.getMiningDurationTicks(context, destX, y + 1, destZ, false);
+        totalCost += miningTicks;
+        if (totalCost >= COST_INF || (miningTicks > 0 && inLiquid)) {
             return COST_INF;
         }
-        totalCost += MovementHelper.getMiningDurationTicks(context, destX, y + 2, destZ, true);
+        miningTicks = MovementHelper.getMiningDurationTicks(context, destX, y + 2, destZ, true);
+        totalCost += miningTicks;
+        if (totalCost >= COST_INF || (miningTicks > 0 && inLiquid)) {
+            return COST_INF;
+        }
         return totalCost;
     }
 
