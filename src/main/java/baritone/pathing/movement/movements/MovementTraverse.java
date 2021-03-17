@@ -338,12 +338,16 @@ public class MovementTraverse extends Movement {
             if (Baritone.settings().overshootTraverse.value && (feet.equals(dest.add(getDirection())) || feet.equals(dest.add(getDirection()).add(getDirection())))) {
                 return state.setStatus(MovementStatus.SUCCESS);
             }
-            Block low = BlockStateInterface.get(ctx, src).getBlock();
+            BlockState lowBs = BlockStateInterface.get(ctx, src);
+            Block low = lowBs.getBlock();
             Block high = BlockStateInterface.get(ctx, src.up()).getBlock();
             if (ctx.entity().getY() > src.y + 0.1D && !ctx.entity().isOnGround() && (low == Blocks.VINE || low == Blocks.LADDER || high == Blocks.VINE || high == Blocks.LADDER)) {
                 // hitting W could cause us to climb the ladder instead of going forward
-                // wait until we're on the ground
-                return state;
+                if (!MovementHelper.isLiquid(lowBs)) {
+                    // wait until we're on the ground
+                    // except if we are swimming, because we will never reach the ground
+                    return state;
+                }
             }
             BlockPos into = dest.subtract(src).add(dest);
             BlockState intoBelow = BlockStateInterface.get(ctx, into);
