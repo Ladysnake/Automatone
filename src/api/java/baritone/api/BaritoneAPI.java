@@ -60,11 +60,11 @@ public final class BaritoneAPI {
         final Calendar now = Calendar.getInstance();
         final boolean xd = now.get(Calendar.MONTH) == Calendar.APRIL && now.get(Calendar.DAY_OF_MONTH) <= 3;
         BaseText baritone = new LiteralText(xd ? "Automatoe" : getSettings().shortBaritonePrefix.value ? "A" : "Automatone");
-        baritone.setStyle(baritone.getStyle().withFormatting(Formatting.LIGHT_PURPLE));
+        baritone.setStyle(baritone.getStyle().withFormatting(Formatting.GREEN));
 
         // Outer brackets
         BaseText prefix = new LiteralText("");
-        prefix.setStyle(baritone.getStyle().withFormatting(Formatting.DARK_PURPLE));
+        prefix.setStyle(baritone.getStyle().withFormatting(Formatting.DARK_GREEN));
         prefix.append("[");
         prefix.append(baritone);
         prefix.append("]");
