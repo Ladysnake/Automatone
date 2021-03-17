@@ -19,11 +19,9 @@ package baritone.utils;
 
 import baritone.api.event.events.RenderEvent;
 import baritone.api.pathing.goals.*;
-import baritone.api.utils.BetterBlockPos;
-import baritone.api.utils.Helper;
 import baritone.api.utils.interfaces.IGoalRenderPos;
-import baritone.render.RenderedPath;
 import baritone.render.ClientPathingBehaviour;
+import baritone.render.RenderedPath;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
@@ -200,12 +198,8 @@ public final class PathRenderer implements IRenderer {
     public static void drawManySelectionBoxes(MatrixStack stack, Entity player, Collection<BlockPos> positions, Color color) {
         IRenderer.startLines(color, settings.pathRenderLineWidthPixels.value, settings.renderSelectionBoxesIgnoreDepth.value);
 
-        //BlockPos blockpos = movingObjectPositionIn.getBlockPos();
-        // TODO this assumes same dimension between primary baritone and render view? is this safe?
-        BlockStateInterface bsi = new BlockStateInterface(Objects.requireNonNull(MinecraftClient.getInstance().world));
-
         positions.forEach(pos -> {
-            BlockState state = bsi.get0(pos);
+            BlockState state = player.world.getBlockState(pos);
             VoxelShape shape = state.getOutlineShape(player.world, pos);
             Box toDraw = shape.isEmpty() ? VoxelShapes.fullCube().getBoundingBox() : shape.getBoundingBox();
             toDraw = toDraw.offset(pos);

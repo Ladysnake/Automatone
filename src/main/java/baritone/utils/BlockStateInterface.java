@@ -18,6 +18,7 @@
 package baritone.utils;
 
 import baritone.api.utils.IEntityContext;
+import baritone.utils.accessor.ServerChunkManagerAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -25,7 +26,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkManager;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.WorldChunk;
 
@@ -36,7 +36,7 @@ import net.minecraft.world.chunk.WorldChunk;
  */
 public class BlockStateInterface {
 
-    private final ChunkManager provider;
+    private final ServerChunkManagerAccessor provider;
     protected final BlockView world;
     public final BlockPos.Mutable isPassableBlockPos;
     public final BlockView access;
@@ -51,13 +51,13 @@ public class BlockStateInterface {
 
     public BlockStateInterface(World world) {
         this.world = world;
-        this.provider = world.getChunkManager();
+        this.provider = (ServerChunkManagerAccessor) world.getChunkManager();
         this.isPassableBlockPos = new BlockPos.Mutable();
         this.access = new BlockStateInterfaceAccessWrapper(this);
     }
 
     public boolean worldContainsLoadedChunk(int blockX, int blockZ) {
-        return provider.isChunkLoaded(blockX >> 4, blockZ >> 4);
+        return provider.automatone$getChunkNow(blockX >> 4, blockZ >> 4) != null;
     }
 
     public static Block getBlock(IEntityContext ctx, BlockPos pos) { // won't be called from the pathing thread because the pathing thread doesn't make a single blockpos pog
@@ -85,7 +85,7 @@ public class BlockStateInterface {
         if (cached != null && cached.getPos().x == x >> 4 && cached.getPos().z == z >> 4) {
             return getFromChunk(cached, x, y, z);
         }
-        WorldChunk chunk = provider.getWorldChunk(x >> 4, z >> 4, false);
+        WorldChunk chunk = provider.automatone$getChunkNow(x >> 4, z >> 4);
         if (chunk != null && !chunk.isEmpty()) {
             prev = chunk;
             return getFromChunk(chunk, x, y, z);
@@ -94,7 +94,16 @@ public class BlockStateInterface {
     }
 
     public boolean isLoaded(int x, int z) {
-        return this.provider.isChunkLoaded(x >> 4, z >> 4);
+        WorldChunk prevChunk = prev;
+        if (prevChunk != null && prevChunk.getPos().x == x >> 4 && prevChunk.getPos().z == z >> 4) {
+            return true;
+        }
+        prevChunk = provider.automatone$getChunkNow(x >> 4, z >> 4);
+        if (prevChunk != null && !prevChunk.isEmpty()) {
+            prev = prevChunk;
+            return true;
+        }
+        return false;
     }
 
     // get the block at x,y,z from this chunk WITHOUT creating a single blockpos object

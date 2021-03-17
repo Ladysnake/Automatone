@@ -21,6 +21,7 @@ import baritone.api.cache.IWorldScanner;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.BlockOptionalMetaLookup;
 import baritone.api.utils.IEntityContext;
+import baritone.utils.accessor.ServerChunkManagerAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
@@ -45,7 +46,7 @@ public enum WorldScanner implements IWorldScanner {
         if (filter.blocks().isEmpty()) {
             return res;
         }
-        ServerChunkManager chunkProvider = ctx.world().getChunkManager();
+        ServerChunkManagerAccessor chunkProvider = (ServerChunkManagerAccessor) ctx.world().getChunkManager();
 
         int maxSearchRadiusSq = maxSearchRadius * maxSearchRadius;
         int playerChunkX = ctx.feetPos().getX() >> 4;
@@ -69,7 +70,7 @@ public enum WorldScanner implements IWorldScanner {
                     foundChunks = true;
                     int chunkX = xoff + playerChunkX;
                     int chunkZ = zoff + playerChunkZ;
-                    Chunk chunk = chunkProvider.getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
+                    Chunk chunk = chunkProvider.automatone$getChunkNow(chunkX, chunkZ);
                     if (chunk == null) {
                         continue;
                     }
@@ -148,8 +149,8 @@ public enum WorldScanner implements IWorldScanner {
     private boolean scanChunkInto(int chunkX, int chunkZ, Chunk chunk, BlockOptionalMetaLookup filter, Collection<BlockPos> result, int max, int yLevelThreshold, int playerY, int[] coordinateIterationOrder) {
         ChunkSection[] chunkInternalStorageArray = chunk.getSectionArray();
         boolean foundWithinY = false;
-        if (chunkInternalStorageArray.length == coordinateIterationOrder.length) {
-            throw new IllegalStateException("Unexpected number of sections in chunk (expected " + coordinateIterationOrder.length + ", got " + chunkInternalStorageArray.length);
+        if (chunkInternalStorageArray.length != coordinateIterationOrder.length) {
+            throw new IllegalStateException("Unexpected number of sections in chunk (expected " + coordinateIterationOrder.length + ", got " + chunkInternalStorageArray.length + ")");
         }
         for (int yIndex = 0; yIndex < chunkInternalStorageArray.length; yIndex++) {
             int y0 = coordinateIterationOrder[yIndex];
