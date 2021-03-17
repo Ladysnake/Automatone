@@ -20,13 +20,12 @@ package baritone.behavior;
 import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.behavior.IPathingBehavior;
-import baritone.api.event.events.*;
+import baritone.api.event.events.PathEvent;
 import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalXZ;
 import baritone.api.process.PathingCommand;
 import baritone.api.utils.BetterBlockPos;
-import baritone.api.utils.Helper;
 import baritone.api.utils.PathCalculationResult;
 import baritone.api.utils.interfaces.IGoalRenderPos;
 import baritone.pathing.calc.AStarPathFinder;
@@ -99,6 +98,7 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior 
         ticksElapsedSoFar++;
         dispatchEvents();
         // Fuck it, synchronizing every tick for now
+        // TODO try not to synchronize every tick
         IBaritone.KEY.sync(this.baritone.getPlayerContext().entity());
     }
 

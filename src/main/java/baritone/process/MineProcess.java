@@ -181,10 +181,17 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
         List<BlockPos> locs = knownOreLocations;
         if (!locs.isEmpty()) {
             CalculationContext context = new CalculationContext(baritone);
-            List<BlockPos> locs2 = prune(context, new ArrayList<>(locs), filter, ORE_LOCATIONS_COUNT, blacklist, droppedItemsScan());
+            locs = prune(context, new ArrayList<>(locs), filter, ORE_LOCATIONS_COUNT, blacklist, droppedItemsScan());
             // can't reassign locs, gotta make a new var locs2, because we use it in a lambda right here, and variables you use in a lambda must be effectively final
-            Goal goal = new GoalComposite(locs2.stream().map(loc -> coalesce(loc, locs2, context)).toArray(Goal[]::new));
-            knownOreLocations = locs2;
+            int locsSize = locs.size();
+            Goal[] list = new Goal[locsSize];
+            for (int i = 0; i < locsSize; i++) {
+                BlockPos loc = locs.get(i);
+                Goal coalesce = coalesce(loc, locs, context);
+                list[i] = coalesce;
+            }
+            Goal goal = new GoalComposite(list);
+            knownOreLocations = locs;
             return new PathingCommand(goal, legit ? PathingCommandType.FORCE_REVALIDATE_GOAL_AND_PATH : PathingCommandType.REVALIDATE_GOAL_AND_PATH);
         }
         // we don't know any ore locations at the moment
@@ -324,6 +331,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
         for (Entity entity : ctx.world().iterateEntities()) {
             if (entity instanceof ItemEntity) {
                 ItemEntity ei = (ItemEntity) entity;
+                // PERF: getStack() calls the data tracker, which is kinda slow
                 if (filter.has(ei.getStack())) {
                     ret.add(entity.getBlockPos());
                 }
@@ -404,6 +412,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
             }
             return false;
         });
+        // PERF: replace the stream with an old fashioned loop
         List<BlockPos> locs = locs2
                 .stream()
                 .distinct()

@@ -24,8 +24,6 @@ import baritone.behavior.Behavior;
 import net.minecraft.entity.LivingEntity;
 
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -84,6 +82,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
     @Override
     public final synchronized void clearAllKeys() {
         // Note that calling setSprinting before entity attributes are initialized will crash the game
+        // PERF: entity flags use a lock, see if we can put this elsewhere to reduce the number of calls
         if (this.ctx.entity().isSprinting()) this.ctx.entity().setSprinting(false);
         this.inputForceStateMap.clear();
     }

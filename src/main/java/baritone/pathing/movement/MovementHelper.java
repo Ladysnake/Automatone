@@ -504,6 +504,7 @@ public interface MovementHelper extends ActionCosts {
     }
 
     static boolean isLiquid(BlockState blockState) {
+        // PERF: getFluidState is kinda slow, but users can install Lithium to fix it
         return !blockState.getFluidState().isEmpty();
     }
 
@@ -535,6 +536,7 @@ public interface MovementHelper extends ActionCosts {
                 || block instanceof ShulkerBoxBlock) {
             return false;
         }
+        // PERF: isShapeFullCube is slow, but people can install lithium to fix it
         return Block.isShapeFullCube(state.getCollisionShape(null, null));
     }
 
