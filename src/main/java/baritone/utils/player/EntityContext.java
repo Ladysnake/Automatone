@@ -19,15 +19,19 @@ package baritone.utils.player;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.cache.IWorldData;
+import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.IEntityContext;
 import baritone.api.utils.IPlayerController;
 import baritone.api.utils.RayTraceUtils;
+import baritone.utils.accessor.ServerChunkManagerAccessor;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.Nullable;
 
 public class EntityContext implements IEntityContext {
@@ -68,5 +72,23 @@ public class EntityContext implements IEntityContext {
     @Override
     public HitResult objectMouseOver() {
         return RayTraceUtils.rayTraceTowards(entity(), entityRotations(), playerController().getBlockReachDistance());
+    }
+
+    @Override
+    public BetterBlockPos feetPos() {
+        // TODO find a better way to deal with soul sand!!!!!
+        double x = entity().getX();
+        double z = entity().getZ();
+        BetterBlockPos feet = new BetterBlockPos(x, entity().getY() + 0.1251, z);
+
+        ServerWorld world = world();
+        if (world != null) {
+            WorldChunk chunk = ((ServerChunkManagerAccessor) world.getChunkManager()).automatone$getChunkNow((int) x << 4, (int) z << 4);
+            if (chunk != null && chunk.getBlockState(feet).getBlock() instanceof SlabBlock) {
+                return feet.up();
+            }
+        }
+
+        return feet;
     }
 }
