@@ -32,7 +32,10 @@ import baritone.command.defaults.DefaultCommands;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Pair;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -144,7 +147,11 @@ public class BaritoneCommandManager implements ICommandManager {
 
         private Stream<String> tabComplete() {
             try {
-                return this.command.tabComplete(this.label, this.args);
+                return this.command.tabComplete(this.label, this.args).map(s -> {
+                    Deque<ICommandArgument> confirmedArgs = new ArrayDeque<>(this.args.getConsumed());
+                    confirmedArgs.removeLast();
+                    return Stream.concat(Stream.of(this.label), confirmedArgs.stream().map(ICommandArgument::getValue)).collect(Collectors.joining(" ")) + " " + s;
+                });
             } catch (Throwable t) {
                 return Stream.empty();
             }
