@@ -101,7 +101,7 @@ public class SelCommand extends Command {
             }
         } else if (action == Action.SET || action == Action.WALLS || action == Action.SHELL || action == Action.CLEARAREA || action == Action.REPLACE) {
             BlockOptionalMeta type = action == Action.CLEARAREA
-                    ? new BlockOptionalMeta(Blocks.AIR)
+                    ? new BlockOptionalMeta(baritone.getPlayerContext().world(), Blocks.AIR)
                     : args.getDatatypeFor(ForBlockOptionalMeta.INSTANCE);
             BlockOptionalMetaLookup replaces = null;
             if (action == Action.REPLACE) {

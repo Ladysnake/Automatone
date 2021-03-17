@@ -17,19 +17,23 @@
 
 package baritone.api.utils;
 
+import baritone.api.BaritoneAPI;
+import baritone.api.IBaritone;
 import baritone.api.cache.IWorldData;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.*;
-import net.minecraft.world.World;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -48,10 +52,10 @@ public interface IEntityContext {
 
     IPlayerController playerController();
 
-    World world();
+    ServerWorld world();
 
     default Iterable<Entity> worldEntities() {
-        return ((ServerWorld) world()).iterateEntities();
+        return world().iterateEntities();
     }
 
     default Stream<Entity> worldEntitiesStream() {
@@ -114,7 +118,14 @@ public interface IEntityContext {
     }
 
     default void logDebug(String message) {
+        if (!BaritoneAPI.getSettings().chatDebug.value) {
+            return;
+        }
         LivingEntity entity = entity();
         if (entity instanceof PlayerEntity) ((PlayerEntity) entity).sendMessage(new LiteralText(message).formatted(Formatting.GRAY), false);
+        MinecraftServer server = world().getServer();
+        for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) {
+            IBaritone.KEY.get(p).logDirect(message);
+        }
     }
 }

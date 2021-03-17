@@ -22,7 +22,7 @@ import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.BlockOptionalMetaLookup;
 import baritone.api.utils.IEntityContext;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.world.ClientChunkManager;
+import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.*;
@@ -43,7 +43,7 @@ public enum WorldScanner implements IWorldScanner {
         if (filter.blocks().isEmpty()) {
             return res;
         }
-        ClientChunkManager chunkProvider = (ClientChunkManager) ctx.world().getChunkManager();
+        ServerChunkManager chunkProvider = ctx.world().getChunkManager();
 
         int maxSearchRadiusSq = maxSearchRadius * maxSearchRadius;
         int playerChunkX = ctx.feetPos().getX() >> 4;
@@ -67,7 +67,7 @@ public enum WorldScanner implements IWorldScanner {
                     foundChunks = true;
                     int chunkX = xoff + playerChunkX;
                     int chunkZ = zoff + playerChunkZ;
-                    WorldChunk chunk = chunkProvider.getChunk(chunkX, chunkZ, null, false);
+                    Chunk chunk = chunkProvider.getChunk(chunkX, chunkZ, null, false);
                     if (chunk == null) {
                         continue;
                     }
@@ -93,11 +93,11 @@ public enum WorldScanner implements IWorldScanner {
             return Collections.emptyList();
         }
 
-        ClientChunkManager chunkProvider = (ClientChunkManager) ctx.world().getChunkManager();
-        WorldChunk chunk = chunkProvider.getChunk(pos.x, pos.z, null, false);
+        ServerChunkManager chunkProvider = ctx.world().getChunkManager();
+        Chunk chunk = chunkProvider.getChunk(pos.x, pos.z, null, false);
         int playerY = ctx.feetPos().getY();
 
-        if (chunk == null || chunk.isEmpty()) {
+        if (!(chunk instanceof WorldChunk) || ((WorldChunk) chunk).isEmpty()) {
             return Collections.emptyList();
         }
 

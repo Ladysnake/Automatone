@@ -37,6 +37,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -207,7 +208,7 @@ public class SettingsUtil {
         FLOAT(Float.class, Float::parseFloat),
         LONG(Long.class, Long::parseLong),
         STRING(String.class, String::new),
-        DIRECTION(Direction.class, Direction::byName),
+        DIRECTION(Direction.class, d -> Direction.valueOf(d.toUpperCase(Locale.ROOT))),
         COLOR(
                 Color.class,
                 str -> new Color(Integer.parseInt(str.split(",")[0]), Integer.parseInt(str.split(",")[1]), Integer.parseInt(str.split(",")[2])),
@@ -288,7 +289,7 @@ public class SettingsUtil {
 
         @Override
         public boolean accepts(Type type) {
-            return type instanceof Class && this.cla$$.isAssignableFrom((Class) type);
+            return type instanceof Class && this.cla$$.isAssignableFrom((Class<?>) type);
         }
 
         public static Parser getParser(Type type) {

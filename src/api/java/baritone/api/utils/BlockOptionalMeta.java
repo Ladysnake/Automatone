@@ -18,49 +18,45 @@
 package baritone.api.utils;
 
 import baritone.api.utils.accessor.IItemStack;
-import com.google.common.collect.ImmutableSet;
-import io.netty.util.concurrent.ThreadPerTaskExecutor;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.*;
-import net.minecraft.loot.condition.LootConditionManager;
+import net.minecraft.loot.LootTables;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
-import net.minecraft.resource.*;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Unit;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public final class BlockOptionalMeta {
 
     private final Block block;
     private final Set<BlockState> blockstates;
-    private final ImmutableSet<Integer> stateHashes;
-    private final ImmutableSet<Integer> stackHashes;
+    private final IntSet stateHashes;
+    private final IntSet stackHashes;
     private static final Pattern pattern = Pattern.compile("^(.+?)(?::(\\d+))?$");
-    private static LootManager manager;
-    private static LootConditionManager predicate = new LootConditionManager();
-    private static Map<Block, List<Item>> drops = new HashMap<>();
+    private static final Map<Block, List<Item>> drops = new HashMap<>();
 
-    public BlockOptionalMeta(@Nonnull Block block) {
+    public BlockOptionalMeta(ServerWorld world, @Nonnull Block block) {
         this.block = block;
         this.blockstates = getStates(block);
         this.stateHashes = getStateHashes(blockstates);
-        this.stackHashes = getStackHashes(blockstates);
+        this.stackHashes = getStackHashes(world, blockstates);
     }
 
-    public BlockOptionalMeta(@Nonnull String selector) {
+    public BlockOptionalMeta(ServerWorld world, @Nonnull String selector) {
         Matcher matcher = pattern.matcher(selector);
 
         if (!matcher.find()) {
@@ -72,32 +68,28 @@ public final class BlockOptionalMeta {
         block = BlockUtils.stringToBlockRequired(matchResult.group(1));
         blockstates = getStates(block);
         stateHashes = getStateHashes(blockstates);
-        stackHashes = getStackHashes(blockstates);
+        stackHashes = getStackHashes(world, blockstates);
     }
 
     private static Set<BlockState> getStates(@Nonnull Block block) {
         return new HashSet<>(block.getStateManager().getStates());
     }
 
-    private static ImmutableSet<Integer> getStateHashes(Set<BlockState> blockstates) {
-        return ImmutableSet.copyOf(
-                blockstates.stream()
+    private static IntSet getStateHashes(Set<BlockState> blockstates) {
+        return blockstates.stream()
                         .map(BlockState::hashCode)
-                        .toArray(Integer[]::new)
-        );
+                        .collect(Collectors.toCollection(IntOpenHashSet::new));
     }
 
-    private static ImmutableSet<Integer> getStackHashes(Set<BlockState> blockstates) {
+    private static IntSet getStackHashes(ServerWorld world, Set<BlockState> blockstates) {
         //noinspection ConstantConditions
-        return ImmutableSet.copyOf(
-                blockstates.stream()
-                        .flatMap(state -> drops(state.getBlock())
+        return blockstates.stream()
+                        .flatMap(state -> drops(world, state.getBlock())
                                 .stream()
                                 .map(item -> new ItemStack(item, 1))
                         )
                         .map(stack -> ((IItemStack) (Object) stack).getBaritoneHash())
-                        .toArray(Integer[]::new)
-        );
+                        .collect(Collectors.toCollection(IntOpenHashSet::new));
     }
 
     public Block getBlock() {
@@ -135,28 +127,8 @@ public final class BlockOptionalMeta {
         return null;
     }
 
-    public static LootManager getManager() {
-        if (manager == null) {
-            ResourcePackManager rpl = new ResourcePackManager(ResourcePackProfile::new, new VanillaDataPackProvider());
-            rpl.scanPacks();
-            ResourcePack thePack = rpl.getProfiles().iterator().next().createResourcePack();
-            ReloadableResourceManager resourceManager = new ReloadableResourceManagerImpl(ResourceType.SERVER_DATA);
-            manager = new LootManager(predicate);
-            resourceManager.registerListener(manager);
-            try {
-                resourceManager.beginReload(new ThreadPerTaskExecutor(Thread::new), new ThreadPerTaskExecutor(Thread::new), Collections.singletonList(thePack), CompletableFuture.completedFuture(Unit.INSTANCE)).get();
-            } catch (Exception exception) {
-                throw new RuntimeException(exception);
-            }
-        }
-        return manager;
-    }
-
-    public static LootConditionManager getPredicateManager() {
-        return predicate;
-    }
-
-    private static synchronized List<Item> drops(Block b) {
+    // TODO check if erasing the metadata of both the block and the drops is a good idea
+    private static synchronized List<Item> drops(ServerWorld world, Block b) {
         return drops.computeIfAbsent(b, block -> {
             Identifier lootTableLocation = block.getLootTableId();
             if (lootTableLocation == LootTables.EMPTY) {
@@ -164,9 +136,8 @@ public final class BlockOptionalMeta {
             } else {
                 List<Item> items = new ArrayList<>();
 
-                // the other overload for generate doesnt work in forge because forge adds code that requires a non null world
-                getManager().getTable(lootTableLocation).generateLoot(
-                    new LootContext.Builder(null)
+                world.getServer().getLootManager().getTable(lootTableLocation).generateLoot(
+                    new LootContext.Builder(world)
                         .random(new Random())
                         .parameter(LootContextParameters.ORIGIN, Vec3d.of(BlockPos.ZERO))
                         .parameter(LootContextParameters.TOOL, ItemStack.EMPTY)

@@ -25,7 +25,7 @@ import baritone.api.utils.RayTraceUtils;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -54,8 +54,10 @@ public class EntityContext implements IEntityContext {
     }
 
     @Override
-    public World world() {
-        return this.entity.world;
+    public ServerWorld world() {
+        World world = this.entity.world;
+        if (world.isClient) throw new IllegalStateException();
+        return (ServerWorld) world;
     }
 
     @Override

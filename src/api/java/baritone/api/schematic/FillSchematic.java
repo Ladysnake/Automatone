@@ -32,10 +32,6 @@ public class FillSchematic extends AbstractSchematic {
         this.bom = bom;
     }
 
-    public FillSchematic(int x, int y, int z, BlockState state) {
-        this(x, y, z, new BlockOptionalMeta(state.getBlock()));
-    }
-
     public BlockOptionalMeta getBom() {
         return bom;
     }

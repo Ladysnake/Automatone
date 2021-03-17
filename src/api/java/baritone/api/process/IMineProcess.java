@@ -21,8 +21,6 @@ import baritone.api.utils.BlockOptionalMeta;
 import baritone.api.utils.BlockOptionalMetaLookup;
 import net.minecraft.block.Block;
 
-import java.util.stream.Stream;
-
 /**
  * @author Brady
  * @since 9/23/2018
@@ -91,13 +89,7 @@ public interface IMineProcess extends IBaritoneProcess {
      * @param quantity The total number of items to get
      * @param blocks   The blocks to mine
      */
-    default void mine(int quantity, Block... blocks) {
-        mine(quantity, new BlockOptionalMetaLookup(
-                Stream.of(blocks)
-                        .map(BlockOptionalMeta::new)
-                        .toArray(BlockOptionalMeta[]::new)
-        ));
-    }
+    void mine(int quantity, Block... blocks);
 
     /**
      * Begin to search for and mine the specified blocks.

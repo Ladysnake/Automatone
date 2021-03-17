@@ -46,7 +46,7 @@ public abstract class MixinItemStack implements IItemStack {
     }
 
     @Inject(
-            method = "<init>*",
+            method = "<init>*", // TODO check if this actually works with smithing tables and stuff
             at = @At("RETURN")
     )
     private void onInit(CallbackInfo ci) {

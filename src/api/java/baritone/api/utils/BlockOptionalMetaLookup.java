@@ -20,6 +20,7 @@ package baritone.api.utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.world.ServerWorld;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,21 +34,21 @@ public class BlockOptionalMetaLookup {
         this.boms = boms;
     }
 
-    public BlockOptionalMetaLookup(Block... blocks) {
+    public BlockOptionalMetaLookup(ServerWorld world, Block... blocks) {
         this.boms = Stream.of(blocks)
-                .map(BlockOptionalMeta::new)
+                .map(block -> new BlockOptionalMeta(world, block))
                 .toArray(BlockOptionalMeta[]::new);
     }
 
-    public BlockOptionalMetaLookup(List<Block> blocks) {
+    public BlockOptionalMetaLookup(ServerWorld world, List<Block> blocks) {
         this.boms = blocks.stream()
-                .map(BlockOptionalMeta::new)
+                .map(block -> new BlockOptionalMeta(world, block))
                 .toArray(BlockOptionalMeta[]::new);
     }
 
-    public BlockOptionalMetaLookup(String... blocks) {
+    public BlockOptionalMetaLookup(ServerWorld world, String... blocks) {
         this.boms = Stream.of(blocks)
-                .map(BlockOptionalMeta::new)
+                .map(block -> new BlockOptionalMeta(world, block))
                 .toArray(BlockOptionalMeta[]::new);
     }
 

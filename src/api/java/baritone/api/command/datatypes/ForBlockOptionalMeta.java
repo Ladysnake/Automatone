@@ -27,7 +27,7 @@ public enum ForBlockOptionalMeta implements IDatatypeFor<BlockOptionalMeta> {
 
     @Override
     public BlockOptionalMeta get(IDatatypeContext ctx) throws CommandException {
-        return new BlockOptionalMeta(ctx.getConsumer().getString());
+        return new BlockOptionalMeta(ctx.getBaritone().getPlayerContext().world(), ctx.getConsumer().getString());
     }
 
     @Override

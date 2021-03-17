@@ -45,7 +45,7 @@ public interface IWorldScanner {
     List<BlockPos> scanChunkRadius(IEntityContext ctx, BlockOptionalMetaLookup filter, int max, int yLevelThreshold, int maxSearchRadius);
 
     default List<BlockPos> scanChunkRadius(IEntityContext ctx, List<Block> filter, int max, int yLevelThreshold, int maxSearchRadius) {
-        return scanChunkRadius(ctx, new BlockOptionalMetaLookup(filter.toArray(new Block[0])), max, yLevelThreshold, maxSearchRadius);
+        return scanChunkRadius(ctx, new BlockOptionalMetaLookup(ctx.world(), filter.toArray(new Block[0])), max, yLevelThreshold, maxSearchRadius);
     }
 
     /**
@@ -73,7 +73,7 @@ public interface IWorldScanner {
      * @return The matching block positions
      */
     default List<BlockPos> scanChunk(IEntityContext ctx, List<Block> blocks, ChunkPos pos, int max, int yLevelThreshold) {
-        return scanChunk(ctx, new BlockOptionalMetaLookup(blocks), pos, max, yLevelThreshold);
+        return scanChunk(ctx, new BlockOptionalMetaLookup(ctx.world(), blocks), pos, max, yLevelThreshold);
     }
 
     /**

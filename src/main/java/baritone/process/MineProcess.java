@@ -32,7 +32,6 @@ import baritone.utils.BaritoneProcessHelper;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.NotificationHelper;
 import net.minecraft.block.*;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -41,6 +40,7 @@ import net.minecraft.util.math.BlockPos;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static baritone.api.pathing.movement.ActionCosts.COST_INF;
 
@@ -320,7 +320,8 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
             return Collections.emptyList();
         }
         List<BlockPos> ret = new ArrayList<>();
-        for (Entity entity : ((ClientWorld) ctx.world()).getEntities()) {
+        // TODO probably don't iterate all entities
+        for (Entity entity : ctx.world().iterateEntities()) {
             if (entity instanceof ItemEntity) {
                 ItemEntity ei = (ItemEntity) entity;
                 if (filter.has(ei.getStack())) {
@@ -461,7 +462,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
 
     @Override
     public void mineByName(int quantity, String... blocks) {
-        mine(quantity, new BlockOptionalMetaLookup(blocks));
+        mine(quantity, new BlockOptionalMetaLookup(this.baritone.getPlayerContext().world(), blocks));
     }
 
     @Override
@@ -482,5 +483,14 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
             this.baritone.activate();
             rescan(new ArrayList<>(), new CalculationContext(baritone));
         }
+    }
+
+    @Override
+    public void mine(int quantity, Block... blocks) {
+        mine(quantity, new BlockOptionalMetaLookup(
+                Stream.of(blocks)
+                        .map(block -> new BlockOptionalMeta(this.baritone.getPlayerContext().world(), block))
+                        .toArray(BlockOptionalMeta[]::new)
+        ));
     }
 }

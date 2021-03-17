@@ -20,17 +20,19 @@ package baritone.api;
 import baritone.api.behavior.ILookBehavior;
 import baritone.api.behavior.IPathingBehavior;
 import baritone.api.cache.IWorldProvider;
+import baritone.api.command.manager.ICommandManager;
 import baritone.api.event.listener.IEventBus;
 import baritone.api.pathing.calc.IPathingControlManager;
 import baritone.api.process.*;
 import baritone.api.utils.IEntityContext;
 import baritone.api.utils.IInputOverrideHandler;
-import baritone.api.command.manager.ICommandManager;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -154,6 +156,10 @@ public interface IBaritone extends AutoSyncedComponent {
         // We won't log debug chat into toasts
         // Because only a madman would want that extreme spam -_-
         logDirect(message);
+        MinecraftServer server = this.getPlayerContext().world().getServer();
+        for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) {
+            KEY.get(p).logDirect(message);
+        }
     }
 
     /**
