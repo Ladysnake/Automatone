@@ -67,7 +67,7 @@ public enum WorldScanner implements IWorldScanner {
                     foundChunks = true;
                     int chunkX = xoff + playerChunkX;
                     int chunkZ = zoff + playerChunkZ;
-                    Chunk chunk = chunkProvider.getChunk(chunkX, chunkZ, null, false);
+                    Chunk chunk = chunkProvider.getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
                     if (chunk == null) {
                         continue;
                     }
@@ -94,7 +94,7 @@ public enum WorldScanner implements IWorldScanner {
         }
 
         ServerChunkManager chunkProvider = ctx.world().getChunkManager();
-        Chunk chunk = chunkProvider.getChunk(pos.x, pos.z, null, false);
+        Chunk chunk = chunkProvider.getChunk(pos.x, pos.z, ChunkStatus.FULL, false);
         int playerY = ctx.feetPos().getY();
 
         if (!(chunk instanceof WorldChunk) || ((WorldChunk) chunk).isEmpty()) {
