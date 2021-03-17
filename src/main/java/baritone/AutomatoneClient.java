@@ -56,12 +56,12 @@ public final class AutomatoneClient implements ClientModInitializer {
             PathRenderer.render(renderEvent, baritone.getClientPathingBehaviour());
         }
 
+        SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), ISelectionManager.KEY.get(mc.world).getSelections());
+
         if (!mc.isIntegratedServerRunning()) {
             // FIXME we should really be able to render stuff in multiplayer
             return;
         }
-
-        SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), ISelectionManager.KEY.get(mc.world).getSelections());
 
         DefaultCommands.selCommand.renderSelectionBox(renderEvent);
     }
@@ -69,6 +69,10 @@ public final class AutomatoneClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         EntityRendererRegistry.INSTANCE.register(Automatone.FAKE_PLAYER, (r, it) -> new PlayerEntityRenderer(r));
+        ClientPlayNetworking.registerGlobalReceiver(AutomatoneNetworking.OPEN_CLICK_SCREEN, (client, handler, buf, responseSender) -> {
+            UUID uuid = buf.readUuid();
+            client.execute(() -> MinecraftClient.getInstance().openScreen(new GuiClick(uuid)));
+        });
         ClientPlayNetworking.registerGlobalReceiver(AutomatoneNetworking.FAKE_PLAYER_SPAWN, (client, handler, buf, responseSender) -> {
             int id = buf.readVarInt();
             UUID uuid = buf.readUuid();

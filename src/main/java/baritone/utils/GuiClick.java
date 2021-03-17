@@ -28,9 +28,9 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.util.math.Vector4f;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -101,7 +101,7 @@ public class GuiClick extends Screen {
                     client.player.sendChatMessage("/automatone sel clear");
                     client.player.sendChatMessage(String.format("/automatone sel 1 %d %d %d", clickStart.getX(), clickStart.getY(), clickStart.getZ()));
                     client.player.sendChatMessage(String.format("/automatone sel 2 %d %d %d", currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));
-                    BaseText component = new LiteralText(BaritoneAPI.getPrefix() + " Selection made! For usage: " + FORCE_COMMAND_PREFIX + "help sel");
+                    MutableText component = new LiteralText("").append(BaritoneAPI.getPrefix()).append(" Selection made! For usage: " + FORCE_COMMAND_PREFIX + "help sel");
                     component.setStyle(component.getStyle()
                             .withFormatting(Formatting.WHITE)
                             .withClickEvent(new ClickEvent(

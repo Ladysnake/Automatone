@@ -29,8 +29,9 @@ import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
 public final class AutomatoneNetworking {
-    public static final Identifier FAKE_PLAYER_SPAWN = new Identifier("automatone", "fake_player_spawn");
-    public static final Identifier PLAYER_PROFILE_SET = new Identifier("automatone", "fake_player_profile");
+    public static final Identifier FAKE_PLAYER_SPAWN = Automatone.id("fake_player_spawn");
+    public static final Identifier PLAYER_PROFILE_SET = Automatone.id("fake_player_profile");
+    public static final Identifier OPEN_CLICK_SCREEN = Automatone.id("open_click_screen");
 
     public static CustomPayloadS2CPacket createFakePlayerSpawnPacket(FakeServerPlayerEntity player) {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
