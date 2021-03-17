@@ -23,6 +23,7 @@ import baritone.api.utils.BlockOptionalMetaLookup;
 import baritone.api.utils.IEntityContext;
 import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerChunkManager;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.*;
@@ -34,6 +35,7 @@ public enum WorldScanner implements IWorldScanner {
 
     INSTANCE;
 
+    public static final int SECTION_HEIGHT = 16;
     private static final int[] DEFAULT_COORDINATE_ITERATION_ORDER = IntStream.range(0, 16).toArray();
 
     @Override
@@ -51,7 +53,7 @@ public enum WorldScanner implements IWorldScanner {
         int playerY = ctx.feetPos().getY();
 
         int playerYBlockStateContainerIndex = playerY >> 4;
-        int[] coordinateIterationOrder = IntStream.range(0, 16).boxed().sorted(Comparator.comparingInt(y -> Math.abs(y - playerYBlockStateContainerIndex))).mapToInt(x -> x).toArray();
+        int[] coordinateIterationOrder = streamSectionY(ctx.world()).boxed().sorted(Comparator.comparingInt(y -> Math.abs(y - playerYBlockStateContainerIndex))).mapToInt(x -> x).toArray();
 
         int searchRadiusSq = 0;
         boolean foundWithinY = false;
@@ -102,8 +104,12 @@ public enum WorldScanner implements IWorldScanner {
         }
 
         ArrayList<BlockPos> res = new ArrayList<>();
-        scanChunkInto(pos.x << 4, pos.z << 4, chunk, filter, res, max, yLevelThreshold, playerY, DEFAULT_COORDINATE_ITERATION_ORDER);
+        scanChunkInto(pos.x << 4, pos.z << 4, chunk, filter, res, max, yLevelThreshold, playerY, streamSectionY(ctx.world()).toArray());
         return res;
+    }
+
+    private IntStream streamSectionY(ServerWorld world) {
+        return IntStream.range(0, world.getHeight() / SECTION_HEIGHT);
     }
 
     @Override
@@ -142,7 +148,10 @@ public enum WorldScanner implements IWorldScanner {
     private boolean scanChunkInto(int chunkX, int chunkZ, Chunk chunk, BlockOptionalMetaLookup filter, Collection<BlockPos> result, int max, int yLevelThreshold, int playerY, int[] coordinateIterationOrder) {
         ChunkSection[] chunkInternalStorageArray = chunk.getSectionArray();
         boolean foundWithinY = false;
-        for (int yIndex = 0; yIndex < 16; yIndex++) {
+        if (chunkInternalStorageArray.length == coordinateIterationOrder.length) {
+            throw new IllegalStateException("Unexpected number of sections in chunk (expected " + coordinateIterationOrder.length + ", got " + chunkInternalStorageArray.length);
+        }
+        for (int yIndex = 0; yIndex < chunkInternalStorageArray.length; yIndex++) {
             int y0 = coordinateIterationOrder[yIndex];
             ChunkSection section = chunkInternalStorageArray[y0];
             if (section == null || ChunkSection.isEmpty(section)) {
