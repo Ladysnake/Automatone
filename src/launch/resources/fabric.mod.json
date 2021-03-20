@@ -18,7 +18,7 @@
     "sources": "https://github.com/Ladysnake/automatone",
     "issues": "https://github.com/Ladysnake/automatone/issues"
   },
-  "license": "LGPL-3.0-only",
+  "license": "LGPL-3.0",
   "environment": "*",
   "mixins": [
     "mixins.automatone.json"

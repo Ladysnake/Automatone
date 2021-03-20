@@ -26,6 +26,7 @@ version '0.1.0'
 
 import baritone.gradle.task.CreateDistTask
 import baritone.gradle.task.ProguardTask
+import org.apache.tools.ant.taskdefs.condition.Os
 
 apply plugin: 'java'
 apply plugin: LoomGradlePlugin
@@ -35,6 +36,7 @@ compileJava {
     sourceCompatibility = targetCompatibility = '1.8'
     options.encoding = "UTF-8" // allow emoji in comments :^)
 }
+
 
 sourceSets {
     api {
@@ -78,10 +80,9 @@ repositories {
         url = 'https://ladysnake.jfrog.io/artifactory/mods'
     }
     maven {
-        name = 'spongepowered-repo'
-        url = 'https://repo.spongepowered.org/maven/'
+        name = 'SpongePowered'
+        url = 'https://repo.spongepowered.org/repository/maven-public/'
     }
-
     maven {
         name = 'impactdevelopment-repo'
         url = 'https://impactdevelopment.github.io/maven/'
@@ -103,7 +104,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
 
-    // launchwrapper + dependencies
+    // this makes it compile with the forge tweak stuff
     compile ('net.minecraft:launchwrapper:1.12') {
         transitive = false
     }
@@ -129,6 +130,23 @@ javadoc {
     classpath += sourceSets.api.compileClasspath
 }
 
+// skidded from fabric-example-mod (comments and all)
+tasks.withType(JavaCompile).configureEach {
+    // ensure that the encoding is set to UTF-8, no matter what the system default is
+    // this fixes some edge cases with special characters not displaying correctly
+    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+    // If Javadoc is generated, this must be specified in that task too.
+    it.options.encoding = "UTF-8"
+
+    // The Minecraft launcher currently installs Java 8 for users, so your mod probably wants to target Java 8 too
+    // JDK 9 introduced a new way of specifying this that will make sure no newer classes or methods are used.
+    // We'll use that if it's available, but otherwise we'll use the older option.
+    def targetVersion = 8
+    if (JavaVersion.current().isJava9Compatible()) {
+        it.options.release = targetVersion
+    }
+}
+
 jar {
     from sourceSets.launch.output, sourceSets.api.output
 
@@ -146,42 +164,37 @@ jar {
 }
 
 // skidded from ProguardTask
-/*File getClientJar() {
+File getClientJar() {
     return project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().findByName("launch").getRuntimeClasspath().getFiles()
             .stream()
-            .filter({f -> f.toString().endsWith("client-extra.jar")})
-            .map({f -> new File(f.getParentFile(), "client.jar")})
+            .filter({ f -> f.toString().endsWith("client-extra.jar") })
+            .map({ f -> new File(f.getParentFile(), "client.jar") })
+            .findFirst()
+            .get()
+}
+
+File getClientJarFabric() {
+    return project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().findByName("launch").getRuntimeClasspath().getFiles()
+            .stream()
+            .filter({ f -> f.getName().endsWith("-v2.jar") && f.getName().startsWith("minecraft-") })
+            .map({ f -> new File(f.getParentFile().getParentFile(), f.getName().toString().replace("mapped", "intermediary")) })
             .findFirst()
             .get()
 }
 
 task copyMcJar(type: Copy) {
-    def mcJar = {getClientJar()}
+    def mcJar = { getClientJarFabric() }
 
     from mcJar
-    into 'build/createMcSrgJar/'
-    rename {'client-srg.jar'}
+    into 'build/createMcIntermediaryJar/'
+    rename { 'client.jar' }
 }
 
-task createSrgMc(type: RenameJarInPlace) {
-    setInput(new File(copyMcJar.getOutputs().getFiles().getSingleFile(), "client-srg.jar"))
-    setClasspath(files({getClientJar()}))
-
-    // fork
-    setMappingType(net.minecraftforge.gradle.common.util.MappingFile.Mapping.SEARGE)
-    setJarTask('trans alaska pipeline')
-}
-project.afterEvaluate {
-    createSrgMc.dependsOn(extractSrg, copyMcJar)
-    createSrgMc.setMappings(extractSrg.getOutput())
-}
-
-
-task proguard(type: ProguardTask, dependsOn: createSrgMc) { // TODO: dont need to create srg mc if doing notch build
+task proguard(type: ProguardTask, dependsOn: copyMcJar) {
     url 'https://downloads.sourceforge.net/project/proguard/proguard/6.0/proguard6.0.3.zip'
     extract 'proguard6.0.3/lib/proguard.jar'
 }
 
 task createDist(type: CreateDistTask, dependsOn: proguard)
 
-build.finalizedBy(createDist)*/
+build.finalizedBy(createDist)

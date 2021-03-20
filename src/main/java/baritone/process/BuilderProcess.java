@@ -851,13 +851,12 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         if (current.getBlock() instanceof FluidBlock && Baritone.settings().okIfWater.value) {
             return true;
         }
+        if (current.getBlock() instanceof AirBlock && desired.getBlock() instanceof AirBlock) {
+            return true;
+        }
         if (current.getBlock() instanceof AirBlock && Baritone.settings().okIfAir.value.contains(desired.getBlock())) {
             return true;
         }
-        if (desired.getBlock() instanceof AirBlock && Baritone.settings().buildIgnoreBlocks.value.contains(current.getBlock())) {
-            return true;
-        }
-        // TODO more complicated comparison logic I guess
         if (desired.getBlock() instanceof AirBlock && Baritone.settings().buildIgnoreBlocks.value.contains(current.getBlock())) {
             return true;
         }

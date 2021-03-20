@@ -199,7 +199,7 @@ public final class FarmProcess extends BaritoneProcessHelper implements IFarmPro
         List<BlockPos> openSoulsand = new ArrayList<>();
         for (BlockPos pos : locations) {
             //check if the target block is out of range.
-            if (range != 0 && !pos.isWithinDistance(center, range)) {
+            if (range != 0 && pos.distanceSq(center) > range * range) {
                 continue;
             }
 

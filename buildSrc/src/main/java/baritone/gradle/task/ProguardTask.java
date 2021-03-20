@@ -20,6 +20,8 @@ package baritone.gradle.task;
 import baritone.gradle.util.Determinizer;
 import org.apache.commons.io.IOUtils;
 import org.gradle.api.plugins.JavaPluginConvention;
+import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.internal.file.IdentityFileResolver;
 import org.gradle.api.tasks.Input;
@@ -215,6 +217,9 @@ public class ProguardTask extends BaritoneGradleTask {
                 if (getProject().hasProperty("baritone.forge_build")) {
                     libraries = dependencies
                         .map(f -> f.toString().endsWith("client.jar") ? getSrgMcJar() : f);
+                } else if (getProject().hasProperty("baritone.fabric_build")) {
+                    libraries = dependencies
+                        .map(f -> f.getName().endsWith("-v2.jar") && f.getName().startsWith("minecraft-") ? getSrgMcJar() : f);
                 } else {
                     libraries = dependencies;
                 }
