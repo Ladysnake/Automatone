@@ -1,9 +1,5 @@
 # Installation
 
-The easiest way to install Baritone is to install [Impact](https://impactclient.net/), which comes with Baritone.
-
-You can also use a custom version json for Minecraft, with the [1.14.4](https://www.dropbox.com/s/rkml3hjokd3qv0m/1.14.4-Baritone.zip?dl=1) version or the [1.15.2](https://www.dropbox.com/s/8rx6f0kts9hvd4f/1.15.2-Baritone.zip?dl=1) version or the [1.16.5](https://www.dropbox.com/s/i6f292o2i7o9acp/1.16.5-Baritone.zip?dl=1) version.
-
 Once Baritone is installed, look [here](USAGE.md) for instructions on how to use it.
 
 ## Prebuilt official releases

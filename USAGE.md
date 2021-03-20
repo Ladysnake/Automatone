@@ -2,11 +2,11 @@
 
 # Prefix
 
-Baritone's chat control prefix is `#` by default. In Impact, you can also use `.b` as a prefix. (for example, `.b click` instead of `#click`)
+Baritone's chat control prefix is `#` by default.
 
 Baritone commands can also by default be typed in the chatbox. However if you make a typo, like typing "gola 10000 10000" instead of "goal" it goes into public chat, which is bad, so using `#` is suggested.
 
-To disable direct chat control (with no prefix), turn off the `chatControl` setting. To disable chat control with the `#` prefix, turn off the `prefixControl` setting. In Impact, `.b` cannot be disabled. Be careful that you don't leave yourself with all control methods disabled (if you do, reset your settings by deleting the file `minecraft/baritone/settings.txt` and relaunching).
+To disable direct chat control (with no prefix), turn off the `chatControl` setting. To disable chat control with the `#` prefix, turn off the `prefixControl` setting. Be careful that you don't leave yourself with all control methods disabled (if you do, reset your settings by deleting the file `minecraft/baritone/settings.txt` and relaunching).
 
 # For Baritone 1.2.10+, 1.3.5+, 1.4.2+
 
@@ -39,7 +39,7 @@ Some common examples:
 - `goal` to set the goal to your player's feet
 - `goal clear` to clear the goal
 - `cancel` or `stop` to stop everything
-- `goto portal` or `goto ender_chest` or `goto block_type` to go to a block. (in Impact, `.goto` is an alias for `.b goto` for the most part)
+- `goto portal` or `goto ender_chest` or `goto block_type` to go to a block.
 - `mine diamond_ore iron_ore` to mine diamond ore or iron ore (turn on the setting `legitMine` to only mine ores that it can actually see. It will explore randomly around y=11 until it finds them.) An amount of blocks can also be specified, for example, `mine 64 diamond_ore`.
 - `click` to click your destination on the screen. Right click path to on top of the block, left click to path into it (either at foot level or eye level), and left click and drag to select an area (`#help sel` to see what you can do with that selection).
 - `follow player playerName` to follow a player. `follow players` to follow any players in range (combine with Kill Aura for a fun time). `follow entities` to follow any entities. `follow entity pig` to follow entities of a specific type.
@@ -83,17 +83,8 @@ There are about a hundred settings, but here are some fun / interesting / import
 
 # Troubleshooting / common issues
 
-## Why doesn't Baritone respond to any of my chat commands?
-This could be one of many things.
+## Why doesn't Automatone respond to any of my chat commands?
 
-First, make sure it's actually installed. An easy way to check is seeing if it created the folder `baritone` in your Minecraft folder.
-
-Second, make sure that you're using the prefix properly, and that chat control is enabled in the way you expect.
-
-For example, Impact disables direct chat control. (i.e. anything typed in chat without a prefix will be ignored and sent publicly). **This is a saved setting**, so if you run Impact once, `chatControl` will be off from then on, **even in other clients**.
-So you'll need to use the `#` prefix or edit `baritone/settings.txt` in your Minecraft folder to undo that (specifically, remove the line `chatControl false` then restart your client).
-
-
-## Why can I do `.goto x z` in Impact but nowhere else? Why can I do `-path to x z` in KAMI but nowhere else?
-These are custom commands that they added; those aren't from Baritone.
-The equivalent you're looking for is `goto x z`.
+Automatone commands will not work if you are not an operator.
+Alternatively, it could be that you did not install the mod properly - if you did,
+an `automatone` directory should have been created in your minecraft instance's `config` folder.
