@@ -59,7 +59,7 @@ public class ToolSet {
         this.player = player;
         this.baritone = IBaritone.KEY.get(player);
 
-        if (baritone.settings().considerPotionEffects.value) {
+        if (baritone.settings().considerPotionEffects.get()) {
             double amplifier = potionAmplifier();
             Function<Double, Double> amplify = x -> amplifier * x;
             backendCalculation = amplify.compose(this::getBestDestructionTime);
@@ -110,7 +110,7 @@ public class ToolSet {
         If we actually want know what efficiency our held item has instead of the best one
         possible, this lets us make pathing depend on the actual tool to be used (if auto tool is disabled)
         */
-        if (baritone.settings().disableAutoTool.value && pathingCalculation) {
+        if (baritone.settings().disableAutoTool.get() && pathingCalculation) {
             return player.inventory.selectedSlot;
         }
 
@@ -121,11 +121,11 @@ public class ToolSet {
         BlockState blockState = b.getDefaultState();
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = player.inventory.getStack(i);
-            if (!baritone.settings().useSwordToMine.value && itemStack.getItem() instanceof SwordItem) {
+            if (!baritone.settings().useSwordToMine.get() && itemStack.getItem() instanceof SwordItem) {
                 continue;
             }
 
-            if (baritone.settings().itemSaver.value && itemStack.getDamage() >= itemStack.getMaxDamage() && itemStack.getMaxDamage() > 1) {
+            if (baritone.settings().itemSaver.get() && itemStack.getDamage() >= itemStack.getMaxDamage() && itemStack.getMaxDamage() > 1) {
                 continue;
             }
             double speed = calculateSpeedVsBlock(itemStack, blockState);
@@ -161,7 +161,7 @@ public class ToolSet {
     }
 
     private double avoidanceMultiplier(Block b) {
-        return baritone.settings().blocksToAvoidBreaking.value.contains(b) ? 0.1 : 1;
+        return baritone.settings().blocksToAvoidBreaking.get().contains(b) ? 0.1 : 1;
     }
 
     /**

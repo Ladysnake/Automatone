@@ -38,7 +38,7 @@ public class AxisCommand extends Command {
     @Override
     public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
-        Goal goal = new GoalAxis();
+        Goal goal = new GoalAxis(baritone.settings().axisHeight.get());
         baritone.getCustomGoalProcess().setGoal(goal);
         logDirect(source, String.format("Goal: %s", goal.toString()));
     }

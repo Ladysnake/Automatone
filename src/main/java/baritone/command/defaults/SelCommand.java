@@ -247,13 +247,13 @@ public class SelCommand extends Command {
     }
 
     public void renderSelectionBox(RenderEvent event) {
-        if (!BaritoneAPI.getSettings().renderSelectionCorners.value || pos1 == null) {
+        if (!BaritoneAPI.getSettings().renderSelectionCorners.get() || pos1 == null) {
             return;
         }
-        Color color = BaritoneAPI.getSettings().colorSelectionPos1.value;
-        float opacity = BaritoneAPI.getSettings().selectionOpacity.value;
-        float lineWidth = BaritoneAPI.getSettings().selectionLineWidth.value;
-        boolean ignoreDepth = BaritoneAPI.getSettings().renderSelectionIgnoreDepth.value;
+        Color color = BaritoneAPI.getSettings().colorSelectionPos1.get();
+        float opacity = BaritoneAPI.getSettings().selectionOpacity.get();
+        float lineWidth = BaritoneAPI.getSettings().selectionLineWidth.get();
+        boolean ignoreDepth = BaritoneAPI.getSettings().renderSelectionIgnoreDepth.get();
         IRenderer.startLines(color, opacity, lineWidth, ignoreDepth);
         IRenderer.drawAABB(event.getModelViewStack(), new Box(pos1, pos1.add(1, 1, 1)));
         IRenderer.endLines(ignoreDepth);

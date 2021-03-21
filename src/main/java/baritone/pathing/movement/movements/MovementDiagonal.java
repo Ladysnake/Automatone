@@ -262,7 +262,7 @@ public class MovementDiagonal extends Movement {
     }
 
     private boolean sprint() {
-        if (MovementHelper.isLiquid(ctx, ctx.feetPos()) && !baritone.settings().sprintInWater.value) {
+        if (MovementHelper.isLiquid(ctx, ctx.feetPos()) && !baritone.settings().sprintInWater.get()) {
             return false;
         }
         for (int i = 0; i < 4; i++) {

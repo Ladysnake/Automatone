@@ -21,7 +21,6 @@ import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import dev.onyxstudios.cca.api.v3.component.TransientComponent;
 import net.minecraft.entity.player.PlayerEntity;
-import baritone.api.BaritoneAPI;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -54,7 +53,5 @@ public interface IPlayerController extends TransientComponent {
 
     void setHittingBlock(boolean hittingBlock);
 
-    default double getBlockReachDistance() {
-        return this.getGameType().isCreative() ? 5.0F : BaritoneAPI.getSettings().blockReachDistance.value;
-    }
+    double getBlockReachDistance();
 }

@@ -27,7 +27,7 @@ import net.minecraft.util.math.BlockPos;
 public abstract class PathBase implements IPath {
 
     public PathBase cutoffAtLoadedChunks(BlockStateInterface bsi, Settings settings) {
-        if (!settings.cutoffAtLoadBoundary.value) {
+        if (!settings.cutoffAtLoadBoundary.get()) {
             return this;
         }
         for (int i = 0; i < positions().size(); i++) {
@@ -40,8 +40,8 @@ public abstract class PathBase implements IPath {
     }
 
     public PathBase staticCutoff(Goal destination, Settings settings) {
-        int minLength = settings.pathCutoffMinimumLength.value;
-        double cutoffFactor = settings.pathCutoffFactor.value;
+        int minLength = settings.pathCutoffMinimumLength.get();
+        double cutoffFactor = settings.pathCutoffFactor.get();
 
         if (length() < minLength) {
             return this;

@@ -18,7 +18,6 @@
 package baritone.command.defaults;
 
 import baritone.Automatone;
-import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.command.Command;
@@ -28,6 +27,7 @@ import baritone.api.command.exception.CommandInvalidTypeException;
 import baritone.api.command.helpers.Paginator;
 import baritone.api.command.helpers.TabCompleteHelper;
 import baritone.api.utils.SettingsUtil;
+import baritone.command.argument.ArgConsumer;
 import baritone.utils.SettingsLoader;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.BaseText;
@@ -143,11 +143,11 @@ public class SetCommand extends Command {
                     throw new CommandInvalidTypeException(args.consumed(), "a toggleable setting", "some other setting");
                 }
                 @SuppressWarnings("unchecked") Settings.Setting<Boolean> toggle = (Settings.Setting<Boolean>) setting;
-                toggle.value ^= true;
+                toggle.set(!toggle.get());
                 logDirect(source, String.format(
                         "Toggled setting %s to %s",
                         toggle.getName(),
-                        toggle.value
+                        toggle.get()
                 ));
             } else {
                 String newValue = args.getString();
@@ -184,27 +184,28 @@ public class SetCommand extends Command {
 
     @Override
     public Stream<String> tabComplete(String label, IArgConsumer args) throws CommandException {
+        Settings settings = ((ArgConsumer) args).getBaritone().settings();
+
         if (args.hasAny()) {
             String arg = args.getString();
             if (args.hasExactlyOne() && !Arrays.asList("s", "save").contains(args.peekString().toLowerCase(Locale.ROOT))) {
                 if (arg.equalsIgnoreCase("reset")) {
                     return new TabCompleteHelper()
-                            .addModifiedSettings()
+                            .addModifiedSettings(settings)
                             .prepend("all")
                             .filterPrefix(args.getString())
                             .stream();
                 } else if (arg.equalsIgnoreCase("toggle")) {
                     return new TabCompleteHelper()
-                            .addToggleableSettings()
+                            .addToggleableSettings(settings)
                             .filterPrefix(args.getString())
                             .stream();
                 }
-                // FIXME autocompleting with global settings but executing with pathfinding settings
-                Settings.Setting<?> setting = BaritoneAPI.getSettings().byLowerName.get(arg.toLowerCase(Locale.US));
+                Settings.Setting<?> setting = settings.byLowerName.get(arg.toLowerCase(Locale.US));
                 if (setting != null) {
                     if (setting.getType() == Boolean.class) {
                         TabCompleteHelper helper = new TabCompleteHelper();
-                        if ((Boolean) setting.value) {
+                        if ((Boolean) setting.get()) {
                             helper.append("true", "false");
                         } else {
                             helper.append("false", "true");
@@ -216,7 +217,7 @@ public class SetCommand extends Command {
                 }
             } else if (!args.hasAny()) {
                 return new TabCompleteHelper()
-                        .addSettings()
+                        .addSettings(settings)
                         .sortAlphabetically()
                         .prepend("list", "modified", "reset", "toggle", "save")
                         .filterPrefix(arg)

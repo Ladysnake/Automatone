@@ -75,7 +75,7 @@ public interface MovementHelper extends ActionCosts {
         if (!directlyAbove // it is fine to mine a block that has a falling block directly above, this (the cost of breaking the stacked fallings) is included in cost calculations
                 // therefore if directlyAbove is true, we will actually ignore if this is falling
                 && block instanceof FallingBlock // obviously, this check is only valid for falling blocks
-                && settings.avoidUpdatingFallingBlocks.value // and if the setting is enabled
+                && settings.avoidUpdatingFallingBlocks.get() // and if the setting is enabled
                 && FallingBlock.canFallThrough(bsi.get0(x, y - 1, z))) { // and if it would fall (i.e. it's unsupported)
             return true; // dont break a block that is adjacent to unsupported gravel because it can cause really weird stuff
         }
@@ -98,7 +98,7 @@ public interface MovementHelper extends ActionCosts {
         if (block instanceof AbstractFireBlock || block == Blocks.TRIPWIRE || block == Blocks.COBWEB || block == Blocks.END_PORTAL || block == Blocks.COCOA || block instanceof AbstractSkullBlock || block == Blocks.BUBBLE_COLUMN || block instanceof ShulkerBoxBlock || block instanceof SlabBlock || block instanceof TrapdoorBlock || block == Blocks.HONEY_BLOCK || block == Blocks.END_ROD) {
             return false;
         }
-        if (settings.blocksToAvoid.value.contains(block)) {
+        if (settings.blocksToAvoid.get().contains(block)) {
             return false;
         }
         if (block instanceof DoorBlock || block instanceof FenceGateBlock) {
@@ -131,7 +131,7 @@ public interface MovementHelper extends ActionCosts {
         }
         FluidState fluidState = state.getFluidState();
         if (fluidState.getFluid() instanceof WaterFluid) {
-            if (settings.assumeWalkOnWater.value) {
+            if (settings.assumeWalkOnWater.get()) {
                 return false;
             }
             BlockState up = bsi.get0(x, y + 1, z);
@@ -308,7 +308,7 @@ public interface MovementHelper extends ActionCosts {
         if (isBlockNormalCube(state)) {
             return true;
         }
-        if (block == Blocks.LADDER || (block == Blocks.VINE && settings.allowVines.value)) { // TODO reconsider this
+        if (block == Blocks.LADDER || (block == Blocks.VINE && settings.allowVines.get())) { // TODO reconsider this
             return true;
         }
         if (block == Blocks.FARMLAND || block == Blocks.GRASS_PATH) {
@@ -327,20 +327,20 @@ public interface MovementHelper extends ActionCosts {
             }
             if (isFlowing(x, y, z, state, bsi) || upState.getFluidState().getFluid() == Fluids.FLOWING_WATER) {
                 // the only scenario in which we can walk on flowing water is if it's under still water with jesus off
-                return isWater(upState) && !settings.assumeWalkOnWater.value;
+                return isWater(upState) && !settings.assumeWalkOnWater.get();
             }
             // if assumeWalkOnWater is on, we can only walk on water if there isn't water above it
             // if assumeWalkOnWater is off, we can only walk on water if there is water above it
-            return isWater(upState) ^ settings.assumeWalkOnWater.value;
+            return isWater(upState) ^ settings.assumeWalkOnWater.get();
         }
-        if (settings.assumeWalkOnLava.value && isLava(state) && !isFlowing(x, y, z, state, bsi)) {
+        if (settings.assumeWalkOnLava.get() && isLava(state) && !isFlowing(x, y, z, state, bsi)) {
             return true;
         }
         if (block == Blocks.GLASS || block instanceof StainedGlassBlock) {
             return true;
         }
         if (block instanceof SlabBlock) {
-            if (!settings.allowWalkOnBottomSlab.value) {
+            if (!settings.allowWalkOnBottomSlab.get()) {
                 return state.get(SlabBlock.TYPE) != SlabType.BOTTOM;
             }
             return true;
@@ -435,7 +435,7 @@ public interface MovementHelper extends ActionCosts {
     static void switchToBestToolFor(IEntityContext ctx, BlockState b) {
         LivingEntity entity = ctx.entity();
         if (entity instanceof PlayerEntity) {
-            switchToBestToolFor(ctx, b, new ToolSet((PlayerEntity) entity), ctx.baritone().settings().preferSilkTouch.value);
+            switchToBestToolFor(ctx, b, new ToolSet((PlayerEntity) entity), ctx.baritone().settings().preferSilkTouch.get());
         }
     }
 
@@ -449,7 +449,7 @@ public interface MovementHelper extends ActionCosts {
     static void switchToBestToolFor(IEntityContext ctx, BlockState b, ToolSet ts, boolean preferSilkTouch) {
         PlayerInventory inventory = ctx.inventory();
 
-        if (inventory != null && !ctx.baritone().settings().disableAutoTool.value && !ctx.baritone().settings().assumeExternalAutoTool.value) {
+        if (inventory != null && !ctx.baritone().settings().disableAutoTool.get() && !ctx.baritone().settings().assumeExternalAutoTool.get()) {
             inventory.selectedSlot = ts.getBestSlot(b.getBlock(), preferSilkTouch);
         }
     }

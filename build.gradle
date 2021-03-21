@@ -78,6 +78,16 @@ repositories {
     maven {
         name = "Ladysnake Mods"
         url = 'https://ladysnake.jfrog.io/artifactory/mods'
+        content {
+            includeGroup 'io.github.ladysnake'
+            includeGroupByRegex 'io\\.github\\.onyxstudios.*'
+        }
+    }
+    maven {
+        url = 'https://maven.jamieswhiteshirt.com/libs-release/'
+        content {
+            includeGroup 'com.jamieswhiteshirt'
+        }
     }
     maven {
         name = 'SpongePowered'
@@ -101,6 +111,7 @@ dependencies {
     modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${cca_version}"
     modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${cca_version}"
     modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-world:${cca_version}"
+    modImplementation "com.jamieswhiteshirt:reach-entity-attributes:${reach_version}"
 
     testImplementation 'junit:junit:4.12'
 

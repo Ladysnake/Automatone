@@ -25,6 +25,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3i;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.lang.reflect.Field;
@@ -1013,7 +1014,7 @@ public final class Settings {
     /**
      * The function that is called when Baritone will log to chat. This function can be added to
      * via {@link Consumer#andThen(Consumer)} or it can completely be overriden via setting
-     * {@link Setting#value};
+     * {@link Setting#get()};
      */
     public final Setting<Consumer<Text>> logger = new Setting<>(message -> MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(message));
 
@@ -1161,7 +1162,7 @@ public final class Settings {
 
     public final class Setting<T> {
 
-        public T value;
+        private @Nullable T value;
         public final T defaultValue;
         private String name;
 
@@ -1169,18 +1170,25 @@ public final class Settings {
             if (value == null) {
                 throw new IllegalArgumentException("Cannot determine value type class from null");
             }
-            this.value = value;
+            this.value = null;
             this.defaultValue = value;
         }
 
+        public T defaultValue() {
+            if (Settings.this == BaritoneAPI.getSettings()) return this.defaultValue;
+            @SuppressWarnings("unchecked") Setting<T> globalSetting = (Setting<T>) BaritoneAPI.getSettings().byLowerName.get(this.name.toLowerCase(Locale.ROOT));
+            return globalSetting.get();
+        }
+
         /**
-         * Deprecated! Please use .value directly instead
-         *
          * @return the current setting value
          */
-        @Deprecated
         public final T get() {
-            return value;
+            return this.value == null ? this.defaultValue() : this.value;
+        }
+
+        public final void set(T value) {
+            this.value = value;
         }
 
         public final String getName() {
@@ -1201,7 +1209,7 @@ public final class Settings {
          * Reset this setting to its default value
          */
         public void reset() {
-            value = defaultValue;
+            this.value = null;
         }
 
         public final Type getType() {
@@ -1224,7 +1232,7 @@ public final class Settings {
                     Setting<?> setting = (Setting<?>) field.get(this);
                     String name = field.getName();
                     setting.name = name;
-                    name = name.toLowerCase();
+                    name = name.toLowerCase(Locale.ROOT);
                     if (tmpByName.containsKey(name)) {
                         throw new IllegalStateException("Duplicate setting name");
                     }

@@ -17,9 +17,9 @@
 
 package baritone.utils.player;
 
-import baritone.api.utils.Helper;
 import baritone.api.utils.IPlayerController;
 import baritone.utils.accessor.IServerPlayerInteractionManager;
+import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
@@ -100,5 +100,10 @@ public class ServerPlayerController implements IPlayerController {
     @Override
     public void setHittingBlock(boolean hittingBlock) {
         // NO-OP
+    }
+
+    @Override
+    public double getBlockReachDistance() {
+        return ReachEntityAttributes.getReachDistance(this.player, this.getGameType().isCreative() ? 5.0 : 4.5);
     }
 }

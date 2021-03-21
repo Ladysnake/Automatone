@@ -43,14 +43,14 @@ public class SettingsUtil {
     public static List<Settings.Setting<?>> modifiedSettings(Settings settings) {
         List<Settings.Setting<?>> modified = new ArrayList<>();
         for (Settings.Setting<?> setting : settings.allSettings) {
-            if (setting.value == null) {
+            if (setting.get() == null) {
                 System.err.println("NULL SETTING?" + setting.getName());
                 continue;
             }
             if (setting.getName().equals("logger")) {
                 continue; // NO
             }
-            if (setting.value == setting.defaultValue) {
+            if (setting.get() == setting.defaultValue()) {
                 continue;
             }
             modified.add(setting);
@@ -82,18 +82,16 @@ public class SettingsUtil {
         return io.toString(new ParserContext(setting), value);
     }
 
-    public static String settingValueToString(Settings.Setting setting) throws IllegalArgumentException {
-        //noinspection unchecked
-        return settingValueToString(setting, setting.value);
+    public static <T> String settingValueToString(Settings.Setting<T> setting) throws IllegalArgumentException {
+        return settingValueToString(setting, setting.get());
     }
 
-    public static String settingDefaultToString(Settings.Setting setting) throws IllegalArgumentException {
-        //noinspection unchecked
-        return settingValueToString(setting, setting.defaultValue);
+    public static <T> String settingDefaultToString(Settings.Setting<T> setting) throws IllegalArgumentException {
+        return settingValueToString(setting, setting.defaultValue());
     }
 
     public static String maybeCensor(int coord) {
-        if (BaritoneAPI.getSettings().censorCoordinates.value) {
+        if (BaritoneAPI.getSettings().censorCoordinates.get()) {
             return "<censored>";
         }
 
@@ -109,17 +107,21 @@ public class SettingsUtil {
     }
 
     public static void parseAndApply(Settings settings, String settingName, String settingValue) throws IllegalStateException, NumberFormatException {
-        Settings.Setting setting = settings.byLowerName.get(settingName);
+        Settings.Setting<?> setting = settings.byLowerName.get(settingName);
         if (setting == null) {
             throw new IllegalStateException("No setting by that name");
         }
-        Class intendedType = setting.getValueClass();
-        ISettingParser ioMethod = Parser.getParser(setting.getType());
-        Object parsed = ioMethod.parse(new ParserContext(setting), settingValue);
+        parseAndApply(setting, settingValue);
+    }
+
+    private static <T> void parseAndApply(Settings.Setting<T> setting, String settingValue) {
+        Class<T> intendedType = setting.getValueClass();
+        @SuppressWarnings("unchecked") ISettingParser<T> ioMethod = (ISettingParser<T>) Parser.getParser(setting.getType());
+        T parsed = ioMethod.parse(new ParserContext(setting), settingValue);
         if (!intendedType.isInstance(parsed)) {
             throw new IllegalStateException(ioMethod + " parser returned incorrect type, expected " + intendedType + " got " + parsed + " which is " + parsed.getClass());
         }
-        setting.value = parsed;
+        setting.set(parsed);
     }
 
     private interface ISettingParser<T> {
@@ -216,7 +218,7 @@ public class SettingsUtil {
         <T> Parser(Class<T> cla$$, Function<String, T> parser, Function<T, String> toString) {
             this.cla$$ = cla$$;
             this.parser = parser::apply;
-            this.toString = x -> toString.apply((T) x);
+            this.toString = x -> toString.apply(cla$$.cast(x));
         }
 
         @Override

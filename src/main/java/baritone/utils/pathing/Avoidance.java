@@ -60,12 +60,12 @@ public class Avoidance {
     }
 
     public static List<Avoidance> create(IEntityContext ctx) {
-        if (!ctx.baritone().settings().avoidance.value) {
+        if (!ctx.baritone().settings().avoidance.get()) {
             return Collections.emptyList();
         }
 
         List<Avoidance> res = new ArrayList<>();
-        double mobCoeff = ctx.baritone().settings().mobAvoidanceCoefficient.value;
+        double mobCoeff = ctx.baritone().settings().mobAvoidanceCoefficient.get();
 
         if (mobCoeff != 1.0D) {
             ctx.worldEntitiesStream()
@@ -73,7 +73,7 @@ public class Avoidance {
                     .filter(entity -> (!(entity instanceof SpiderEntity)) || ctx.entity().getBrightnessAtEyes() < 0.5)
                     .filter(entity -> !(entity instanceof ZombifiedPiglinEntity) || ((ZombifiedPiglinEntity) entity).getAttacker() != null)
                     .filter(entity -> !(entity instanceof EndermanEntity) || ((EndermanEntity) entity).isAngry())
-                    .forEach(entity -> res.add(new Avoidance(entity.getBlockPos(), mobCoeff, ctx.baritone().settings().mobAvoidanceRadius.value)));
+                    .forEach(entity -> res.add(new Avoidance(entity.getBlockPos(), mobCoeff, ctx.baritone().settings().mobAvoidanceRadius.get())));
         }
 
         return res;

@@ -53,9 +53,9 @@ public final class LookBehavior extends Behavior implements ILookBehavior {
             if (Math.abs(rand) < 0.1) {
                 rand *= 4;
             }
-            this.target = new Rotation(this.target.getYaw() + (float) (rand * baritone.settings().randomLooking113.value), this.target.getPitch());
+            this.target = new Rotation(this.target.getYaw() + (float) (rand * baritone.settings().randomLooking113.get()), this.target.getPitch());
         }
-        this.force = force || !baritone.settings().freeLook.value;
+        this.force = force || !baritone.settings().freeLook.get();
     }
 
     @Override
@@ -69,9 +69,9 @@ public final class LookBehavior extends Behavior implements ILookBehavior {
             float oldPitch = ctx.entity().pitch;
             float desiredPitch = this.target.getPitch();
             ctx.entity().pitch = desiredPitch;
-            ctx.entity().yaw += (Math.random() - 0.5) * baritone.settings().randomLooking.value;
-            ctx.entity().pitch += (Math.random() - 0.5) * baritone.settings().randomLooking.value;
-            if (desiredPitch == oldPitch && !baritone.settings().freeLook.value) {
+            ctx.entity().yaw += (Math.random() - 0.5) * baritone.settings().randomLooking.get();
+            ctx.entity().pitch += (Math.random() - 0.5) * baritone.settings().randomLooking.get();
+            if (desiredPitch == oldPitch && !baritone.settings().freeLook.get()) {
                 nudgeToLevel();
             }
             this.target = null;

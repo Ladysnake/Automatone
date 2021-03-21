@@ -64,20 +64,20 @@ public final class AStarPathFinder extends AbstractNodeCostSearch {
         BetterWorldBorder worldBorder = new BetterWorldBorder(calcContext.world.getWorldBorder());
         long startTime = System.currentTimeMillis();
         Settings settings = calcContext.getBaritone().settings();
-        boolean slowPath = settings.slowPath.value;
+        boolean slowPath = settings.slowPath.get();
         if (slowPath) {
-            calcContext.baritone.logDebug("slowPath is on, path timeout will be " + settings.slowPathTimeoutMS.value + "ms instead of " + primaryTimeout + "ms");
+            calcContext.baritone.logDebug("slowPath is on, path timeout will be " + settings.slowPathTimeoutMS.get() + "ms instead of " + primaryTimeout + "ms");
         }
-        long primaryTimeoutTime = startTime + (slowPath ? settings.slowPathTimeoutMS.value : primaryTimeout);
-        long failureTimeoutTime = startTime + (slowPath ? settings.slowPathTimeoutMS.value : failureTimeout);
+        long primaryTimeoutTime = startTime + (slowPath ? settings.slowPathTimeoutMS.get() : primaryTimeout);
+        long failureTimeoutTime = startTime + (slowPath ? settings.slowPathTimeoutMS.get() : failureTimeout);
         boolean failing = true;
         int numNodes = 0;
         int numMovementsConsidered = 0;
         int numEmptyChunk = 0;
         boolean isFavoring = !favoring.isEmpty();
         int timeCheckInterval = 1 << 6;
-        int pathingMaxChunkBorderFetch = settings.pathingMaxChunkBorderFetch.value; // grab all settings beforehand so that changing settings during pathing doesn't cause a crash or unpredictable behavior
-        double minimumImprovement = settings.minimumImprovementRepropagation.value ? MIN_IMPROVEMENT : 0;
+        int pathingMaxChunkBorderFetch = settings.pathingMaxChunkBorderFetch.get(); // grab all settings beforehand so that changing settings during pathing doesn't cause a crash or unpredictable behavior
+        double minimumImprovement = settings.minimumImprovementRepropagation.get() ? MIN_IMPROVEMENT : 0;
         Moves[] allMoves = Moves.values();
         while (!openSet.isEmpty() && numEmptyChunk < pathingMaxChunkBorderFetch && !cancelRequested) {
             if ((numNodes & (timeCheckInterval - 1)) == 0) { // only call this once every 64 nodes (about half a millisecond)
@@ -90,7 +90,7 @@ public final class AStarPathFinder extends AbstractNodeCostSearch {
                 try {
                     // Not busy waiting, only artificially slowing the loop down
                     //noinspection BusyWait
-                    Thread.sleep(settings.slowPathTimeDelayMS.value);
+                    Thread.sleep(settings.slowPathTimeDelayMS.get());
                 } catch (InterruptedException ignored) {}
             }
             PathNode currentNode = openSet.removeLowest();

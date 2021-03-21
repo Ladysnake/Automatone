@@ -107,9 +107,9 @@ public final class DefaultCommands {
     }
 
     private static void logRanCommand(ServerCommandSource source, String command, String rest) {
-        if (BaritoneAPI.getSettings().echoCommands.value) {
+        if (BaritoneAPI.getSettings().echoCommands.get()) {
             String msg = command + rest;
-            String toDisplay = BaritoneAPI.getSettings().censorRanCommands.value ? command + " ..." : msg;
+            String toDisplay = BaritoneAPI.getSettings().censorRanCommands.get() ? command + " ..." : msg;
             BaseText component = new LiteralText(String.format("> %s", toDisplay));
             component.setStyle(component.getStyle()
                     .withFormatting(Formatting.WHITE)

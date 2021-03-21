@@ -96,31 +96,31 @@ public class CalculationContext {
         this.worldData = (WorldData) baritone.getWorldProvider().getCurrentWorld();
         this.bsi = new BlockStateInterface(world);
         this.toolSet = player == null ? null : new ToolSet(player);
-        this.hasThrowaway = baritone.settings().allowPlace.value && ((Baritone) baritone).getInventoryBehavior().hasGenericThrowaway();
-        this.hasWaterBucket = player != null && baritone.settings().allowWaterBucketFall.value && PlayerInventory.isValidHotbarIndex(InventoryBehavior.getSlotWithStack(player.inventory, Automatone.WATER_BUCKETS)) && !world.getDimension().isUltrawarm();
-        this.canSprint = player != null && baritone.settings().allowSprint.value && player.getHungerManager().getFoodLevel() > 6;
-        this.placeBlockCost = baritone.settings().blockPlacementPenalty.value;
-        this.allowBreak = baritone.settings().allowBreak.value;
-        this.allowParkour = baritone.settings().allowParkour.value;
-        this.allowParkourPlace = baritone.settings().allowParkourPlace.value;
-        this.allowJumpAt256 = baritone.settings().allowJumpAt256.value;
-        this.allowParkourAscend = baritone.settings().allowParkourAscend.value;
-        this.assumeWalkOnWater = baritone.settings().assumeWalkOnWater.value;
-        this.allowDiagonalDescend = baritone.settings().allowDiagonalDescend.value;
-        this.allowDiagonalAscend = baritone.settings().allowDiagonalAscend.value;
-        this.allowDownward = baritone.settings().allowDownward.value;
-        this.maxFallHeightNoWater = baritone.settings().maxFallHeightNoWater.value;
-        this.maxFallHeightBucket = baritone.settings().maxFallHeightBucket.value;
+        this.hasThrowaway = baritone.settings().allowPlace.get() && ((Baritone) baritone).getInventoryBehavior().hasGenericThrowaway();
+        this.hasWaterBucket = player != null && baritone.settings().allowWaterBucketFall.get() && PlayerInventory.isValidHotbarIndex(InventoryBehavior.getSlotWithStack(player.inventory, Automatone.WATER_BUCKETS)) && !world.getDimension().isUltrawarm();
+        this.canSprint = player != null && baritone.settings().allowSprint.get() && player.getHungerManager().getFoodLevel() > 6;
+        this.placeBlockCost = baritone.settings().blockPlacementPenalty.get();
+        this.allowBreak = baritone.settings().allowBreak.get();
+        this.allowParkour = baritone.settings().allowParkour.get();
+        this.allowParkourPlace = baritone.settings().allowParkourPlace.get();
+        this.allowJumpAt256 = baritone.settings().allowJumpAt256.get();
+        this.allowParkourAscend = baritone.settings().allowParkourAscend.get();
+        this.assumeWalkOnWater = baritone.settings().assumeWalkOnWater.get();
+        this.allowDiagonalDescend = baritone.settings().allowDiagonalDescend.get();
+        this.allowDiagonalAscend = baritone.settings().allowDiagonalAscend.get();
+        this.allowDownward = baritone.settings().allowDownward.get();
+        this.maxFallHeightNoWater = baritone.settings().maxFallHeightNoWater.get();
+        this.maxFallHeightBucket = baritone.settings().maxFallHeightBucket.get();
         int depth = EnchantmentHelper.getDepthStrider(entity);
         if (depth > 3) {
             depth = 3;
         }
         float mult = depth / 3.0F;
         this.waterWalkSpeed = ActionCosts.WALK_ONE_IN_WATER_COST * (1 - mult) + ActionCosts.WALK_ONE_BLOCK_COST * mult;
-        this.breakBlockAdditionalCost = baritone.settings().blockBreakAdditionalPenalty.value;
-        this.backtrackCostFavoringCoefficient = baritone.settings().backtrackCostFavoringCoefficient.value;
-        this.jumpPenalty = baritone.settings().jumpPenalty.value;
-        this.walkOnWaterOnePenalty = baritone.settings().walkOnWaterOnePenalty.value;
+        this.breakBlockAdditionalCost = baritone.settings().blockBreakAdditionalPenalty.get();
+        this.backtrackCostFavoringCoefficient = baritone.settings().backtrackCostFavoringCoefficient.get();
+        this.jumpPenalty = baritone.settings().jumpPenalty.get();
+        this.walkOnWaterOnePenalty = baritone.settings().walkOnWaterOnePenalty.get();
         // why cache these things here, why not let the movements just get directly from settings?
         // because if some movements are calculated one way and others are calculated another way,
         // then you get a wildly inconsistent path that isn't optimal for either scenario.

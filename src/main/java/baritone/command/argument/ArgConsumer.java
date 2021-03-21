@@ -309,7 +309,7 @@ public class ArgConsumer implements IArgConsumer, IDatatypeContext {
         try {
             return datatype.apply(this, original);
         } catch (Exception e) {
-            if (baritone.settings().verboseCommandExceptions.value) {
+            if (baritone.settings().verboseCommandExceptions.get()) {
                 Automatone.LOGGER.error(e);
             }
             throw new CommandInvalidTypeException(hasAny() ? peek() : consumed(), datatype.getClass().getSimpleName(), e);
@@ -341,7 +341,7 @@ public class ArgConsumer implements IArgConsumer, IDatatypeContext {
         try {
             return datatype.get(this);
         } catch (Exception e) {
-            if (baritone.settings().verboseCommandExceptions.value) {
+            if (baritone.settings().verboseCommandExceptions.get()) {
                 Automatone.LOGGER.error(e);
             }
             throw new CommandInvalidTypeException(hasAny() ? peek() : consumed(), datatype.getClass().getSimpleName(), e);

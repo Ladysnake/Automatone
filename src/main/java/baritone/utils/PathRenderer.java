@@ -94,20 +94,20 @@ public final class PathRenderer implements IRenderer {
             return;
         }
 
-        if (goal != null && settings.renderGoal.value) {
-            drawDankLitGoalBox(event.getModelViewStack(), renderView, goal, partialTicks, settings.colorGoalBox.value);
+        if (goal != null && settings.renderGoal.get()) {
+            drawDankLitGoalBox(event.getModelViewStack(), renderView, goal, partialTicks, settings.colorGoalBox.get());
         }
 
-        if (!settings.renderPath.value) {
+        if (!settings.renderPath.get()) {
             return;
         }
 
         RenderedPath current = behavior.getCurrent(); // this should prevent most race conditions?
         RenderedPath next = behavior.getNext(); // like, now it's not possible for current!=null to be true, then suddenly false because of another thread
-        if (current != null && settings.renderSelectionBoxes.value) {
-            drawManySelectionBoxes(event.getModelViewStack(), renderView, current.toBreak(), settings.colorBlocksToBreak.value);
-            drawManySelectionBoxes(event.getModelViewStack(), renderView, current.toPlace(), settings.colorBlocksToPlace.value);
-            drawManySelectionBoxes(event.getModelViewStack(), renderView, current.toWalkInto(), settings.colorBlocksToWalkInto.value);
+        if (current != null && settings.renderSelectionBoxes.get()) {
+            drawManySelectionBoxes(event.getModelViewStack(), renderView, current.toBreak(), settings.colorBlocksToBreak.get());
+            drawManySelectionBoxes(event.getModelViewStack(), renderView, current.toPlace(), settings.colorBlocksToPlace.get());
+            drawManySelectionBoxes(event.getModelViewStack(), renderView, current.toWalkInto(), settings.colorBlocksToWalkInto.get());
         }
 
         //drawManySelectionBoxes(player, Collections.singletonList(behavior.pathStart()), partialTicks, Color.WHITE);
@@ -115,26 +115,26 @@ public final class PathRenderer implements IRenderer {
         // Render the current path, if there is one
         if (current != null && current.pathPositions() != null) {
             int renderBegin = Math.max(current.getPosition() - 3, 0);
-            drawPath(event.getModelViewStack(), current.pathPositions(), renderBegin, settings.colorCurrentPath.value, settings.fadePath.value, 10, 20);
+            drawPath(event.getModelViewStack(), current.pathPositions(), renderBegin, settings.colorCurrentPath.get(), settings.fadePath.get(), 10, 20);
         }
 
         if (next != null && next.pathPositions() != null) {
-            drawPath(event.getModelViewStack(), next.pathPositions(), 0, settings.colorNextPath.value, settings.fadePath.value, 10, 20);
+            drawPath(event.getModelViewStack(), next.pathPositions(), 0, settings.colorNextPath.get(), settings.fadePath.get(), 10, 20);
         }
 
         // If there is a path calculation currently running, render the path calculation process
         behavior.getInProgress().ifPresent(currentlyRunning -> {
-            currentlyRunning.bestPathSoFar().ifPresent(p -> drawPath(event.getModelViewStack(), p.positions(), 0, settings.colorBestPathSoFar.value, settings.fadePath.value, 10, 20));
+            currentlyRunning.bestPathSoFar().ifPresent(p -> drawPath(event.getModelViewStack(), p.positions(), 0, settings.colorBestPathSoFar.get(), settings.fadePath.get(), 10, 20));
 
             currentlyRunning.pathToMostRecentNodeConsidered().ifPresent(mr -> {
-                drawPath(event.getModelViewStack(), mr.positions(), 0, settings.colorMostRecentConsidered.value, settings.fadePath.value, 10, 20);
-                drawManySelectionBoxes(event.getModelViewStack(), renderView, Collections.singletonList(mr.getDest()), settings.colorMostRecentConsidered.value);
+                drawPath(event.getModelViewStack(), mr.positions(), 0, settings.colorMostRecentConsidered.get(), settings.fadePath.get(), 10, 20);
+                drawManySelectionBoxes(event.getModelViewStack(), renderView, Collections.singletonList(mr.getDest()), settings.colorMostRecentConsidered.get());
             });
         });
     }
 
     public static void drawPath(MatrixStack stack, List<? extends BlockPos> positions, int startIndex, Color color, boolean fadeOut, int fadeStart0, int fadeEnd0) {
-        IRenderer.startLines(color, settings.pathRenderLineWidthPixels.value, settings.renderPathIgnoreDepth.value);
+        IRenderer.startLines(color, settings.pathRenderLineWidthPixels.get(), settings.renderPathIgnoreDepth.get());
 
         int fadeStart = fadeStart0 + startIndex;
         int fadeEnd = fadeEnd0 + startIndex;
@@ -173,7 +173,7 @@ public final class PathRenderer implements IRenderer {
             tessellator.draw();
         }
 
-        IRenderer.endLines(settings.renderPathIgnoreDepth.value);
+        IRenderer.endLines(settings.renderPathIgnoreDepth.get());
     }
 
 
@@ -183,7 +183,7 @@ public final class PathRenderer implements IRenderer {
         double vpX = posX();
         double vpY = posY();
         double vpZ = posZ();
-        boolean renderPathAsFrickinThingy = !settings.renderPathAsLine.value;
+        boolean renderPathAsFrickinThingy = !settings.renderPathAsLine.get();
 
         buffer.begin(renderPathAsFrickinThingy ? GL_LINE_STRIP : GL_LINES, VertexFormats.POSITION);
         buffer.vertex(matrix4f, (float) (x1 + 0.5D - vpX), (float) (y1 + 0.5D - vpY), (float) (z1 + 0.5D - vpZ)).next();
@@ -197,7 +197,7 @@ public final class PathRenderer implements IRenderer {
     }
 
     public static void drawManySelectionBoxes(MatrixStack stack, Entity player, Collection<BlockPos> positions, Color color) {
-        IRenderer.startLines(color, settings.pathRenderLineWidthPixels.value, settings.renderSelectionBoxesIgnoreDepth.value);
+        IRenderer.startLines(color, settings.pathRenderLineWidthPixels.get(), settings.renderSelectionBoxesIgnoreDepth.get());
 
         positions.forEach(pos -> {
             BlockState state = player.world.getBlockState(pos);
@@ -207,7 +207,7 @@ public final class PathRenderer implements IRenderer {
             IRenderer.drawAABB(stack, toDraw, .002D);
         });
 
-        IRenderer.endLines(settings.renderSelectionBoxesIgnoreDepth.value);
+        IRenderer.endLines(settings.renderSelectionBoxesIgnoreDepth.get());
     }
 
     public static void drawDankLitGoalBox(MatrixStack stack, Entity player, Goal goal, float partialTicks, Color color) {
@@ -240,11 +240,11 @@ public final class PathRenderer implements IRenderer {
         } else if (goal instanceof GoalXZ) {
             GoalXZ goalPos = (GoalXZ) goal;
 
-            if (settings.renderGoalXZBeacon.value) {
+            if (settings.renderGoalXZBeacon.get()) {
                 glPushAttrib(GL_LIGHTING_BIT);
 
                 MinecraftClient.getInstance().getTextureManager().bindTexture(TEXTURE_BEACON_BEAM);
-                if (settings.renderGoalIgnoreDepth.value) {
+                if (settings.renderGoalIgnoreDepth.get()) {
                     RenderSystem.disableDepthTest();
                 }
 
@@ -269,7 +269,7 @@ public final class PathRenderer implements IRenderer {
 
                 stack.pop(); // pop
 
-                if (settings.renderGoalIgnoreDepth.value) {
+                if (settings.renderGoalIgnoreDepth.get()) {
                     RenderSystem.enableDepthTest();
                 }
 
@@ -292,14 +292,14 @@ public final class PathRenderer implements IRenderer {
             }
             return;
         } else if (goal instanceof GoalInverted) {
-            drawDankLitGoalBox(stack, player, ((GoalInverted) goal).origin, partialTicks, settings.colorInvertedGoalBox.value);
+            drawDankLitGoalBox(stack, player, ((GoalInverted) goal).origin, partialTicks, settings.colorInvertedGoalBox.get());
             return;
         } else if (goal instanceof GoalYLevel) {
             GoalYLevel goalpos = (GoalYLevel) goal;
-            minX = player.getX() - settings.yLevelBoxSize.value - renderPosX;
-            minZ = player.getZ() - settings.yLevelBoxSize.value - renderPosZ;
-            maxX = player.getX() + settings.yLevelBoxSize.value - renderPosX;
-            maxZ = player.getZ() + settings.yLevelBoxSize.value - renderPosZ;
+            minX = player.getX() - settings.yLevelBoxSize.get() - renderPosX;
+            minZ = player.getZ() - settings.yLevelBoxSize.get() - renderPosZ;
+            maxX = player.getX() + settings.yLevelBoxSize.get() - renderPosX;
+            maxZ = player.getZ() + settings.yLevelBoxSize.get() - renderPosZ;
             minY = ((GoalYLevel) goal).level - renderPosY;
             maxY = minY + 2;
             y1 = 1 + y + goalpos.level - renderPosY;
@@ -308,7 +308,7 @@ public final class PathRenderer implements IRenderer {
             return;
         }
 
-        IRenderer.startLines(color, settings.goalRenderLineWidthPixels.value, settings.renderGoalIgnoreDepth.value);
+        IRenderer.startLines(color, settings.goalRenderLineWidthPixels.get(), settings.renderGoalIgnoreDepth.get());
 
         renderHorizontalQuad(stack, minX, maxX, minZ, maxZ, y1);
         renderHorizontalQuad(stack, minX, maxX, minZ, maxZ, y2);
@@ -325,7 +325,7 @@ public final class PathRenderer implements IRenderer {
         buffer.vertex(matrix4f, (float) minX, (float) maxY, (float) maxZ).next();
         tessellator.draw();
 
-        IRenderer.endLines(settings.renderGoalIgnoreDepth.value);
+        IRenderer.endLines(settings.renderGoalIgnoreDepth.get());
     }
 
     private static void renderHorizontalQuad(MatrixStack stack, double minX, double maxX, double minZ, double maxZ, double y) {

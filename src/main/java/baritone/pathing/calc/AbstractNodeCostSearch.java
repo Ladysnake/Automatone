@@ -89,7 +89,7 @@ public abstract class AbstractNodeCostSearch implements IPathFinder {
         this.startZ = startZ;
         this.goal = goal;
         this.context = context;
-        this.map = new Long2ObjectOpenHashMap<>(context.baritone.settings().pathingMapDefaultSize.value, context.baritone.settings().pathingMapLoadFactor.value);
+        this.map = new Long2ObjectOpenHashMap<>(context.baritone.settings().pathingMapDefaultSize.get(), context.baritone.settings().pathingMapLoadFactor.get());
     }
 
     public void cancel() {
@@ -226,7 +226,7 @@ public abstract class AbstractNodeCostSearch implements IPathFinder {
         if (logInfo) {
             context.baritone.logDebug("Even with a cost coefficient of " + COEFFICIENTS[COEFFICIENTS.length - 1] + ", I couldn't get more than " + Math.sqrt(bestDist) + " blocks");
             context.baritone.logDebug("No path found =(");
-            if (context.baritone.settings().desktopNotifications.value) {
+            if (context.baritone.settings().desktopNotifications.get()) {
                 NotificationHelper.notify("No path found =(", true);
             }
         }

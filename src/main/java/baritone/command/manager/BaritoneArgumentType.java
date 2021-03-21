@@ -17,36 +17,25 @@
 
 package baritone.command.manager;
 
-import baritone.Baritone;
-import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
-import baritone.api.Settings;
 import baritone.api.command.argument.ICommandArgument;
 import baritone.api.command.exception.CommandNotEnoughArgumentsException;
 import baritone.api.command.helpers.TabCompleteHelper;
 import baritone.api.command.manager.ICommandManager;
-import baritone.api.utils.SettingsUtil;
 import baritone.command.argument.ArgConsumer;
 import baritone.command.argument.CommandArguments;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientCommandSource;
-import net.minecraft.command.EntitySelector;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -76,20 +65,6 @@ public class BaritoneArgumentType implements ArgumentType<String> {
                             .addCommands()
                             .filterPrefix(argc.getString())
                             .stream();
-                }
-                Settings.Setting<?> setting = BaritoneAPI.getSettings().byLowerName.get(argc.getString().toLowerCase(Locale.US));
-                if (setting != null) {
-                    if (setting.getValueClass() == Boolean.class) {
-                        TabCompleteHelper helper = new TabCompleteHelper();
-                        if ((Boolean) setting.value) {
-                            helper.append("true", "false");
-                        } else {
-                            helper.append("false", "true");
-                        }
-                        return helper.filterPrefix(argc.getString()).stream();
-                    } else {
-                        return Stream.of(SettingsUtil.settingValueToString(setting));
-                    }
                 }
             }
             return manager.tabComplete(msg);

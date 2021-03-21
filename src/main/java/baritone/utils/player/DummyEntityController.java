@@ -72,4 +72,9 @@ public class DummyEntityController implements IPlayerController {
     public void setHittingBlock(boolean hittingBlock) {
         // NO-OP
     }
+
+    @Override
+    public double getBlockReachDistance() {
+        return 0;
+    }
 }

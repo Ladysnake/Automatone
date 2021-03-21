@@ -197,7 +197,7 @@ public class PathExecutor implements IPathExecutor {
             costEstimateIndex = pathPosition;
             // do this only once, when the movement starts, and deliberately get the cost as cached when this path was calculated, not the cost as it is right now
             currentMovementOriginalCostEstimate = movement.getCost();
-            for (int i = 1; i < baritone.settings().costVerificationLookahead.value && pathPosition + i < path.length() - 1; i++) {
+            for (int i = 1; i < baritone.settings().costVerificationLookahead.get() && pathPosition + i < path.length() - 1; i++) {
                 if (((Movement) path.movements().get(pathPosition + i)).calculateCost(behavior.secretInternalGetCalculationContext()) >= ActionCosts.COST_INF && canCancel) {
                     logDebug("Something has changed in the world and a future movement has become impossible. Cancelling.");
                     cancel();
@@ -211,7 +211,7 @@ public class PathExecutor implements IPathExecutor {
             cancel();
             return true;
         }
-        if (!movement.calculatedWhileLoaded() && currentCost - currentMovementOriginalCostEstimate > baritone.settings().maxCostIncrease.value && canCancel) {
+        if (!movement.calculatedWhileLoaded() && currentCost - currentMovementOriginalCostEstimate > baritone.settings().maxCostIncrease.get() && canCancel) {
             // don't do this if the movement was calculated while loaded
             // that means that this isn't a cache error, it's just part of the path interfering with a later part
             logDebug("Original cost " + currentMovementOriginalCostEstimate + " current cost " + currentCost + ". Cancelling.");
@@ -238,7 +238,7 @@ public class PathExecutor implements IPathExecutor {
         } else {
             ctx.entity().setSprinting(shouldSprintNextTick());
             ticksOnCurrent++;
-            if (ticksOnCurrent > currentMovementOriginalCostEstimate + baritone.settings().movementTimeoutTicks.value) {
+            if (ticksOnCurrent > currentMovementOriginalCostEstimate + baritone.settings().movementTimeoutTicks.get()) {
                 // only cancel if the total time has exceeded the initial estimate
                 // as you break the blocks required, the remaining cost goes down, to the point where
                 // ticksOnCurrent is greater than recalculateCost + 100
@@ -355,7 +355,7 @@ public class PathExecutor implements IPathExecutor {
         // traverse requests sprinting, so we need to do this check first
         if (current instanceof MovementTraverse && pathPosition < path.length() - 3) {
             IMovement next = path.movements().get(pathPosition + 1);
-            if (next instanceof MovementAscend && behavior.baritone.settings().sprintAscends.value && sprintableAscend(ctx, (MovementTraverse) current, (MovementAscend) next, path.movements().get(pathPosition + 2))) {
+            if (next instanceof MovementAscend && behavior.baritone.settings().sprintAscends.get() && sprintableAscend(ctx, (MovementTraverse) current, (MovementAscend) next, path.movements().get(pathPosition + 2))) {
                 if (skipNow(ctx, current)) {
                     logDebug("Skipping traverse to straight ascend");
                     pathPosition++;
@@ -539,7 +539,7 @@ public class PathExecutor implements IPathExecutor {
         if (next instanceof MovementTraverse && next.getDirection().down().equals(current.getDirection())) {
             return true;
         }
-        return next instanceof MovementDiagonal && settings.allowOvershootDiagonalDescend.value;
+        return next instanceof MovementDiagonal && settings.allowOvershootDiagonalDescend.get();
     }
 
     private void onChangeInPathPosition() {
@@ -582,8 +582,8 @@ public class PathExecutor implements IPathExecutor {
     }
 
     private PathExecutor cutIfTooLong() {
-        if (pathPosition > behavior.baritone.settings().maxPathHistoryLength.value) {
-            int cutoffAmt = behavior.baritone.settings().pathHistoryCutoffAmount.value;
+        if (pathPosition > behavior.baritone.settings().maxPathHistoryLength.get()) {
+            int cutoffAmt = behavior.baritone.settings().pathHistoryCutoffAmount.get();
             CutoffPath newPath = new CutoffPath(path, cutoffAmt, path.length() - 1);
             if (!newPath.getDest().equals(path.getDest())) {
                 throw new IllegalStateException();

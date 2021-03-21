@@ -17,12 +17,11 @@
 
 package baritone.api.command.helpers;
 
-import baritone.api.BaritoneAPI;
 import baritone.api.Settings;
-import baritone.api.event.events.TabCompleteEvent;
-import baritone.api.utils.SettingsUtil;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.manager.ICommandManager;
+import baritone.api.event.events.TabCompleteEvent;
+import baritone.api.utils.SettingsUtil;
 import net.minecraft.util.Identifier;
 
 import java.util.Comparator;
@@ -249,9 +248,9 @@ public class TabCompleteHelper {
      *
      * @return This {@link TabCompleteHelper}
      */
-    public TabCompleteHelper addSettings() {
+    public TabCompleteHelper addSettings(Settings settings) {
         return append(
-                BaritoneAPI.getSettings().allSettings.stream()
+                settings.allSettings.stream()
                         .map(Settings.Setting::getName)
                         .filter(s -> !s.equalsIgnoreCase("logger"))
                         .sorted(String.CASE_INSENSITIVE_ORDER)
@@ -263,9 +262,9 @@ public class TabCompleteHelper {
      *
      * @return This {@link TabCompleteHelper}
      */
-    public TabCompleteHelper addModifiedSettings() {
+    public TabCompleteHelper addModifiedSettings(Settings settings) {
         return append(
-                SettingsUtil.modifiedSettings(BaritoneAPI.getSettings()).stream()
+                SettingsUtil.modifiedSettings(settings).stream()
                         .map(Settings.Setting::getName)
                         .sorted(String.CASE_INSENSITIVE_ORDER)
         );
@@ -276,9 +275,9 @@ public class TabCompleteHelper {
      *
      * @return This {@link TabCompleteHelper}
      */
-    public TabCompleteHelper addToggleableSettings() {
+    public TabCompleteHelper addToggleableSettings(Settings settings) {
         return append(
-                BaritoneAPI.getSettings().getAllValuesByType(Boolean.class).stream()
+                settings.getAllValuesByType(Boolean.class).stream()
                         .map(Settings.Setting::getName)
                         .sorted(String.CASE_INSENSITIVE_ORDER)
         );

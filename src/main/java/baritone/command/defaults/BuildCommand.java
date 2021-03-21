@@ -47,7 +47,7 @@ public class BuildCommand extends Command {
     public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         File file = args.getDatatypePost(RelativeFile.INSTANCE, schematicsDir).getAbsoluteFile();
         if (FilenameUtils.getExtension(file.getAbsolutePath()).isEmpty()) {
-            file = new File(file.getAbsolutePath() + "." + baritone.settings().schematicFallbackExtension.value);
+            file = new File(file.getAbsolutePath() + "." + baritone.settings().schematicFallbackExtension.get());
         }
         BetterBlockPos origin = new BetterBlockPos(new BlockPos(source.getPosition()));
         BetterBlockPos buildOrigin;

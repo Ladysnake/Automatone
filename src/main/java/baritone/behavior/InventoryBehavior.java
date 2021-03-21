@@ -45,7 +45,7 @@ public final class InventoryBehavior extends Behavior {
 
     @Override
     public void onTickServer() {
-        if (!baritone.settings().allowInventory.value) {
+        if (!baritone.settings().allowInventory.get()) {
             return;
         }
         if (!(ctx.entity() instanceof PlayerEntity)) {
@@ -108,7 +108,7 @@ public final class InventoryBehavior extends Behavior {
     private int firstValidThrowaway(PlayerInventory inventory) { // TODO offhand idk
         DefaultedList<ItemStack> invy = inventory.main;
         for (int i = 0; i < invy.size(); i++) {
-            if (baritone.settings().acceptableThrowawayItems.value.contains(invy.get(i).getItem())) {
+            if (baritone.settings().acceptableThrowawayItems.get().contains(invy.get(i).getItem())) {
                 return i;
             }
         }
@@ -124,7 +124,7 @@ public final class InventoryBehavior extends Behavior {
             if (stack.isEmpty()) {
                 continue;
             }
-            if (baritone.settings().itemSaver.value && stack.getDamage() >= stack.getMaxDamage() && stack.getMaxDamage() > 1) {
+            if (baritone.settings().itemSaver.get() && stack.getDamage() >= stack.getMaxDamage() && stack.getMaxDamage() > 1) {
                 continue;
             }
             if (cla$$.isInstance(stack.getItem())) {
@@ -139,7 +139,7 @@ public final class InventoryBehavior extends Behavior {
     }
 
     public boolean hasGenericThrowaway() {
-        for (Item item : baritone.settings().acceptableThrowawayItems.value) {
+        for (Item item : baritone.settings().acceptableThrowawayItems.get()) {
             if (throwaway(false, stack -> item.equals(stack.getItem()))) {
                 return true;
             }
@@ -158,7 +158,7 @@ public final class InventoryBehavior extends Behavior {
         if (maybe != null && throwaway(select, stack -> stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock().equals(maybe.getBlock()))) {
             return true;
         }
-        for (Item item : baritone.settings().acceptableThrowawayItems.value) {
+        for (Item item : baritone.settings().acceptableThrowawayItems.get()) {
             if (throwaway(select, stack -> item.equals(stack.getItem()))) {
                 return true;
             }
