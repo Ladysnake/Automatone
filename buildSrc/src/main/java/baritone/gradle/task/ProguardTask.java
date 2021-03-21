@@ -18,20 +18,16 @@
 package baritone.gradle.task;
 
 import baritone.gradle.util.Determinizer;
-import org.apache.commons.io.IOUtils;
-import org.gradle.api.plugins.JavaPluginConvention;
-import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.TaskAction;
+import net.fabricmc.loom.LoomGradleExtension;
 import org.gradle.api.JavaVersion;
-import org.gradle.api.internal.file.IdentityFileResolver;
+import org.gradle.api.artifacts.ResolvedArtifact;
+import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.compile.ForkOptions;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.internal.jvm.Jvm;
-import org.gradle.internal.jvm.inspection.DefaultJvmVersionDetector;
-import org.gradle.process.internal.DefaultExecActionFactory;
 
 import java.io.*;
 import java.net.URL;
@@ -39,6 +35,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -198,36 +196,14 @@ public class ProguardTask extends BaritoneGradleTask {
         List<String> template = Files.readAllLines(getTemporaryFile(PROGUARD_CONFIG_DEST));
         template.add(0, "-injars " + this.artifactPath.toString());
         template.add(1, "-outjars " + this.getTemporaryFile(PROGUARD_EXPORT_PATH));
+        template.add(2, "-libraryjars <java.home>/lib/rt.jar'");
 
-        // Acquire the RT jar using "java -verbose". This doesn't work on Java 9+
-        Process p = new ProcessBuilder(this.getJavaBinPathForProguard(), "-verbose").start();
-        String out = IOUtils.toString(p.getInputStream(), "UTF-8").split("\n")[0].split("Opened ")[1].replace("]", "");
-        template.add(2, "-libraryjars '" + out + "'");
+//        template.add(2, "-libraryjars '<java.home>/jmods/java.base.jmod(!**.jar;!module-info.class)'");
 
-        {
-            final Stream<File> libraries;
-            {
-                // Discover all of the libraries that we will need to acquire from gradle
-                final Stream<File> dependencies = acquireDependencies()
-                    // remove MCP mapped jar
-                    .filter(f -> !f.toString().endsWith("-recomp.jar"))
-                    // go from the extra to the original downloaded client
-                    .map(f -> f.toString().endsWith("client-extra.jar") ? new File(f.getParentFile(), "client.jar") : f);
-
-                if (getProject().hasProperty("baritone.forge_build")) {
-                    libraries = dependencies
-                        .map(f -> f.toString().endsWith("client.jar") ? getSrgMcJar() : f);
-                } else if (getProject().hasProperty("baritone.fabric_build")) {
-                    libraries = dependencies
-                        .map(f -> f.getName().endsWith("-v2.jar") && f.getName().startsWith("minecraft-") ? getSrgMcJar() : f);
-                } else {
-                    libraries = dependencies;
-                }
-            }
-            libraries.forEach(f -> {
-                template.add(2, "-libraryjars '" + f + "'");
-            });
-        }
+        // Discover all of the libraries that we will need to acquire from gradle
+        acquireDependencies().forEach(f -> {
+            template.add(2, "-libraryjars '" + f + "'");
+        });
 
         // API config doesn't require any changes from the changes that we made to the template
         Files.write(getTemporaryFile(PROGUARD_API_CONFIG), template);
@@ -238,14 +214,20 @@ public class ProguardTask extends BaritoneGradleTask {
         Files.write(getTemporaryFile(PROGUARD_STANDALONE_CONFIG), standalone);
     }
 
-    private File getSrgMcJar() {
-        return getProject().getTasks().findByName("copyMcJar").getOutputs().getFiles().getSingleFile();
-    }
-
     private Stream<File> acquireDependencies() {
-        return getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().findByName("launch").getRuntimeClasspath().getFiles()
-            .stream()
-            .filter(File::isFile);
+        Set<File> mappedMods = getProject().getConfigurations().getByName("modCompileClasspathMapped").getResolvedConfiguration().getFiles();
+        LoomGradleExtension loom = (LoomGradleExtension) getProject().getExtensions().findByName("loom");
+        Objects.requireNonNull(loom);
+        return Stream.concat(
+                Stream.of(loom.getMinecraftMappedProvider().getIntermediaryJar()),
+                Stream.concat(
+                        getProject().getConfigurations().getByName("modCompileClasspath").getResolvedConfiguration().getResolvedArtifacts().stream().map(ResolvedArtifact::getFile),
+                        getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().findByName("launch").getRuntimeClasspath().getFiles()
+                                .stream()
+                                .filter(File::isFile)
+                                // remove remapped jars, the intermediary versions should be in proguardClasspath
+                                .filter(f -> !loom.getMinecraftMappedProvider().getMappedJar().equals(f) && !mappedMods.contains(f))
+                ));
     }
 
     private void proguardApi() throws Exception {

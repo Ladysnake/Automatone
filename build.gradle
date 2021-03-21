@@ -15,18 +15,18 @@
  * along with Baritone.  If not, see <https://www.gnu.org/licenses/>.
  */
 import net.fabricmc.loom.LoomGradlePlugin
+import baritone.gradle.task.CreateDistTask
+import baritone.gradle.task.ProguardTask
+import org.apache.tools.ant.taskdefs.condition.Os
+
 
 plugins {
-    id 'fabric-loom' version '0.6-SNAPSHOT'
+    id 'fabric-loom'
     id 'maven-publish'
 }
 
 group 'ladysnake'
 version '0.1.0'
-
-import baritone.gradle.task.CreateDistTask
-import baritone.gradle.task.ProguardTask
-import org.apache.tools.ant.taskdefs.condition.Os
 
 apply plugin: 'java'
 apply plugin: LoomGradlePlugin
@@ -97,7 +97,7 @@ dependencies {
     mappings "net.fabricmc:yarn:1.16.5+build.5:v2"
     modImplementation "net.fabricmc:fabric-loader:0.11.1"
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
-    modImplementation "net.fabricmc.fabric-api:fabric-api:0.31.0+1.16"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
     modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${cca_version}"
     modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${cca_version}"
     modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-world:${cca_version}"

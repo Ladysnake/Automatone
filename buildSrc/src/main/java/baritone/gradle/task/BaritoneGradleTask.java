@@ -64,26 +64,16 @@ class BaritoneGradleTask extends DefaultTask {
 
         this.artifactPath = this.getBuildFile(formatVersion(ARTIFACT_STANDARD));
 
-        if (getProject().hasProperty("baritone.forge_build")) {
-            this.artifactUnoptimizedPath = this.getBuildFile(formatVersion(ARTIFACT_FORGE_UNOPTIMIZED));
-            this.artifactApiPath         = this.getBuildFile(formatVersion(ARTIFACT_FORGE_API));
-            this.artifactStandalonePath  = this.getBuildFile(formatVersion(ARTIFACT_FORGE_STANDALONE));
-        } else if (getProject().hasProperty("baritone.fabric_build")) {
-            this.artifactUnoptimizedPath = this.getBuildFile(formatVersion(ARTIFACT_FABRIC_UNOPTIMIZED));
-            this.artifactApiPath         = this.getBuildFile(formatVersion(ARTIFACT_FABRIC_API));
-            this.artifactStandalonePath  = this.getBuildFile(formatVersion(ARTIFACT_FABRIC_STANDALONE));
-        } else {
-            this.artifactUnoptimizedPath = this.getBuildFile(formatVersion(ARTIFACT_UNOPTIMIZED));
-            this.artifactApiPath         = this.getBuildFile(formatVersion(ARTIFACT_API));
-            this.artifactStandalonePath  = this.getBuildFile(formatVersion(ARTIFACT_STANDALONE));
-        }
+        this.artifactUnoptimizedPath = this.getBuildFile(formatVersion(ARTIFACT_FABRIC_UNOPTIMIZED));
+        this.artifactApiPath         = this.getBuildFile(formatVersion(ARTIFACT_FABRIC_API));
+        this.artifactStandalonePath  = this.getBuildFile(formatVersion(ARTIFACT_FABRIC_STANDALONE));
 
         this.proguardOut = this.getTemporaryFile(PROGUARD_EXPORT_PATH);
     }
 
     protected void verifyArtifacts() throws IllegalStateException {
         if (!Files.exists(this.artifactPath)) {
-            throw new IllegalStateException("Artifact not found! Run build first!");
+            throw new IllegalStateException("Artifact " + this.artifactPath + " not found! Run build first!");
         }
     }
 
@@ -99,14 +89,16 @@ class BaritoneGradleTask extends DefaultTask {
     }
 
     protected Path getRelativeFile(String file) {
-        return Paths.get(new File(file).getAbsolutePath());
+        return Paths.get(new File(this.getProject().getProjectDir(), file).getAbsolutePath());
     }
 
     protected Path getTemporaryFile(String file) {
+        Path path = Paths.get(new File(getTemporaryDir(), file).getAbsolutePath());
+        System.out.println("Temporary file created : " + path);
         return Paths.get(new File(getTemporaryDir(), file).getAbsolutePath());
     }
 
     protected Path getBuildFile(String file) {
-        return getRelativeFile("build/libs/" + file);
+        return this.getProject().getBuildDir().toPath().resolve("libs").resolve(file);
     }
 }
