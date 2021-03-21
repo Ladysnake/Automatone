@@ -17,7 +17,7 @@
 
 package baritone.command.defaults;
 
-import baritone.Baritone;
+import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
@@ -247,13 +247,13 @@ public class SelCommand extends Command {
     }
 
     public void renderSelectionBox(RenderEvent event) {
-        if (!Baritone.settings().renderSelectionCorners.value || pos1 == null) {
+        if (!BaritoneAPI.getSettings().renderSelectionCorners.value || pos1 == null) {
             return;
         }
-        Color color = Baritone.settings().colorSelectionPos1.value;
-        float opacity = Baritone.settings().selectionOpacity.value;
-        float lineWidth = Baritone.settings().selectionLineWidth.value;
-        boolean ignoreDepth = Baritone.settings().renderSelectionIgnoreDepth.value;
+        Color color = BaritoneAPI.getSettings().colorSelectionPos1.value;
+        float opacity = BaritoneAPI.getSettings().selectionOpacity.value;
+        float lineWidth = BaritoneAPI.getSettings().selectionLineWidth.value;
+        boolean ignoreDepth = BaritoneAPI.getSettings().renderSelectionIgnoreDepth.value;
         IRenderer.startLines(color, opacity, lineWidth, ignoreDepth);
         IRenderer.drawAABB(event.getModelViewStack(), new Box(pos1, pos1.add(1, 1, 1)));
         IRenderer.endLines(ignoreDepth);

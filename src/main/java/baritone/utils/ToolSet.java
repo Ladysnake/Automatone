@@ -17,11 +17,12 @@
 
 package baritone.utils;
 
-import baritone.Baritone;
+import baritone.api.IBaritone;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -51,12 +52,14 @@ public class ToolSet {
     private final Function<Block, Double> backendCalculation;
 
     private final PlayerEntity player;
+    private final IBaritone baritone;
 
     public ToolSet(PlayerEntity player) {
-        breakStrengthCache = new HashMap<>();
+        this.breakStrengthCache = new HashMap<>();
         this.player = player;
+        this.baritone = IBaritone.KEY.get(player);
 
-        if (Baritone.settings().considerPotionEffects.value) {
+        if (baritone.settings().considerPotionEffects.value) {
             double amplifier = potionAmplifier();
             Function<Double, Double> amplify = x -> amplifier * x;
             backendCalculation = amplify.compose(this::getBestDestructionTime);
@@ -107,7 +110,7 @@ public class ToolSet {
         If we actually want know what efficiency our held item has instead of the best one
         possible, this lets us make pathing depend on the actual tool to be used (if auto tool is disabled)
         */
-        if (Baritone.settings().disableAutoTool.value && pathingCalculation) {
+        if (baritone.settings().disableAutoTool.value && pathingCalculation) {
             return player.inventory.selectedSlot;
         }
 
@@ -118,11 +121,11 @@ public class ToolSet {
         BlockState blockState = b.getDefaultState();
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = player.inventory.getStack(i);
-            if (!Baritone.settings().useSwordToMine.value && itemStack.getItem() instanceof SwordItem) {
+            if (!baritone.settings().useSwordToMine.value && itemStack.getItem() instanceof SwordItem) {
                 continue;
             }
 
-            if (Baritone.settings().itemSaver.value && itemStack.getDamage() >= itemStack.getMaxDamage() && itemStack.getMaxDamage() > 1) {
+            if (baritone.settings().itemSaver.value && itemStack.getDamage() >= itemStack.getMaxDamage() && itemStack.getMaxDamage() > 1) {
                 continue;
             }
             double speed = calculateSpeedVsBlock(itemStack, blockState);
@@ -158,7 +161,7 @@ public class ToolSet {
     }
 
     private double avoidanceMultiplier(Block b) {
-        return Baritone.settings().blocksToAvoidBreaking.value.contains(b) ? 0.1 : 1;
+        return baritone.settings().blocksToAvoidBreaking.value.contains(b) ? 0.1 : 1;
     }
 
     /**
@@ -198,11 +201,15 @@ public class ToolSet {
      */
     private double potionAmplifier() {
         double speed = 1;
-        if (player.hasStatusEffect(StatusEffects.HASTE)) {
-            speed *= 1 + (player.getStatusEffect(StatusEffects.HASTE).getAmplifier() + 1) * 0.2;
+
+        StatusEffectInstance hasteEffect = player.getStatusEffect(StatusEffects.HASTE);
+        if (hasteEffect != null) {
+            speed *= 1 + (hasteEffect.getAmplifier() + 1) * 0.2;
         }
-        if (player.hasStatusEffect(StatusEffects.MINING_FATIGUE)) {
-            switch (player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) {
+
+        StatusEffectInstance fatigueEffect = player.getStatusEffect(StatusEffects.MINING_FATIGUE);
+        if (fatigueEffect != null) {
+            switch (fatigueEffect.getAmplifier()) {
                 case 0:
                     speed *= 0.3;
                     break;

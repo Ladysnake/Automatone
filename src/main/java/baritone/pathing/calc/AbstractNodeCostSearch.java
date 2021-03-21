@@ -18,7 +18,7 @@
 package baritone.pathing.calc;
 
 import baritone.Automatone;
-import baritone.Baritone;
+import baritone.api.Settings;
 import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.calc.IPathFinder;
 import baritone.api.pathing.goals.Goal;
@@ -26,6 +26,7 @@ import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.PathCalculationResult;
 import baritone.pathing.movement.CalculationContext;
 import baritone.utils.NotificationHelper;
+import baritone.utils.pathing.PathBase;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
 import java.util.Optional;
@@ -88,7 +89,7 @@ public abstract class AbstractNodeCostSearch implements IPathFinder {
         this.startZ = startZ;
         this.goal = goal;
         this.context = context;
-        this.map = new Long2ObjectOpenHashMap<>(Baritone.settings().pathingMapDefaultSize.value, Baritone.settings().pathingMapLoadFactor.value);
+        this.map = new Long2ObjectOpenHashMap<>(context.baritone.settings().pathingMapDefaultSize.value, context.baritone.settings().pathingMapLoadFactor.value);
     }
 
     public void cancel() {
@@ -103,25 +104,33 @@ public abstract class AbstractNodeCostSearch implements IPathFinder {
         cancelRequested = false;
         try {
             IPath path = calculate0(primaryTimeout, failureTimeout).map(IPath::postProcess).orElse(null);
+
             if (cancelRequested) {
                 return new PathCalculationResult(PathCalculationResult.Type.CANCELLATION);
             }
+
             if (path == null) {
                 return new PathCalculationResult(PathCalculationResult.Type.FAILURE);
             }
+
             int previousLength = path.length();
-            path = path.cutoffAtLoadedChunks(context.bsi);
+            Settings settings = context.getBaritone().settings();
+            path = ((PathBase) path).cutoffAtLoadedChunks(context.bsi, settings);
+
             if (path.length() < previousLength) {
                 context.baritone.logDebug("Cutting off path at edge of loaded chunks");
                 context.baritone.logDebug("Length decreased by " + (previousLength - path.length()));
             } else {
                 context.baritone.logDebug("Path ends within loaded chunks");
             }
+
             previousLength = path.length();
-            path = path.staticCutoff(goal);
+            path = ((PathBase) path).staticCutoff(goal, settings);
+
             if (path.length() < previousLength) {
                 context.baritone.logDebug("Static cutoff " + previousLength + " to " + path.length());
             }
+
             if (goal.isInGoal(path.getDest())) {
                 return new PathCalculationResult(PathCalculationResult.Type.SUCCESS_TO_GOAL, path);
             } else {
@@ -217,7 +226,7 @@ public abstract class AbstractNodeCostSearch implements IPathFinder {
         if (logInfo) {
             context.baritone.logDebug("Even with a cost coefficient of " + COEFFICIENTS[COEFFICIENTS.length - 1] + ", I couldn't get more than " + Math.sqrt(bestDist) + " blocks");
             context.baritone.logDebug("No path found =(");
-            if (Baritone.settings().desktopNotifications.value) {
+            if (context.baritone.settings().desktopNotifications.value) {
                 NotificationHelper.notify("No path found =(", true);
             }
         }

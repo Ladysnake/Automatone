@@ -242,6 +242,10 @@ public class Baritone implements IBaritone {
         return BaritoneProvider.INSTANCE.isActive(this);
     }
 
+    public Settings settings() {
+        return BaritoneAPI.getSettings();
+    }
+
     @Override
     public void logDebug(String message) {
         Automatone.LOGGER.debug(message);
@@ -290,10 +294,6 @@ public class Baritone implements IBaritone {
             AutomatoneClient.renderList.remove(this);
         }
         this.clientPathingBehaviour.readFromPacket(buf);
-    }
-
-    public static Settings settings() {
-        return BaritoneAPI.getSettings();
     }
 
     public static File getDir() {

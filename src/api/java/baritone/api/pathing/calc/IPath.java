@@ -17,7 +17,6 @@
 
 package baritone.api.pathing.calc;
 
-import baritone.api.Settings;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.movement.IMovement;
 import baritone.api.utils.BetterBlockPos;
@@ -115,32 +114,6 @@ public interface IPath {
             sum += movements.get(i).getCost();
         }
         return sum;
-    }
-
-    /**
-     * Cuts off this path at the loaded chunk border, and returns the resulting path. Default
-     * implementation just returns this path, without the intended functionality.
-     * <p>
-     * The argument is supposed to be a BlockStateInterface LOL LOL LOL LOL LOL
-     *
-     * @param bsi The block state lookup, highly cursed
-     * @return The result of this cut-off operation
-     */
-    default IPath cutoffAtLoadedChunks(Object bsi) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Cuts off this path using the min length and cutoff factor settings, and returns the resulting path.
-     * Default implementation just returns this path, without the intended functionality.
-     *
-     * @param destination The end goal of this path
-     * @return The result of this cut-off operation
-     * @see Settings#pathCutoffMinimumLength
-     * @see Settings#pathCutoffFactor
-     */
-    default IPath staticCutoff(Goal destination) {
-        throw new UnsupportedOperationException();
     }
 
 

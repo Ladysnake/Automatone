@@ -18,7 +18,7 @@
 package baritone.cache;
 
 import baritone.Automatone;
-import baritone.Baritone;
+import baritone.api.BaritoneAPI;
 import baritone.api.cache.IContainerMemory;
 import baritone.api.cache.IRememberedInventory;
 import io.netty.buffer.ByteBuf;
@@ -54,7 +54,7 @@ public class ContainerMemory implements IContainerMemory {
         }
     }
 
-    private void read(byte[] bytes) throws IOException {
+    private void read(byte[] bytes) {
         PacketByteBuf in = new PacketByteBuf(Unpooled.wrappedBuffer(bytes));
         int chests = in.readInt();
         for (int i = 0; i < chests; i++) {
@@ -73,7 +73,7 @@ public class ContainerMemory implements IContainerMemory {
     }
 
     public synchronized void save() throws IOException {
-        if (!Baritone.settings().containerMemory.value) {
+        if (!BaritoneAPI.getSettings().containerMemory.value) {
             return;
         }
         ByteBuf buf = Unpooled.buffer(0, Integer.MAX_VALUE);

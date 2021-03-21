@@ -17,7 +17,6 @@
 
 package baritone.utils.pathing;
 
-import baritone.Baritone;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.IEntityContext;
 import it.unimi.dsi.fastutil.longs.Long2DoubleOpenHashMap;
@@ -61,12 +60,12 @@ public class Avoidance {
     }
 
     public static List<Avoidance> create(IEntityContext ctx) {
-        if (!Baritone.settings().avoidance.value) {
+        if (!ctx.baritone().settings().avoidance.value) {
             return Collections.emptyList();
         }
 
         List<Avoidance> res = new ArrayList<>();
-        double mobCoeff = Baritone.settings().mobAvoidanceCoefficient.value;
+        double mobCoeff = ctx.baritone().settings().mobAvoidanceCoefficient.value;
 
         if (mobCoeff != 1.0D) {
             ctx.worldEntitiesStream()
@@ -74,7 +73,7 @@ public class Avoidance {
                     .filter(entity -> (!(entity instanceof SpiderEntity)) || ctx.entity().getBrightnessAtEyes() < 0.5)
                     .filter(entity -> !(entity instanceof ZombifiedPiglinEntity) || ((ZombifiedPiglinEntity) entity).getAttacker() != null)
                     .filter(entity -> !(entity instanceof EndermanEntity) || ((EndermanEntity) entity).isAngry())
-                    .forEach(entity -> res.add(new Avoidance(entity.getBlockPos(), mobCoeff, Baritone.settings().mobAvoidanceRadius.value)));
+                    .forEach(entity -> res.add(new Avoidance(entity.getBlockPos(), mobCoeff, ctx.baritone().settings().mobAvoidanceRadius.value)));
         }
 
         return res;

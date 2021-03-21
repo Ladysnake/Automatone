@@ -17,7 +17,6 @@
 
 package baritone.pathing.movement.movements;
 
-import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
@@ -110,24 +109,24 @@ public class MovementDiagonal extends Movement {
     }
 
     public static void cost(CalculationContext context, int x, int y, int z, int destX, int destZ, MutableMoveResult res) {
-        if (!MovementHelper.canWalkThrough(context.bsi, destX, y + 1, destZ)) {
+        if (!MovementHelper.canWalkThrough(context.bsi, destX, y + 1, destZ, context.baritone.settings())) {
             return;
         }
         BlockState destInto = context.get(destX, y, destZ);
         boolean ascend = false;
         BlockState destWalkOn;
         boolean descend = false;
-        if (!MovementHelper.canWalkThrough(context.bsi, destX, y, destZ, destInto)) {
+        if (!MovementHelper.canWalkThrough(context.bsi, destX, y, destZ, destInto, context.baritone.settings())) {
             ascend = true;
-            if (!context.allowDiagonalAscend || !MovementHelper.canWalkThrough(context.bsi, x, y + 2, z) || !MovementHelper.canWalkOn(context.bsi, destX, y, destZ, destInto) || !MovementHelper.canWalkThrough(context.bsi, destX, y + 2, destZ)) {
+            if (!context.allowDiagonalAscend || !MovementHelper.canWalkThrough(context.bsi, x, y + 2, z, context.baritone.settings()) || !MovementHelper.canWalkOn(context.bsi, destX, y, destZ, destInto, context.baritone.settings()) || !MovementHelper.canWalkThrough(context.bsi, destX, y + 2, destZ, context.baritone.settings())) {
                 return;
             }
             destWalkOn = destInto;
         } else {
             destWalkOn = context.get(destX, y - 1, destZ);
-            if (!MovementHelper.canWalkOn(context.bsi, destX, y - 1, destZ, destWalkOn)) {
+            if (!MovementHelper.canWalkOn(context.bsi, destX, y - 1, destZ, destWalkOn, context.baritone.settings())) {
                 descend = true;
-                if (!context.allowDiagonalDescend || !MovementHelper.canWalkOn(context.bsi, destX, y - 2, destZ) || !MovementHelper.canWalkThrough(context.bsi, destX, y - 1, destZ, destWalkOn)) {
+                if (!context.allowDiagonalDescend || !MovementHelper.canWalkOn(context.bsi, destX, y - 2, destZ, context.baritone.settings()) || !MovementHelper.canWalkThrough(context.bsi, destX, y - 1, destZ, destWalkOn, context.baritone.settings())) {
                     return;
                 }
             }
@@ -166,17 +165,17 @@ public class MovementDiagonal extends Movement {
         BlockState pb0 = context.get(x, y, destZ);
         BlockState pb2 = context.get(destX, y, z);
         if (ascend) {
-            boolean ATop = MovementHelper.canWalkThrough(context.bsi, x, y + 2, destZ);
-            boolean AMid = MovementHelper.canWalkThrough(context.bsi, x, y + 1, destZ);
-            boolean ALow = MovementHelper.canWalkThrough(context.bsi, x, y, destZ, pb0);
-            boolean BTop = MovementHelper.canWalkThrough(context.bsi, destX, y + 2, z);
-            boolean BMid = MovementHelper.canWalkThrough(context.bsi, destX, y + 1, z);
-            boolean BLow = MovementHelper.canWalkThrough(context.bsi, destX, y, z, pb2);
+            boolean ATop = MovementHelper.canWalkThrough(context.bsi, x, y + 2, destZ, context.baritone.settings());
+            boolean AMid = MovementHelper.canWalkThrough(context.bsi, x, y + 1, destZ, context.baritone.settings());
+            boolean ALow = MovementHelper.canWalkThrough(context.bsi, x, y, destZ, pb0, context.baritone.settings());
+            boolean BTop = MovementHelper.canWalkThrough(context.bsi, destX, y + 2, z, context.baritone.settings());
+            boolean BMid = MovementHelper.canWalkThrough(context.bsi, destX, y + 1, z, context.baritone.settings());
+            boolean BLow = MovementHelper.canWalkThrough(context.bsi, destX, y, z, pb2, context.baritone.settings());
             if ((!(ATop && AMid && ALow) && !(BTop && BMid && BLow)) // no option
                     || MovementHelper.avoidWalkingInto(pb0) // bad
                     || MovementHelper.avoidWalkingInto(pb2) // bad
-                    || (ATop && AMid && MovementHelper.canWalkOn(context.bsi, x, y, destZ, pb0)) // we could just ascend
-                    || (BTop && BMid && MovementHelper.canWalkOn(context.bsi, destX, y, z, pb2)) // we could just ascend
+                    || (ATop && AMid && MovementHelper.canWalkOn(context.bsi, x, y, destZ, pb0, context.baritone.settings())) // we could just ascend
+                    || (BTop && BMid && MovementHelper.canWalkOn(context.bsi, destX, y, z, pb2, context.baritone.settings())) // we could just ascend
                     || (!ATop && AMid && ALow) // head bonk A
                     || (!BTop && BMid && BLow)) { // head bonk B
                 return;
@@ -263,7 +262,7 @@ public class MovementDiagonal extends Movement {
     }
 
     private boolean sprint() {
-        if (MovementHelper.isLiquid(ctx, ctx.feetPos()) && !Baritone.settings().sprintInWater.value) {
+        if (MovementHelper.isLiquid(ctx, ctx.feetPos()) && !baritone.settings().sprintInWater.value) {
             return false;
         }
         for (int i = 0; i < 4; i++) {
@@ -286,7 +285,7 @@ public class MovementDiagonal extends Movement {
         }
         List<BlockPos> result = new ArrayList<>();
         for (int i = 4; i < 6; i++) {
-            if (!MovementHelper.canWalkThrough(bsi, positionsToBreak[i].x, positionsToBreak[i].y, positionsToBreak[i].z)) {
+            if (!MovementHelper.canWalkThrough(bsi, positionsToBreak[i].x, positionsToBreak[i].y, positionsToBreak[i].z, ctx.baritone().settings())) {
                 result.add(positionsToBreak[i]);
             }
         }
@@ -301,7 +300,7 @@ public class MovementDiagonal extends Movement {
         }
         List<BlockPos> result = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            if (!MovementHelper.canWalkThrough(bsi, positionsToBreak[i].x, positionsToBreak[i].y, positionsToBreak[i].z)) {
+            if (!MovementHelper.canWalkThrough(bsi, positionsToBreak[i].x, positionsToBreak[i].y, positionsToBreak[i].z, ctx.baritone().settings())) {
                 result.add(positionsToBreak[i]);
             }
         }

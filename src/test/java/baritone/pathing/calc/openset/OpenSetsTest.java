@@ -87,7 +87,7 @@ public class OpenSetsTest {
         PathNode[] toInsert = new PathNode[size];
         for (int i = 0; i < size; i++) {
             // can't use an existing goal
-            // because they use Baritone.settings()
+            // because they use baritone.settings()
             // and we can't do that because Minecraft itself isn't initted
             PathNode pn = new PathNode(0, 0, 0, new Goal() {
                 @Override

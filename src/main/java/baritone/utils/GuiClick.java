@@ -17,7 +17,6 @@
 
 package baritone.utils;
 
-import baritone.Baritone;
 import baritone.api.BaritoneAPI;
 import baritone.api.utils.BetterBlockPos;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -140,7 +139,7 @@ public class GuiClick extends Screen {
                 RenderSystem.enableBlend();
                 RenderSystem.blendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
                 RenderSystem.color4f(Color.RED.getColorComponents(null)[0], Color.RED.getColorComponents(null)[1], Color.RED.getColorComponents(null)[2], 0.4F);
-                RenderSystem.lineWidth(Baritone.settings().pathRenderLineWidthPixels.value);
+                RenderSystem.lineWidth(BaritoneAPI.getSettings().pathRenderLineWidthPixels.value);
                 RenderSystem.disableTexture();
                 RenderSystem.depthMask(false);
                 RenderSystem.disableDepthTest();

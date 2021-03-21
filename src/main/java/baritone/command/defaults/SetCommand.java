@@ -18,7 +18,7 @@
 package baritone.command.defaults;
 
 import baritone.Automatone;
-import baritone.Baritone;
+import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.command.Command;
@@ -55,7 +55,7 @@ public class SetCommand extends Command {
     public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         String arg = args.hasAny() ? args.getString().toLowerCase(Locale.US) : "list";
         if (Arrays.asList("s", "save").contains(arg)) {
-            SettingsLoader.save(Baritone.settings());
+            SettingsLoader.save(baritone.settings());
             logDirect(source, "Settings saved");
             return;
         }
@@ -66,7 +66,7 @@ public class SetCommand extends Command {
             String search = args.hasAny() && args.peekAsOrNull(Integer.class) == null ? args.getString() : "";
             args.requireMax(1);
             List<? extends Settings.Setting<?>> toPaginate =
-                    (viewModified ? SettingsUtil.modifiedSettings(Baritone.settings()) : Baritone.settings().allSettings).stream()
+                    (viewModified ? SettingsUtil.modifiedSettings(baritone.settings()) : baritone.settings().allSettings).stream()
                             .filter(s -> !s.getName().equals("logger"))
                             .filter(s -> s.getName().toLowerCase(Locale.US).contains(search.toLowerCase(Locale.US)))
                             .sorted((s1, s2) -> String.CASE_INSENSITIVE_ORDER.compare(s1.getName(), s2.getName()))
@@ -114,9 +114,9 @@ public class SetCommand extends Command {
                 logDirect(source, "ALL settings will be reset. Use the 'set modified' or 'modified' commands to see what will be reset.");
                 logDirect(source, "Specify a setting name instead of 'all' to only reset one setting");
             } else if (args.peekString().equalsIgnoreCase("all")) {
-                SettingsUtil.modifiedSettings(Baritone.settings()).forEach(Settings.Setting::reset);
+                SettingsUtil.modifiedSettings(baritone.settings()).forEach(Settings.Setting::reset);
                 logDirect(source, "All settings have been reset to their default values");
-                SettingsLoader.save(Baritone.settings());
+                SettingsLoader.save(baritone.settings());
                 return;
             }
         }
@@ -124,7 +124,7 @@ public class SetCommand extends Command {
             args.requireMin(1);
         }
         String settingName = doingSomething ? args.getString() : arg;
-        Settings.Setting<?> setting = Baritone.settings().allSettings.stream()
+        Settings.Setting<?> setting = baritone.settings().allSettings.stream()
                 .filter(s -> s.getName().equalsIgnoreCase(settingName))
                 .findFirst()
                 .orElse(null);
@@ -152,7 +152,7 @@ public class SetCommand extends Command {
             } else {
                 String newValue = args.getString();
                 try {
-                    SettingsUtil.parseAndApply(Baritone.settings(), arg, newValue);
+                    SettingsUtil.parseAndApply(baritone.settings(), arg, newValue);
                 } catch (Throwable t) {
                     Automatone.LOGGER.error(t);
                     throw new CommandInvalidTypeException(args.consumed(), "a valid value", t);
@@ -179,7 +179,7 @@ public class SetCommand extends Command {
                     )));
             logDirect(source, oldValueComponent);
         }
-        SettingsLoader.save(Baritone.settings());
+        SettingsLoader.save(baritone.settings());
     }
 
     @Override
@@ -199,7 +199,8 @@ public class SetCommand extends Command {
                             .filterPrefix(args.getString())
                             .stream();
                 }
-                Settings.Setting<?> setting = Baritone.settings().byLowerName.get(arg.toLowerCase(Locale.US));
+                // FIXME autocompleting with global settings but executing with pathfinding settings
+                Settings.Setting<?> setting = BaritoneAPI.getSettings().byLowerName.get(arg.toLowerCase(Locale.US));
                 if (setting != null) {
                     if (setting.getType() == Boolean.class) {
                         TabCompleteHelper helper = new TabCompleteHelper();

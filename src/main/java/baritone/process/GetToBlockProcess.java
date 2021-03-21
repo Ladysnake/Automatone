@@ -74,7 +74,7 @@ public final class GetToBlockProcess extends BaritoneProcessHelper implements IG
             rescan(new ArrayList<>(), new CalculationContext(baritone));
         }
         if (knownLocations.isEmpty()) {
-            if (Baritone.settings().exploreForBlocks.value && !calcFailed) {
+            if (baritone.settings().exploreForBlocks.value && !calcFailed) {
                 return new PathingCommand(new GoalRunAway(1, start) {
                     @Override
                     public boolean isInGoal(int x, int y, int z) {
@@ -94,7 +94,7 @@ public final class GetToBlockProcess extends BaritoneProcessHelper implements IG
         }
         Goal goal = new GoalComposite(knownLocations.stream().map(this::createGoal).toArray(Goal[]::new));
         if (calcFailed) {
-            if (Baritone.settings().blacklistClosestOnFailure.value) {
+            if (baritone.settings().blacklistClosestOnFailure.value) {
                 logDirect("Unable to find any path to " + gettingTo + ", blacklisting presumably unreachable closest instances...");
                 blacklistClosest();
                 return onTick(false, isSafeToCancel); // gamer moment
@@ -106,7 +106,7 @@ public final class GetToBlockProcess extends BaritoneProcessHelper implements IG
                 return new PathingCommand(goal, PathingCommandType.CANCEL_AND_SET_GOAL);
             }
         }
-        int mineGoalUpdateInterval = Baritone.settings().mineGoalUpdateInterval.value;
+        int mineGoalUpdateInterval = baritone.settings().mineGoalUpdateInterval.value;
         if (mineGoalUpdateInterval != 0 && tickCount++ % mineGoalUpdateInterval == 0) { // big brain
             List<BlockPos> current = new ArrayList<>(knownLocations);
             CalculationContext context = new CalculationContext(baritone, true);
@@ -219,14 +219,14 @@ public final class GetToBlockProcess extends BaritoneProcessHelper implements IG
     }
 
     private boolean walkIntoInsteadOfAdjacent(Block block) {
-        if (!Baritone.settings().enterPortal.value) {
+        if (!baritone.settings().enterPortal.value) {
             return false;
         }
         return block == Blocks.NETHER_PORTAL;
     }
 
     private boolean rightClickOnArrival(Block block) {
-        if (!Baritone.settings().rightClickContainerOnArrival.value) {
+        if (!baritone.settings().rightClickContainerOnArrival.value) {
             return false;
         }
         return block == Blocks.CRAFTING_TABLE || block == Blocks.FURNACE || block == Blocks.ENDER_CHEST || block == Blocks.CHEST || block == Blocks.TRAPPED_CHEST;

@@ -17,8 +17,7 @@
 
 package baritone.utils;
 
-import baritone.Baritone;
-import baritone.api.utils.Helper;
+import baritone.api.BaritoneAPI;
 import baritone.api.utils.IEntityContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.vehicle.BoatEntity;
@@ -47,7 +46,7 @@ public class BlockPlaceHelper {
             return;
         }
 
-        rightClickTimer = Baritone.settings().rightClickSpeed.value;
+        rightClickTimer = BaritoneAPI.getSettings().rightClickSpeed.value;
         PlayerEntity player = (PlayerEntity) ctx.entity();
 
         for (Hand hand : Hand.values()) {

@@ -17,7 +17,6 @@
 
 package baritone.pathing.movement;
 
-import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.pathing.movement.IMovement;
 import baritone.api.pathing.movement.MovementStatus;
@@ -160,7 +159,7 @@ public abstract class Movement implements IMovement, MovementHelper {
         }
         boolean somethingInTheWay = false;
         for (BetterBlockPos blockPos : positionsToBreak) {
-            if (!ctx.world().getEntitiesIncludingUngeneratedChunks(FallingBlockEntity.class, new Box(0, 0, 0, 1, 1.1, 1).offset(blockPos)).isEmpty() && Baritone.settings().pauseMiningForFallingBlocks.value) {
+            if (!ctx.world().getEntitiesIncludingUngeneratedChunks(FallingBlockEntity.class, new Box(0, 0, 0, 1, 1.1, 1).offset(blockPos)).isEmpty() && baritone.settings().pauseMiningForFallingBlocks.value) {
                 return false;
             }
             if (!MovementHelper.canWalkThrough(ctx, blockPos)) { // can't break air, so don't try
@@ -267,7 +266,7 @@ public abstract class Movement implements IMovement, MovementHelper {
         }
         List<BlockPos> result = new ArrayList<>();
         for (BetterBlockPos positionToBreak : positionsToBreak) {
-            if (!MovementHelper.canWalkThrough(bsi, positionToBreak.x, positionToBreak.y, positionToBreak.z)) {
+            if (!MovementHelper.canWalkThrough(bsi, positionToBreak.x, positionToBreak.y, positionToBreak.z, ctx.baritone().settings())) {
                 result.add(positionToBreak);
             }
         }
@@ -280,7 +279,7 @@ public abstract class Movement implements IMovement, MovementHelper {
             return toPlaceCached;
         }
         List<BlockPos> result = new ArrayList<>();
-        if (positionToPlace != null && !MovementHelper.canWalkOn(bsi, positionToPlace.x, positionToPlace.y, positionToPlace.z)) {
+        if (positionToPlace != null && !MovementHelper.canWalkOn(bsi, positionToPlace.x, positionToPlace.y, positionToPlace.z, baritone.settings())) {
             result.add(positionToPlace);
         }
         toPlaceCached = result;

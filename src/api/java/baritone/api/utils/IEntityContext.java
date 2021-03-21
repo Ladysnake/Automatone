@@ -47,6 +47,10 @@ public interface IEntityContext {
 
     LivingEntity entity();
 
+    default IBaritone baritone() {
+        return IBaritone.KEY.get(entity());
+    }
+
     @Nullable PlayerInventory inventory();
 
     IPlayerController playerController();

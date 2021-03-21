@@ -205,4 +205,6 @@ public interface IBaritone extends AutoSyncedComponent {
     void deactivate();
 
     boolean isActive();
+
+    Settings settings();
 }

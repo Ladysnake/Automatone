@@ -25,7 +25,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.*;
-import net.minecraft.recipe.Ingredient;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
@@ -46,7 +45,7 @@ public final class InventoryBehavior extends Behavior {
 
     @Override
     public void onTickServer() {
-        if (!Baritone.settings().allowInventory.value) {
+        if (!baritone.settings().allowInventory.value) {
             return;
         }
         if (!(ctx.entity() instanceof PlayerEntity)) {
@@ -109,7 +108,7 @@ public final class InventoryBehavior extends Behavior {
     private int firstValidThrowaway(PlayerInventory inventory) { // TODO offhand idk
         DefaultedList<ItemStack> invy = inventory.main;
         for (int i = 0; i < invy.size(); i++) {
-            if (Baritone.settings().acceptableThrowawayItems.value.contains(invy.get(i).getItem())) {
+            if (baritone.settings().acceptableThrowawayItems.value.contains(invy.get(i).getItem())) {
                 return i;
             }
         }
@@ -125,7 +124,7 @@ public final class InventoryBehavior extends Behavior {
             if (stack.isEmpty()) {
                 continue;
             }
-            if (Baritone.settings().itemSaver.value && stack.getDamage() >= stack.getMaxDamage() && stack.getMaxDamage() > 1) {
+            if (baritone.settings().itemSaver.value && stack.getDamage() >= stack.getMaxDamage() && stack.getMaxDamage() > 1) {
                 continue;
             }
             if (cla$$.isInstance(stack.getItem())) {
@@ -140,7 +139,7 @@ public final class InventoryBehavior extends Behavior {
     }
 
     public boolean hasGenericThrowaway() {
-        for (Item item : Baritone.settings().acceptableThrowawayItems.value) {
+        for (Item item : baritone.settings().acceptableThrowawayItems.value) {
             if (throwaway(false, stack -> item.equals(stack.getItem()))) {
                 return true;
             }
@@ -159,7 +158,7 @@ public final class InventoryBehavior extends Behavior {
         if (maybe != null && throwaway(select, stack -> stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock().equals(maybe.getBlock()))) {
             return true;
         }
-        for (Item item : Baritone.settings().acceptableThrowawayItems.value) {
+        for (Item item : baritone.settings().acceptableThrowawayItems.value) {
             if (throwaway(select, stack -> item.equals(stack.getItem()))) {
                 return true;
             }

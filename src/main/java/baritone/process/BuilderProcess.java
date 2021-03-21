@@ -93,18 +93,18 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         int x = origin.getX();
         int y = origin.getY();
         int z = origin.getZ();
-        if (Baritone.settings().schematicOrientationX.value) {
+        if (baritone.settings().schematicOrientationX.value) {
             x += schematic.widthX();
         }
-        if (Baritone.settings().schematicOrientationY.value) {
+        if (baritone.settings().schematicOrientationY.value) {
             y += schematic.heightY();
         }
-        if (Baritone.settings().schematicOrientationZ.value) {
+        if (baritone.settings().schematicOrientationZ.value) {
             z += schematic.lengthZ();
         }
         this.origin = new Vec3i(x, y, z);
         this.paused = false;
-        this.layer = Baritone.settings().startAtLayer.value;
+        this.layer = baritone.settings().startAtLayer.value;
         this.numRepeats = 0;
         this.observedCompleted = new LongOpenHashSet();
         this.baritone.activate();
@@ -138,7 +138,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
             return false;
         }
 
-        if (Baritone.settings().mapArtMode.value) {
+        if (baritone.settings().mapArtMode.value) {
             parsed = new MapArtSchematic((IStaticSchematic) parsed);
         }
 
@@ -154,7 +154,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
                 IStaticSchematic s = schematic.get().getLeft();
                 this.build(
                         schematic.get().getLeft().toString(),
-                        Baritone.settings().mapArtMode.value ? new MapArtSchematic(s) : s,
+                        baritone.settings().mapArtMode.value ? new MapArtSchematic(s) : s,
                         schematic.get().getRight()
                 );
             } else {
@@ -201,7 +201,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         BetterBlockPos center = ctx.feetPos();
         BetterBlockPos pathStart = baritone.getPathingBehavior().pathStart();
         for (int dx = -5; dx <= 5; dx++) {
-            for (int dy = Baritone.settings().breakFromAbove.value ? -1 : 0; dy <= 5; dy++) {
+            for (int dy = baritone.settings().breakFromAbove.value ? -1 : 0; dy <= 5; dy++) {
                 for (int dz = -5; dz <= 5; dz++) {
                     int x = center.x + dx;
                     int y = center.y + dy;
@@ -387,7 +387,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         if (paused) {
             return new PathingCommand(null, PathingCommandType.CANCEL_AND_SET_GOAL);
         }
-        if (Baritone.settings().buildInLayers.value) {
+        if (baritone.settings().buildInLayers.value) {
             if (realSchematic == null) {
                 realSchematic = schematic;
             }
@@ -396,7 +396,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
             int maxYInclusive;
             // layer = 0 should be nothing
             // layer = realSchematic.heightY() should be everything
-            if (Baritone.settings().layerOrder.value) { // top to bottom
+            if (baritone.settings().layerOrder.value) { // top to bottom
                 maxYInclusive = realSchematic.heightY() - 1;
                 minYInclusive = realSchematic.heightY() - layer;
             } else {
@@ -437,17 +437,17 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         }
         BuilderCalculationContext bcc = new BuilderCalculationContext();
         if (!recalc(bcc)) {
-            if (Baritone.settings().buildInLayers.value && layer < realSchematic.heightY()) {
+            if (baritone.settings().buildInLayers.value && layer < realSchematic.heightY()) {
                 logDirect("Starting layer " + layer);
                 layer++;
                 return onTick(calcFailed, isSafeToCancel, recursions + 1);
             }
-            Vec3i repeat = Baritone.settings().buildRepeat.value;
-            int max = Baritone.settings().buildRepeatCount.value;
+            Vec3i repeat = baritone.settings().buildRepeat.value;
+            int max = baritone.settings().buildRepeatCount.value;
             numRepeats++;
             if (repeat.equals(new Vec3i(0, 0, 0)) || (max != -1 && numRepeats >= max)) {
                 logDirect("Done building");
-                if (Baritone.settings().desktopNotifications.value && Baritone.settings().notificationOnBuildFinished.value) {
+                if (baritone.settings().desktopNotifications.value && baritone.settings().notificationOnBuildFinished.value) {
                     NotificationHelper.notify("Done building", false);
                 }
                 onLostControl();
@@ -456,13 +456,13 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
             // build repeat time
             layer = 0;
             origin = new BlockPos(origin).add(repeat);
-            if (!Baritone.settings().buildRepeatSneaky.value) {
+            if (!baritone.settings().buildRepeatSneaky.value) {
                 schematic.reset();
             }
             logDirect("Repeating build in vector " + repeat + ", new origin is " + origin);
             return onTick(calcFailed, isSafeToCancel, recursions + 1);
         }
-        if (Baritone.settings().distanceTrim.value) {
+        if (baritone.settings().distanceTrim.value) {
             trim();
         }
 
@@ -498,7 +498,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
             return new PathingCommand(null, PathingCommandType.CANCEL_AND_SET_GOAL);
         }
 
-        if (Baritone.settings().allowInventory.value) {
+        if (baritone.settings().allowInventory.value) {
             ArrayList<Integer> usefulSlots = new ArrayList<>();
             List<BlockState> noValidHotbarOption = new ArrayList<>();
             outer:
@@ -527,7 +527,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         if (goal == null) {
             goal = assemble(bcc, approxPlaceable, true); // we're far away, so assume that we have our whole inventory to recalculate placeable properly
             if (goal == null) {
-                if (Baritone.settings().skipFailedLayers.value && Baritone.settings().buildInLayers.value && layer < realSchematic.heightY()) {
+                if (baritone.settings().skipFailedLayers.value && baritone.settings().buildInLayers.value && layer < realSchematic.heightY()) {
                     logDirect("Skipping layer that I cannot construct! Layer #" + layer);
                     layer++;
                     return onTick(calcFailed, isSafeToCancel, recursions + 1);
@@ -565,7 +565,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
 
     private void recalcNearby(BuilderCalculationContext bcc) {
         BetterBlockPos center = ctx.feetPos();
-        int radius = Baritone.settings().builderTickScanRadius.value;
+        int radius = baritone.settings().builderTickScanRadius.value;
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dy = -radius; dy <= radius; dy++) {
                 for (int dz = -radius; dz <= radius; dz++) {
@@ -608,7 +608,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
                         } else {
                             incorrectPositions.add(new BetterBlockPos(blockX, blockY, blockZ));
                             observedCompleted.remove(BetterBlockPos.longHash(blockX, blockY, blockZ));
-                            if (incorrectPositions.size() > Baritone.settings().incorrectSize.value) {
+                            if (incorrectPositions.size() > baritone.settings().incorrectSize.value) {
                                 return;
                             }
                         }
@@ -619,7 +619,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
                         // and we've never seen this position be correct
                         // therefore mark as incorrect
                         incorrectPositions.add(new BetterBlockPos(blockX, blockY, blockZ));
-                        if (incorrectPositions.size() > Baritone.settings().incorrectSize.value) {
+                        if (incorrectPositions.size() > baritone.settings().incorrectSize.value) {
                             return;
                         }
                     }
@@ -753,7 +753,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
     }
 
     private Goal breakGoal(BlockPos pos, BuilderCalculationContext bcc) {
-        if (Baritone.settings().goalBreakFromAbove.value && bcc.bsi.get0(pos.up()).getBlock() instanceof AirBlock && bcc.bsi.get0(pos.up(2)).getBlock() instanceof AirBlock) { // TODO maybe possible without the up(2) check?
+        if (baritone.settings().goalBreakFromAbove.value && bcc.bsi.get0(pos.up()).getBlock() instanceof AirBlock && bcc.bsi.get0(pos.up(2)).getBlock() instanceof AirBlock) { // TODO maybe possible without the up(2) check?
             return new JankyGoalComposite(new GoalBreak(pos), new GoalGetToBlock(pos.up()) {
                 @Override
                 public boolean isInGoal(int x, int y, int z) {
@@ -818,7 +818,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         name = null;
         schematic = null;
         realSchematic = null;
-        layer = Baritone.settings().startAtLayer.value;
+        layer = baritone.settings().startAtLayer.value;
         numRepeats = 0;
         paused = false;
         observedCompleted = null;
@@ -849,19 +849,19 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         if (desired == null) {
             return true;
         }
-        if (current.getBlock() instanceof FluidBlock && Baritone.settings().okIfWater.value) {
+        if (current.getBlock() instanceof FluidBlock && baritone.settings().okIfWater.value) {
             return true;
         }
         if (current.getBlock() instanceof AirBlock && desired.getBlock() instanceof AirBlock) {
             return true;
         }
-        if (current.getBlock() instanceof AirBlock && Baritone.settings().okIfAir.value.contains(desired.getBlock())) {
+        if (current.getBlock() instanceof AirBlock && baritone.settings().okIfAir.value.contains(desired.getBlock())) {
             return true;
         }
-        if (desired.getBlock() instanceof AirBlock && Baritone.settings().buildIgnoreBlocks.value.contains(current.getBlock())) {
+        if (desired.getBlock() instanceof AirBlock && baritone.settings().buildIgnoreBlocks.value.contains(current.getBlock())) {
             return true;
         }
-        if (!(current.getBlock() instanceof AirBlock) && Baritone.settings().buildIgnoreExisting.value && !itemVerify) {
+        if (!(current.getBlock() instanceof AirBlock) && baritone.settings().buildIgnoreExisting.value && !itemVerify) {
             return true;
         }
         return current.equals(desired);
@@ -944,7 +944,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
                 // it should be a real block
                 // is it already that block?
                 if (valid(bsi.get0(x, y, z), sch, false)) {
-                    return Baritone.settings().breakCorrectBlockPenaltyMultiplier.value;
+                    return baritone.settings().breakCorrectBlockPenaltyMultiplier.value;
                 } else {
                     // can break if it's wrong
                     // would be great to return less than 1 here, but that would actually make the cost calculation messed up

@@ -47,12 +47,12 @@ public final class BackfillProcess extends BaritoneProcessHelper {
         if (ctx.entity() == null || ctx.world() == null) {
             return false;
         }
-        if (!Baritone.settings().backfill.value) {
+        if (!baritone.settings().backfill.value) {
             return false;
         }
-        if (Baritone.settings().allowParkour.value) {
+        if (baritone.settings().allowParkour.value) {
             logDirect("Backfill cannot be used with allowParkour true");
-            Baritone.settings().backfill.value = false;
+            baritone.settings().backfill.value = false;
             return false;
         }
         amIBreakingABlockHMMMMMMM();
