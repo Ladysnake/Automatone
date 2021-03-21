@@ -17,6 +17,7 @@
 
 package baritone.cache;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.cache.IContainerMemory;
 import baritone.api.cache.IRememberedInventory;
@@ -48,7 +49,7 @@ public class ContainerMemory implements IContainerMemory {
         } catch (NoSuchFileException ignored) {
             inventories.clear();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Automatone.LOGGER.error(ex);
             inventories.clear();
         }
     }
@@ -108,12 +109,12 @@ public class ContainerMemory implements IContainerMemory {
         return new HashMap<>(inventories);
     }
 
-    public static List<ItemStack> readItemStacks(byte[] bytes) throws IOException {
+    public static List<ItemStack> readItemStacks(byte[] bytes) {
         PacketByteBuf in = new PacketByteBuf(Unpooled.wrappedBuffer(bytes));
         return readItemStacks(in);
     }
 
-    public static List<ItemStack> readItemStacks(PacketByteBuf in) throws IOException {
+    public static List<ItemStack> readItemStacks(PacketByteBuf in) {
         int count = in.readInt();
         List<ItemStack> result = new ArrayList<>();
         for (int i = 0; i < count; i++) {

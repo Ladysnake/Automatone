@@ -17,6 +17,7 @@
 
 package baritone.pathing.calc;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.goals.Goal;
@@ -86,6 +87,8 @@ public final class AStarPathFinder extends AbstractNodeCostSearch {
             }
             if (slowPath) {
                 try {
+                    // Not busy waiting, only artificially slowing the loop down
+                    //noinspection BusyWait
                     Thread.sleep(Baritone.settings().slowPathTimeDelayMS.value);
                 } catch (InterruptedException ignored) {}
             }
@@ -164,10 +167,10 @@ public final class AStarPathFinder extends AbstractNodeCostSearch {
         if (cancelRequested) {
             return Optional.empty();
         }
-        System.out.println(numMovementsConsidered + " movements considered");
-        System.out.println("Open set size: " + openSet.size());
-        System.out.println("PathNode map size: " + mapSize());
-        System.out.println((int) (numNodes * 1.0 / ((System.currentTimeMillis() - startTime) / 1000F)) + " nodes per second");
+        Automatone.LOGGER.debug(numMovementsConsidered + " movements considered");
+        Automatone.LOGGER.debug("Open set size: " + openSet.size());
+        Automatone.LOGGER.debug("PathNode map size: " + mapSize());
+        Automatone.LOGGER.debug((int) (numNodes * 1.0 / ((System.currentTimeMillis() - startTime) / 1000F)) + " nodes per second");
         Optional<IPath> result = bestSoFar(true, numNodes);
         if (result.isPresent()) {
             calcContext.baritone.logDebug("Took " + (System.currentTimeMillis() - startTime) + "ms, " + numMovementsConsidered + " movements considered");

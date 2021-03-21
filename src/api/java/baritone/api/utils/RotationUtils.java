@@ -192,7 +192,7 @@ public final class RotationUtils {
             }
         }
         Optional<Rotation> possibleRotation = reachableCenter(entity, pos, blockReachDistance, wouldSneak);
-        //System.out.println("center: " + possibleRotation);
+        //Automatone.LOGGER.debug("center: " + possibleRotation);
         if (possibleRotation.isPresent()) {
             return possibleRotation;
         }
@@ -229,7 +229,7 @@ public final class RotationUtils {
         Vec3d eyes = wouldSneak ? RayTraceUtils.inferSneakingEyePosition(entity) : entity.getCameraPosVec(1.0F);
         Rotation rotation = calcRotationFromVec3d(eyes, offsetPos, new Rotation(entity.yaw, entity.pitch));
         HitResult result = RayTraceUtils.rayTraceTowards(entity, rotation, blockReachDistance, wouldSneak);
-        //System.out.println(result);
+        //Automatone.LOGGER.debug(result);
         if (result != null && result.getType() == HitResult.Type.BLOCK) {
             if (((BlockHitResult) result).getBlockPos().equals(pos)) {
                 return Optional.of(rotation);

@@ -93,8 +93,6 @@ class BaritoneGradleTask extends DefaultTask {
     }
 
     protected Path getTemporaryFile(String file) {
-        Path path = Paths.get(new File(getTemporaryDir(), file).getAbsolutePath());
-        System.out.println("Temporary file created : " + path);
         return Paths.get(new File(getTemporaryDir(), file).getAbsolutePath());
     }
 

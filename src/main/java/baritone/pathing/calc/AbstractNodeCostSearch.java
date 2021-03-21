@@ -23,7 +23,6 @@ import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.calc.IPathFinder;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.utils.BetterBlockPos;
-import baritone.api.utils.Helper;
 import baritone.api.utils.PathCalculationResult;
 import baritone.pathing.movement.CalculationContext;
 import baritone.utils.NotificationHelper;
@@ -203,11 +202,11 @@ public abstract class AbstractNodeCostSearch implements IPathFinder {
             if (dist > MIN_DIST_PATH * MIN_DIST_PATH) { // square the comparison since distFromStartSq is squared
                 if (logInfo) {
                     if (COEFFICIENTS[i] >= 3) {
-                        System.out.println("Warning: cost coefficient is greater than three! Probably means that");
-                        System.out.println("the path I found is pretty terrible (like sneak-bridging for dozens of blocks)");
-                        System.out.println("But I'm going to do it anyway, because yolo");
+                        Automatone.LOGGER.warn("Warning: cost coefficient is greater than three! Probably means that");
+                        Automatone.LOGGER.warn("the path I found is pretty terrible (like sneak-bridging for dozens of blocks)");
+                        Automatone.LOGGER.warn("But I'm going to do it anyway, because yolo");
                     }
-                    System.out.println("Path goes for " + Math.sqrt(dist) + " blocks");
+                    Automatone.LOGGER.info("Path goes for " + Math.sqrt(dist) + " blocks");
                     context.baritone.logDebug("A* cost coefficient " + COEFFICIENTS[i]);
                 }
                 return Optional.of(new Path(startNode, bestSoFar[i], numNodes, goal, context));

@@ -212,7 +212,7 @@ public class MovementDescend extends Movement {
             // Wait until we're actually on the ground before saying we're done because sometimes we continue to fall if the next action starts immediately
             return state.setStatus(MovementStatus.SUCCESS);
             /* else {
-                // System.out.println(player().getPositionVec().y + " " + playerFeet.getY() + " " + (player().getPositionVec().y - playerFeet.getY()));
+                // Automatone.LOGGER.debug(player().getPositionVec().y + " " + playerFeet.getY() + " " + (player().getPositionVec().y - playerFeet.getY()));
             }*/
         }
         if (safeMode()) {

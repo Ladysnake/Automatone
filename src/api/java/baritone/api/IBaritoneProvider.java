@@ -71,4 +71,6 @@ public interface IBaritoneProvider {
      * @return The {@link ISchematicSystem} instance.
      */
     ISchematicSystem getSchematicSystem();
+
+    Settings getSettings();
 }

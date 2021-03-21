@@ -15,8 +15,10 @@
  * along with Baritone.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package baritone.api.command.exception;
+package baritone.command;
 
+import baritone.Automatone;
+import baritone.api.command.exception.CommandException;
 import net.minecraft.text.Text;
 
 public class CommandUnhandledException extends CommandException {
@@ -31,7 +33,7 @@ public class CommandUnhandledException extends CommandException {
 
     @Override
     public Text handle() {
-        this.printStackTrace();
+        Automatone.LOGGER.error("An unhandled exception occurred while running a command", this.getCause());
         return super.handle();
     }
 }

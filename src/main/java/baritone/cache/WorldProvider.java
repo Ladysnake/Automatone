@@ -17,8 +17,8 @@
 
 package baritone.cache;
 
+import baritone.Automatone;
 import baritone.api.cache.IWorldProvider;
-import baritone.api.utils.Helper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
@@ -26,12 +26,9 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.world.dimension.DimensionType;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -82,7 +79,7 @@ public class WorldProvider implements IWorldProvider {
             Files.write(readme, "https://github.com/Ladysnake/Automatone\n".getBytes());
         } catch (IOException ignored) {}
 
-        System.out.println("Automatone world data dir: " + dir);
+        Automatone.LOGGER.info("Automatone world data dir: " + dir);
         synchronized (worldCache) {
             this.currentWorld = worldCache.computeIfAbsent(dir, d -> new WorldData(d, world.getRegistryKey()));
         }

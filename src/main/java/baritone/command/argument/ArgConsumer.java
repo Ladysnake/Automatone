@@ -17,6 +17,7 @@
 
 package baritone.command.argument;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.command.argument.IArgConsumer;
@@ -310,7 +311,7 @@ public class ArgConsumer implements IArgConsumer, IDatatypeContext {
             return datatype.apply(this, original);
         } catch (Exception e) {
             if (Baritone.settings().verboseCommandExceptions.value) {
-                e.printStackTrace();
+                Automatone.LOGGER.error(e);
             }
             throw new CommandInvalidTypeException(hasAny() ? peek() : consumed(), datatype.getClass().getSimpleName(), e);
         }
@@ -342,7 +343,7 @@ public class ArgConsumer implements IArgConsumer, IDatatypeContext {
             return datatype.get(this);
         } catch (Exception e) {
             if (Baritone.settings().verboseCommandExceptions.value) {
-                e.printStackTrace();
+                Automatone.LOGGER.error(e);
             }
             throw new CommandInvalidTypeException(hasAny() ? peek() : consumed(), datatype.getClass().getSimpleName(), e);
         }
@@ -373,7 +374,7 @@ public class ArgConsumer implements IArgConsumer, IDatatypeContext {
         try {
             return datatype.tabComplete(this);
         } catch (Exception e) {
-            e.printStackTrace();
+            Automatone.LOGGER.error(e);
         }
         return Stream.empty();
     }

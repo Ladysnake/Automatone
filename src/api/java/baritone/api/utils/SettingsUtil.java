@@ -19,7 +19,6 @@ package baritone.api.utils;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.Settings;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
@@ -28,79 +27,24 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 public class SettingsUtil {
 
-    private static final Path SETTINGS_PATH = FabricLoader.getInstance().getConfigDir().resolve("automatone").resolve("settings.txt");
-    private static final Pattern SETTING_PATTERN = Pattern.compile("^(?<setting>[^ ]+) +(?<value>.+)"); // key and value split by the first space
-
-
-    private static boolean isComment(String line) {
-        return line.startsWith("#") || line.startsWith("//");
-    }
-
-    public static void readAndApply(Settings settings) {
-        try {
-            Files.lines(SETTINGS_PATH).filter(line -> !line.trim().isEmpty() && !isComment(line)).forEach(line -> {
-                Matcher matcher = SETTING_PATTERN.matcher(line);
-                if (!matcher.matches()) {
-                    System.out.println("Invalid syntax in setting file: " + line);
-                    return;
-                }
-
-                String settingName = matcher.group("setting").toLowerCase();
-                String settingValue = matcher.group("value");
-                try {
-                    parseAndApply(settings, settingName, settingValue);
-                } catch (Exception ex) {
-                    System.out.println("Unable to parse line " + line);
-                    ex.printStackTrace();
-                }
-            });
-        } catch (NoSuchFileException e) {
-            System.out.println("Automatone settings file not found, resetting.");
-            try {
-                Files.createFile(SETTINGS_PATH);
-            } catch (IOException ignored) { }
-        } catch (Exception ex) {
-            System.out.println("Exception while reading Automatone settings, some settings may be reset to default values!");
-            ex.printStackTrace();
-        }
-    }
-
-    public static synchronized void save(Settings settings) {
-        try (BufferedWriter out = Files.newBufferedWriter(SETTINGS_PATH)) {
-            for (Settings.Setting<?> setting : modifiedSettings(settings)) {
-                out.write(settingToString(setting) + "\n");
-            }
-        } catch (Exception ex) {
-            System.out.println("Exception thrown while saving Automatone settings!");
-            ex.printStackTrace();
-        }
-    }
-
     public static List<Settings.Setting<?>> modifiedSettings(Settings settings) {
         List<Settings.Setting<?>> modified = new ArrayList<>();
         for (Settings.Setting<?> setting : settings.allSettings) {
             if (setting.value == null) {
-                System.out.println("NULL SETTING?" + setting.getName());
+                System.err.println("NULL SETTING?" + setting.getName());
                 continue;
             }
             if (setting.getName().equals("logger")) {

@@ -17,6 +17,7 @@
 
 package baritone.utils;
 
+import baritone.Automatone;
 import baritone.api.event.events.RenderEvent;
 import baritone.api.pathing.goals.*;
 import baritone.api.utils.interfaces.IGoalRenderPos;
@@ -87,9 +88,9 @@ public final class PathRenderer implements IRenderer {
         Entity renderView = mc.getCameraEntity();
 
         if (renderView.world != world) {
-            System.out.println("I have no idea what's going on");
-            System.out.println("The primary baritone is in a different world than the render view entity");
-            System.out.println("Not rendering the path");
+            Automatone.LOGGER.error("I have no idea what's going on");
+            Automatone.LOGGER.error("The primary baritone is in a different world than the render view entity");
+            Automatone.LOGGER.error("Not rendering the path");
             return;
         }
 

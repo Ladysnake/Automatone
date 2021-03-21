@@ -17,6 +17,7 @@
 
 package baritone.cache;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.cache.ICachedWorld;
 import baritone.api.cache.IContainerMemory;
@@ -50,12 +51,11 @@ public class WorldData implements IWorldData {
 
     public void onClose() {
         Baritone.getExecutor().execute(() -> {
-            System.out.println("Started saving saved containers in a new thread");
+            Automatone.LOGGER.info("Started saving saved containers in a new thread");
             try {
                 containerMemory.save();
             } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("Failed to save saved containers");
+                Automatone.LOGGER.error("Failed to save saved containers", e);
             }
         });
     }

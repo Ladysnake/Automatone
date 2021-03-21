@@ -39,6 +39,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
@@ -239,6 +240,23 @@ public class Baritone implements IBaritone {
     @Override
     public boolean isActive() {
         return BaritoneProvider.INSTANCE.isActive(this);
+    }
+
+    @Override
+    public void logDebug(String message) {
+        Automatone.LOGGER.debug(message);
+
+        if (!BaritoneAPI.getSettings().chatDebug.value) {
+            return;
+        }
+
+        // We won't log debug chat into toasts
+        // Because only a madman would want that extreme spam -_-
+        logDirect(message);
+        MinecraftServer server = this.getPlayerContext().world().getServer();
+        for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) {
+            KEY.get(p).logDirect(message);
+        }
     }
 
     @Override

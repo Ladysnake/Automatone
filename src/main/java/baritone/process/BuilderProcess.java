@@ -17,6 +17,7 @@
 
 package baritone.process;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalBlock;
@@ -133,7 +134,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         try {
             parsed = format.get().parse(new FileInputStream(schematic));
         } catch (Exception e) {
-            e.printStackTrace();
+            Automatone.LOGGER.error(e);
             return false;
         }
 

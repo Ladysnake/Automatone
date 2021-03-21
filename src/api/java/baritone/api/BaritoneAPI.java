@@ -17,7 +17,6 @@
 
 package baritone.api;
 
-import baritone.api.utils.SettingsUtil;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -34,12 +33,8 @@ import java.util.Calendar;
 public final class BaritoneAPI {
 
     private static final IBaritoneProvider provider;
-    private static final Settings settings;
 
     static {
-        settings = new Settings();
-        SettingsUtil.readAndApply(settings);
-
         try {
             provider = (IBaritoneProvider) Class.forName("baritone.BaritoneProvider").getField("INSTANCE").get(null);
         } catch (ReflectiveOperationException ex) {
@@ -52,7 +47,7 @@ public final class BaritoneAPI {
     }
 
     public static Settings getSettings() {
-        return BaritoneAPI.settings;
+        return getProvider().getSettings();
     }
 
     public static Text getPrefix() {

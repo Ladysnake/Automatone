@@ -17,6 +17,7 @@
 
 package baritone.utils;
 
+import baritone.Automatone;
 import org.apache.commons.lang3.SystemUtils;
 
 import java.awt.*;
@@ -57,10 +58,10 @@ public class NotificationHelper {
 
                 trayIcon.displayMessage("Baritone", text, error ? TrayIcon.MessageType.ERROR : TrayIcon.MessageType.INFO);
             } catch (Exception e) {
-                e.printStackTrace();
+                Automatone.LOGGER.error(e);
             }
         } else {
-            System.out.println("SystemTray is not supported");
+            Automatone.LOGGER.error("SystemTray is not supported");
         }
     }
 
@@ -70,7 +71,7 @@ public class NotificationHelper {
         try {
             processBuilder.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            Automatone.LOGGER.error(e);
         }
     }
 
@@ -83,7 +84,7 @@ public class NotificationHelper {
         try {
             processBuilder.start();
         } catch (IOException e) {
-            e.printStackTrace();
+            Automatone.LOGGER.error(e);
         }
     }
 }

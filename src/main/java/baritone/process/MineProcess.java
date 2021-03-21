@@ -17,6 +17,7 @@
 
 package baritone.process;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.pathing.goals.*;
 import baritone.api.process.IMineProcess;
@@ -78,7 +79,7 @@ public final class MineProcess extends BaritoneProcessHelper implements IMinePro
             int curr = inventory == null ? -1 : inventory.main.stream()
                     .filter(stack -> filter.has(stack))
                     .mapToInt(ItemStack::getCount).sum();
-            System.out.println("Currently have " + curr + " valid items");
+            Automatone.LOGGER.debug("Currently have " + curr + " valid items");
             if (curr >= desiredQuantity) {
                 logDirect("Have " + curr + " valid items");
                 cancel();

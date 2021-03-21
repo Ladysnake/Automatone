@@ -19,26 +19,22 @@ package baritone;
 
 import baritone.api.IBaritone;
 import baritone.api.IBaritoneProvider;
-import baritone.api.cache.IWorldProvider;
+import baritone.api.Settings;
 import baritone.api.cache.IWorldScanner;
 import baritone.api.command.ICommandSystem;
 import baritone.api.schematic.ISchematicSystem;
 import baritone.behavior.PathingBehavior;
-import baritone.cache.WorldProvider;
 import baritone.cache.WorldScanner;
 import baritone.command.CommandSystem;
+import baritone.utils.SettingsLoader;
 import baritone.utils.schematic.SchematicSystem;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * @author Brady
@@ -49,6 +45,12 @@ public final class BaritoneProvider implements IBaritoneProvider {
     public static final BaritoneProvider INSTANCE = new BaritoneProvider();
 
     private final Set<IBaritone> activeBaritones = new ReferenceOpenHashSet<>();
+    private final Settings settings;
+
+    public BaritoneProvider() {
+        this.settings = new Settings();
+        SettingsLoader.readAndApply(settings);
+    }
 
     public void tick() {
         for (IBaritone baritone : this.activeBaritones) {
@@ -108,4 +110,8 @@ public final class BaritoneProvider implements IBaritoneProvider {
         return SchematicSystem.INSTANCE;
     }
 
+    @Override
+    public Settings getSettings() {
+        return this.settings;
+    }
 }

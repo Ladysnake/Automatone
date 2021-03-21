@@ -17,11 +17,12 @@
 
 package baritone.event;
 
+import baritone.Automatone;
 import baritone.Baritone;
-import baritone.api.event.events.*;
+import baritone.api.event.events.BlockInteractEvent;
+import baritone.api.event.events.PathEvent;
 import baritone.api.event.listener.IEventBus;
 import baritone.api.event.listener.IGameEventListener;
-import baritone.api.utils.Helper;
 import baritone.utils.BlockStateInterface;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public final class GameEventHandler implements IEventBus {
         try {
             baritone.bsi = new BlockStateInterface(baritone.getPlayerContext());
         } catch (Exception ex) {
-            ex.printStackTrace();
+            Automatone.LOGGER.error(ex);
             baritone.bsi = null;
         }
         listeners.forEach(IGameEventListener::onTickServer);

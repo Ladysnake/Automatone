@@ -17,6 +17,7 @@
 
 package baritone.pathing.path;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.movement.ActionCosts;
@@ -114,7 +115,7 @@ public class PathExecutor implements IPathExecutor {
                     if (i - pathPosition > 2) {
                         logDebug("Skipping forward " + (i - pathPosition) + " steps, to " + i);
                     }
-                    //System.out.println("Double skip sundae");
+                    //Automatone.LOGGER.debug("Double skip sundae");
                     pathPosition = i - 1;
                     onChangeInPathPosition();
                     onTick();
@@ -125,7 +126,7 @@ public class PathExecutor implements IPathExecutor {
         Pair<Double, BlockPos> status = closestPathPos(path);
         if (possiblyOffPath(status, MAX_DIST_FROM_PATH)) {
             ticksAway++;
-            System.out.println("FAR AWAY FROM PATH FOR " + ticksAway + " TICKS. Current distance: " + status.getLeft() + ". Threshold: " + MAX_DIST_FROM_PATH);
+            Automatone.LOGGER.warn("FAR AWAY FROM PATH FOR " + ticksAway + " TICKS. Current distance: " + status.getLeft() + ". Threshold: " + MAX_DIST_FROM_PATH);
             if (ticksAway > MAX_TICKS_AWAY) {
                 logDebug("Too far away from path for too long, cancelling path");
                 cancel();
@@ -177,7 +178,7 @@ public class PathExecutor implements IPathExecutor {
         }
         /*long end = System.nanoTime() / 1000000L;
         if (end - start > 0) {
-            System.out.println("Recalculating break and place took " + (end - start) + "ms");
+            Automatone.LOGGER.info("Recalculating break and place took " + (end - start) + "ms");
         }*/
         if (pathPosition < path.movements().size() - 1) {
             IMovement next = path.movements().get(pathPosition + 1);
@@ -225,7 +226,7 @@ public class PathExecutor implements IPathExecutor {
             return true;
         }
         if (movementStatus == SUCCESS) {
-            //System.out.println("Movement done, next path");
+            //Automatone.LOGGER.debug("Movement done, next path");
             pathPosition++;
             onChangeInPathPosition();
             onTick();

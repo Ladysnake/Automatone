@@ -17,16 +17,18 @@
 
 package baritone.command.defaults;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
-import baritone.api.utils.SettingsUtil;
 import baritone.api.command.Command;
+import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.exception.CommandInvalidTypeException;
-import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.helpers.Paginator;
 import baritone.api.command.helpers.TabCompleteHelper;
+import baritone.api.utils.SettingsUtil;
+import baritone.utils.SettingsLoader;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
@@ -53,7 +55,7 @@ public class SetCommand extends Command {
     public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         String arg = args.hasAny() ? args.getString().toLowerCase(Locale.US) : "list";
         if (Arrays.asList("s", "save").contains(arg)) {
-            SettingsUtil.save(Baritone.settings());
+            SettingsLoader.save(Baritone.settings());
             logDirect(source, "Settings saved");
             return;
         }
@@ -114,7 +116,7 @@ public class SetCommand extends Command {
             } else if (args.peekString().equalsIgnoreCase("all")) {
                 SettingsUtil.modifiedSettings(Baritone.settings()).forEach(Settings.Setting::reset);
                 logDirect(source, "All settings have been reset to their default values");
-                SettingsUtil.save(Baritone.settings());
+                SettingsLoader.save(Baritone.settings());
                 return;
             }
         }
@@ -152,7 +154,7 @@ public class SetCommand extends Command {
                 try {
                     SettingsUtil.parseAndApply(Baritone.settings(), arg, newValue);
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    Automatone.LOGGER.error(t);
                     throw new CommandInvalidTypeException(args.consumed(), "a valid value", t);
                 }
             }
@@ -177,7 +179,7 @@ public class SetCommand extends Command {
                     )));
             logDirect(source, oldValueComponent);
         }
-        SettingsUtil.save(Baritone.settings());
+        SettingsLoader.save(Baritone.settings());
     }
 
     @Override

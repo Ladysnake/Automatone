@@ -17,6 +17,7 @@
 
 package baritone.behavior;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.cache.Waypoint;
 import baritone.api.event.events.BlockInteractEvent;
@@ -67,25 +68,23 @@ public final class MemoryBehavior extends Behavior {
 
         private EnderChestMemory(Path enderChest) {
             this.enderChest = enderChest;
-            System.out.println("Echest storing in " + enderChest);
+            Automatone.LOGGER.info("Echest storing in " + enderChest);
             try {
                 this.contents = ContainerMemory.readItemStacks(Files.readAllBytes(enderChest));
             } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("CANNOT read echest =( =(");
+                Automatone.LOGGER.error("CANNOT read echest =( =(", e);
                 this.contents = null;
             }
         }
 
         public synchronized void save() {
-            System.out.println("Saving");
+            Automatone.LOGGER.info("Saving");
             if (contents != null) {
                 try {
                     Files.createDirectory(enderChest.getParent());
                     Files.write(enderChest, ContainerMemory.writeItemStacks(contents));
                 } catch (IOException e) {
-                    e.printStackTrace();
-                    System.out.println("CANNOT save echest =( =(");
+                    Automatone.LOGGER.error("CANNOT save echest =( =(", e);
                 }
             }
         }

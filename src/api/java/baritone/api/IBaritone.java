@@ -31,8 +31,6 @@ import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -147,20 +145,7 @@ public interface IBaritone extends AutoSyncedComponent {
      *
      * @param message The message to display in chat
      */
-    default void logDebug(String message) {
-        if (!BaritoneAPI.getSettings().chatDebug.value) {
-            //System.out.println("Suppressed debug message:");
-            //System.out.println(message);
-            return;
-        }
-        // We won't log debug chat into toasts
-        // Because only a madman would want that extreme spam -_-
-        logDirect(message);
-        MinecraftServer server = this.getPlayerContext().world().getServer();
-        for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) {
-            KEY.get(p).logDirect(message);
-        }
-    }
+    void logDebug(String message);
 
     /**
      * Send components to chat with the [Automatone] prefix
@@ -168,15 +153,17 @@ public interface IBaritone extends AutoSyncedComponent {
      * @param components The components to send
      */
     default void logDirect(Text... components) {
-        BaseText component = new LiteralText("");
-        // If we are not logging as a Toast
-        // Append the prefix to the base component line
-        component.append(BaritoneAPI.getPrefix());
-        component.append(new LiteralText(" "));
-        Arrays.asList(components).forEach(component::append);
         IEntityContext playerContext = this.getPlayerContext();
         LivingEntity entity = playerContext.entity();
-        if (entity instanceof PlayerEntity) ((PlayerEntity) entity).sendMessage(component, false);
+        if (entity instanceof PlayerEntity) {
+            BaseText component = new LiteralText("");
+            // If we are not logging as a Toast
+            // Append the prefix to the base component line
+            component.append(BaritoneAPI.getPrefix());
+            component.append(new LiteralText(" "));
+            Arrays.asList(components).forEach(component::append);
+            ((PlayerEntity) entity).sendMessage(component, false);
+        }
     }
 
     /**
