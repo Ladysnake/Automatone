@@ -191,8 +191,8 @@ task copyMcJar(type: Copy) {
 }
 
 task proguard(type: ProguardTask, dependsOn: copyMcJar) {
-    url 'https://downloads.sourceforge.net/project/proguard/proguard/6.0/proguard6.0.3.zip'
-    extract 'proguard6.0.3/lib/proguard.jar'
+    url 'https://github.com/Guardsquare/proguard/releases/download/v7.1.0-beta1/proguard-7.1.0-beta1.zip'
+    extract 'proguard-7.1.0-beta1/lib/proguard.jar'
 }
 
 task createDist(type: CreateDistTask, dependsOn: proguard)

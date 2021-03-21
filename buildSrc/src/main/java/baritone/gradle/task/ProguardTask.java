@@ -24,10 +24,6 @@ import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
-import org.gradle.api.tasks.TaskCollection;
-import org.gradle.api.tasks.compile.ForkOptions;
-import org.gradle.api.tasks.compile.JavaCompile;
-import org.gradle.internal.jvm.Jvm;
 
 import java.io.*;
 import java.net.URL;
@@ -94,101 +90,6 @@ public class ProguardTask extends BaritoneGradleTask {
         }
     }
 
-    private String getJavaBinPathForProguard() throws Exception {
-        String path;
-        try {
-            path = findJavaPathByGradleConfig();
-            if (path != null) return path;
-        }
-        catch (Exception ex) {
-            System.err.println("Unable to find java by javaCompile options");
-            ex.printStackTrace();
-        }
-
-        try {
-            path = findJavaByJavaHome();
-            if (path != null) return path;
-        }
-        catch(Exception ex) {
-            System.err.println("Unable to find java by JAVA_HOME");
-            ex.printStackTrace();
-        }
-
-
-        path = findJavaByGradleCurrentRuntime();
-        if (path != null) return path;
-        
-        throw new Exception("Unable to find java to determine ProGuard libraryjars. Please specify forkOptions.executable in javaCompile," +
-                " JAVA_HOME environment variable, or make sure to run Gradle with the correct JDK (a v1.8 only)");
-    }
-
-    private String findJavaByGradleCurrentRuntime() {
-        String path = Jvm.current().getJavaExecutable().getAbsolutePath();
-
-        if (this.validateJavaVersion(path)) {
-            System.out.println("Using Gradle's runtime Java for ProGuard");
-            return path;
-        }
-        return null;
-    }
-
-    private String findJavaByJavaHome() {
-        final String javaHomeEnv = System.getenv("JAVA_HOME");
-        if (javaHomeEnv != null) {
-
-            String path = Jvm.forHome(new File(javaHomeEnv)).getJavaExecutable().getAbsolutePath();
-            if (this.validateJavaVersion(path)) {
-                System.out.println("Detected Java path by JAVA_HOME");
-                return path;
-            }
-        }
-        return null;
-    }
-
-    private String findJavaPathByGradleConfig() {
-        final TaskCollection<JavaCompile> javaCompiles = super.getProject().getTasks().withType(JavaCompile.class);
-
-        final JavaCompile compileTask = javaCompiles.iterator().next();
-        final ForkOptions forkOptions = compileTask.getOptions().getForkOptions();
-
-        if (forkOptions != null) {
-            String javacPath = forkOptions.getExecutable();
-            if (javacPath != null) {
-                File javacFile = new File(javacPath);
-                if (javacFile.exists()) {
-                    File[] maybeJava = javacFile.getParentFile().listFiles(new FilenameFilter() {
-                        @Override
-                        public boolean accept(File dir, String name) {
-                            return name.equals("java");
-                        }
-                    });
-
-                    if (maybeJava != null && maybeJava.length > 0) {
-                        String path = maybeJava[0].getAbsolutePath();
-                        if (this.validateJavaVersion(path)) {
-                            System.out.println("Detected Java path by forkOptions");
-                            return path;
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    private boolean validateJavaVersion(String java) {
-        final JavaVersion javaVersion = JavaVersion.current();
-
-        if (javaVersion != JavaVersion.VERSION_1_8) {
-            System.out.println("Failed to validate Java version " + javaVersion.toString() + " [" + java + "] for ProGuard libraryjars");
-            // throw new RuntimeException("Java version incorrect: " + javaVersion.getMajorVersion() + " for " + java);
-            return false;
-        }
-
-        System.out.println("Validated Java version " + javaVersion.toString() + " [" + java + "] for ProGuard libraryjars");
-        return true;
-    }
-
     private void generateConfigs() throws Exception {
         Files.copy(getRelativeFile(PROGUARD_CONFIG_TEMPLATE), getTemporaryFile(PROGUARD_CONFIG_DEST), REPLACE_EXISTING);
 
@@ -196,9 +97,12 @@ public class ProguardTask extends BaritoneGradleTask {
         List<String> template = Files.readAllLines(getTemporaryFile(PROGUARD_CONFIG_DEST));
         template.add(0, "-injars " + this.artifactPath.toString());
         template.add(1, "-outjars " + this.getTemporaryFile(PROGUARD_EXPORT_PATH));
-        template.add(2, "-libraryjars <java.home>/lib/rt.jar'");
-
-//        template.add(2, "-libraryjars '<java.home>/jmods/java.base.jmod(!**.jar;!module-info.class)'");
+        if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+            template.add(2, "-libraryjars <java.home>/lib/rt.jar");
+        } else {
+            template.add(2, "-libraryjars <java.home>/jmods/java.base.jmod(!**.jar;!module-info.class)");
+            template.add(2, "-libraryjars <java.home>/jmods/java.desktop.jmod(!**.jar;!module-info.class)");
+        }
 
         // Discover all of the libraries that we will need to acquire from gradle
         acquireDependencies().forEach(f -> {
