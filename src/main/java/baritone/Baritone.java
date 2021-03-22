@@ -72,6 +72,7 @@ public class Baritone implements IBaritone {
         }
     }
 
+    private final Settings settings;
     private final GameEventHandler gameEventHandler;
 
     private final PathingBehavior pathingBehavior;
@@ -101,6 +102,7 @@ public class Baritone implements IBaritone {
     public BlockStateInterface bsi;
 
     public Baritone(LivingEntity player) {
+        this.settings = new Settings();
         this.gameEventHandler = new GameEventHandler(this);
 
         // Define this before behaviors try and get it, or else it will be null and the builds will fail!
@@ -243,7 +245,7 @@ public class Baritone implements IBaritone {
     }
 
     public Settings settings() {
-        return BaritoneAPI.getSettings();
+        return this.settings;
     }
 
     @Override
