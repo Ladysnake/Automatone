@@ -18,6 +18,7 @@
 package baritone.command.defaults;
 
 import baritone.Automatone;
+import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.command.Command;
@@ -53,9 +54,19 @@ public class SetCommand extends Command {
 
     @Override
     public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
-        String arg = args.hasAny() ? args.getString().toLowerCase(Locale.US) : "list";
+        Settings settings;
+        boolean global;
+        String arg = args.hasAny() ? args.getString().toLowerCase(Locale.ROOT) : "list";
+        if (Arrays.asList("g", "global").contains(arg.toLowerCase(Locale.ROOT))) {
+            settings = BaritoneAPI.getSettings();
+            arg = args.hasAny() ? args.getString().toLowerCase(Locale.ROOT) : arg;
+            global = true;
+        } else {
+            settings = baritone.settings();
+            global = false;
+        }
         if (Arrays.asList("s", "save").contains(arg)) {
-            SettingsLoader.save(baritone.settings());
+            SettingsLoader.save(settings);
             logDirect(source, "Settings saved");
             return;
         }
@@ -66,7 +77,7 @@ public class SetCommand extends Command {
             String search = args.hasAny() && args.peekAsOrNull(Integer.class) == null ? args.getString() : "";
             args.requireMax(1);
             List<? extends Settings.Setting<?>> toPaginate =
-                    (viewModified ? SettingsUtil.modifiedSettings(baritone.settings()) : baritone.settings().allSettings).stream()
+                    (viewModified ? SettingsUtil.modifiedSettings(settings) : settings.allSettings).stream()
                             .filter(s -> !s.getName().equals("logger"))
                             .filter(s -> s.getName().toLowerCase(Locale.US).contains(search.toLowerCase(Locale.US)))
                             .sorted((s1, s2) -> String.CASE_INSENSITIVE_ORDER.compare(s1.getName(), s2.getName()))
@@ -91,7 +102,7 @@ public class SetCommand extends Command {
                         hoverComponent.append(String.format("\nType: %s", settingTypeToString(setting)));
                         hoverComponent.append(String.format("\n\nValue:\n%s", settingValueToString(setting)));
                         hoverComponent.append(String.format("\n\nDefault Value:\n%s", settingDefaultToString(setting)));
-                        String commandSuggestion = FORCE_COMMAND_PREFIX + String.format("set %s ", setting.getName());
+                        String commandSuggestion = FORCE_COMMAND_PREFIX + String.format("set %s%s ", global ? "global " : "", setting.getName());
                         BaseText component = new LiteralText(setting.getName());
                         component.setStyle(component.getStyle().withFormatting(Formatting.GRAY));
                         component.append(typeComponent);
@@ -114,9 +125,9 @@ public class SetCommand extends Command {
                 logDirect(source, "ALL settings will be reset. Use the 'set modified' or 'modified' commands to see what will be reset.");
                 logDirect(source, "Specify a setting name instead of 'all' to only reset one setting");
             } else if (args.peekString().equalsIgnoreCase("all")) {
-                SettingsUtil.modifiedSettings(baritone.settings()).forEach(Settings.Setting::reset);
+                SettingsUtil.modifiedSettings(settings).forEach(Settings.Setting::reset);
                 logDirect(source, "All settings have been reset to their default values");
-                SettingsLoader.save(baritone.settings());
+                SettingsLoader.save(settings);
                 return;
             }
         }
@@ -124,7 +135,7 @@ public class SetCommand extends Command {
             args.requireMin(1);
         }
         String settingName = doingSomething ? args.getString() : arg;
-        Settings.Setting<?> setting = baritone.settings().allSettings.stream()
+        Settings.Setting<?> setting = settings.allSettings.stream()
                 .filter(s -> s.getName().equalsIgnoreCase(settingName))
                 .findFirst()
                 .orElse(null);
@@ -152,7 +163,7 @@ public class SetCommand extends Command {
             } else {
                 String newValue = args.getString();
                 try {
-                    SettingsUtil.parseAndApply(baritone.settings(), arg, newValue);
+                    SettingsUtil.parseAndApply(settings, arg, newValue);
                 } catch (Throwable t) {
                     Automatone.LOGGER.error(t);
                     throw new CommandInvalidTypeException(args.consumed(), "a valid value", t);
@@ -179,7 +190,7 @@ public class SetCommand extends Command {
                     )));
             logDirect(source, oldValueComponent);
         }
-        SettingsLoader.save(baritone.settings());
+        SettingsLoader.save(settings);
     }
 
     @Override
@@ -188,6 +199,18 @@ public class SetCommand extends Command {
 
         if (args.hasAny()) {
             String arg = args.getString();
+            if (Arrays.asList("g", "global").contains(arg.toLowerCase(Locale.ROOT))) {
+                if (args.hasAny()) {
+                    arg = args.getString();
+                } else {
+                    return new TabCompleteHelper()
+                            .addSettings(settings)
+                            .sortAlphabetically()
+                            .prepend("list", "modified", "reset", "toggle", "save")
+                            .filterPrefix(arg)
+                            .stream();
+                }
+            }
             if (args.hasExactlyOne() && !Arrays.asList("s", "save").contains(args.peekString().toLowerCase(Locale.ROOT))) {
                 if (arg.equalsIgnoreCase("reset")) {
                     return new TabCompleteHelper()
@@ -220,6 +243,7 @@ public class SetCommand extends Command {
                         .addSettings(settings)
                         .sortAlphabetically()
                         .prepend("list", "modified", "reset", "toggle", "save")
+                        .prepend("global")
                         .filterPrefix(arg)
                         .stream();
             }
