@@ -32,21 +32,34 @@
  * The GNU General Public License gives permission to release a modified version without this exception;
  * this exception also makes it possible to release a modified version which carries forward this exception.
  */
-package baritone.entity.fakeplayer;
+package baritone.api.fakeplayer;
 
+import baritone.api.IBaritone;
 import com.mojang.authlib.GameProfile;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.CheckForNull;
 import java.util.UUID;
 
+/**
+ * Player entities that implement this class:
+ * <ul>
+ *     <li>will <em>not</em> keep chunks loaded</li>
+ *     <li>will <em>not</em> be counted in sleep checks</li>
+ *     <li>should be counted as fake players by other mods</li>
+ * </ul>
+ */
 public interface AutomatoneFakePlayer {
-    @Nullable GameProfile getOwnerProfile();
+    @Nullable GameProfile getDisplayProfile();
 
-    void setOwnerProfile(@CheckForNull GameProfile profile);
+    void setDisplayProfile(@CheckForNull GameProfile profile);
 
     @Nullable
     default UUID getOwnerUuid() {
-        return this.getOwnerProfile() != null ? this.getOwnerProfile().getId() : null;
+        return this.getDisplayProfile() != null ? this.getDisplayProfile().getId() : null;
+    }
+
+    default IBaritone getBaritone() {
+        return IBaritone.KEY.get(this);
     }
 }

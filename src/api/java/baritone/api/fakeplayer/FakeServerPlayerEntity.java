@@ -32,12 +32,13 @@
  * The GNU General Public License gives permission to release a modified version without this exception;
  * this exception also makes it possible to release a modified version which carries forward this exception.
  */
-package baritone.entity.fakeplayer;
+package baritone.api.fakeplayer;
 
-import baritone.AutomatoneNetworking;
 import baritone.api.utils.IEntityAccessor;
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -46,6 +47,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.Packet;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
@@ -53,6 +56,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.CheckForNull;
@@ -60,8 +64,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class FakeServerPlayerEntity extends ServerPlayerEntity implements AutomatoneFakePlayer {
-    @Nullable
-    protected GameProfile ownerProfile;
+
+    protected @Nullable GameProfile displayProfile;
     private boolean release;
 
     public FakeServerPlayerEntity(EntityType<?> type, ServerWorld world) {
@@ -154,19 +158,55 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     @Nullable
-    public GameProfile getOwnerProfile() {
-        return this.ownerProfile;
+    public GameProfile getDisplayProfile() {
+        return this.displayProfile;
     }
 
-    public void setOwnerProfile(@CheckForNull GameProfile profile) {
-        if (!Objects.equals(profile, this.ownerProfile)) {
-            this.ownerProfile = profile;
-            AutomatoneNetworking.sendFakePlayerUpdatePacket(this);
+    public void setDisplayProfile(@CheckForNull GameProfile profile) {
+        if (!Objects.equals(profile, this.displayProfile)) {
+            this.displayProfile = profile;
+            this.sendProfileUpdatePacket();
         }
     }
 
     @Override
     public Packet<?> createSpawnPacket() {
-        return AutomatoneNetworking.createFakePlayerSpawnPacket(this);
+        PacketByteBuf buf = PacketByteBufs.create();
+        writeToSpawnPacket(buf);
+        return new CustomPayloadS2CPacket(FakePlayers.SPAWN_PACKET_ID, buf);
+    }
+
+    protected void writeToSpawnPacket(PacketByteBuf buf) {
+        buf.writeVarInt(this.getEntityId());
+        buf.writeUuid(this.getUuid());
+        buf.writeVarInt(Registry.ENTITY_TYPE.getRawId(this.getType()));
+        buf.writeString(this.getGameProfile().getName());
+        buf.writeDouble(this.getX());
+        buf.writeDouble(this.getY());
+        buf.writeDouble(this.getZ());
+        buf.writeByte((byte)((int)(this.yaw * 256.0F / 360.0F)));
+        buf.writeByte((byte)((int)(this.pitch * 256.0F / 360.0F)));
+        writeProfile(buf, this.getDisplayProfile());
+    }
+
+    public void sendProfileUpdatePacket() {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeVarInt(this.getEntityId());
+        writeProfile(buf, this.getDisplayProfile());
+
+        CustomPayloadS2CPacket packet = new CustomPayloadS2CPacket(FakePlayers.PROFILE_UPDATE_PACKET_ID, buf);
+
+        for (ServerPlayerEntity e : PlayerLookup.tracking(this)) {
+            e.networkHandler.sendPacket(packet);
+        }
+    }
+
+    public static void writeProfile(PacketByteBuf buf, @Nullable GameProfile profile) {
+        buf.writeBoolean(profile != null);
+
+        if (profile != null) {
+            buf.writeUuid(profile.getId());
+            buf.writeString(profile.getName());
+        }
     }
 }

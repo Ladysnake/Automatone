@@ -190,11 +190,6 @@ public class PathingControlManager implements IPathingControlManager {
             }
         }
 
-        if (active.isEmpty()) {
-            this.baritone.deactivate();
-            return null;
-        }
-
         // ties are broken by which was added to the beginning of the list first
         active.sort(Comparator.comparingDouble(IBaritoneProcess::priority).reversed());
 

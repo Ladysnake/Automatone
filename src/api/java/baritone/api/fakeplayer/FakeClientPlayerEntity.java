@@ -32,7 +32,7 @@
  * The GNU General Public License gives permission to release a modified version without this exception;
  * this exception also makes it possible to release a modified version which carries forward this exception.
  */
-package baritone.entity.fakeplayer;
+package baritone.api.fakeplayer;
 
 import baritone.api.utils.IEntityAccessor;
 import com.mojang.authlib.GameProfile;
@@ -40,6 +40,7 @@ import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -51,6 +52,12 @@ import javax.annotation.CheckForNull;
 
 public class FakeClientPlayerEntity extends OtherClientPlayerEntity implements AutomatoneFakePlayer {
     protected PlayerListEntry listEntry;
+
+    public static <P extends PlayerEntity & AutomatoneFakePlayer> P createClientFakePlayer(EntityType<?> type, ClientWorld world, GameProfile profile) {
+        @SuppressWarnings("unchecked") FakePlayers.FakePlayerFactory<ClientWorld, P> factory = (FakePlayers.FakePlayerFactory<ClientWorld, P>) FakePlayers.clientFactories.getOrDefault(type, FakeClientPlayerEntity::new);
+        @SuppressWarnings("unchecked") EntityType<? super P> playerType = (EntityType<? super P>) type;
+        return factory.create(playerType, world, profile);
+    }
 
     public FakeClientPlayerEntity(EntityType<?> type, ClientWorld clientWorld, GameProfile gameProfile) {
         super(clientWorld, gameProfile);
@@ -71,7 +78,7 @@ public class FakeClientPlayerEntity extends OtherClientPlayerEntity implements A
 
     @Override
     public Text getName() {
-        GameProfile ownerProfile = this.getOwnerProfile();
+        GameProfile ownerProfile = this.getDisplayProfile();
         if (ownerProfile != null) {
             return new LiteralText(ownerProfile.getName());
         }
@@ -80,12 +87,12 @@ public class FakeClientPlayerEntity extends OtherClientPlayerEntity implements A
 
     @Override
     @Nullable
-    public GameProfile getOwnerProfile() {
+    public GameProfile getDisplayProfile() {
         return this.getPlayerListEntry() != null ? this.getPlayerListEntry().getProfile() : null;
     }
 
     @Override
-    public void setOwnerProfile(@CheckForNull GameProfile profile) {
+    public void setDisplayProfile(@CheckForNull GameProfile profile) {
         this.setPlayerListEntry(profile);
     }
 

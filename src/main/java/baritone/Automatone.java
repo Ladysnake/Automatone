@@ -18,10 +18,10 @@
 package baritone;
 
 import baritone.api.cache.IWorldProvider;
+import baritone.api.fakeplayer.FakeServerPlayerEntity;
 import baritone.cache.WorldProvider;
 import baritone.command.defaults.DefaultCommands;
 import baritone.command.manager.BaritoneArgumentType;
-import baritone.entity.fakeplayer.FakeServerPlayerEntity;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -49,7 +49,7 @@ public final class Automatone implements ModInitializer {
     public static final Tag<Item> EMPTY_BUCKETS = TagRegistry.item(id("empty_buckets"));
     public static final Tag<Item> WATER_BUCKETS = TagRegistry.item(id("water_buckets"));
 
-    public static final EntityType<FakeServerPlayerEntity> FAKE_PLAYER = FabricEntityTypeBuilder.<FakeServerPlayerEntity>createLiving()
+    public static final EntityType<PlayerEntity> FAKE_PLAYER = FabricEntityTypeBuilder.<PlayerEntity>createLiving()
             .spawnGroup(SpawnGroup.MISC)
             .entityFactory((type, world) -> new FakeServerPlayerEntity(type, (ServerWorld) world))
             .defaultAttributes(PlayerEntity::createPlayerAttributes)

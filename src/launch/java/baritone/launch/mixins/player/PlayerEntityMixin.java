@@ -34,7 +34,7 @@
  */
 package baritone.launch.mixins.player;
 
-import baritone.entity.fakeplayer.FakeServerPlayerEntity;
+import baritone.api.fakeplayer.FakeServerPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;

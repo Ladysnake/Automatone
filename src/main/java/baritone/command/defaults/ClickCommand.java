@@ -18,7 +18,6 @@
 package baritone.command.defaults;
 
 import baritone.Automatone;
-import baritone.AutomatoneNetworking;
 import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
@@ -30,12 +29,14 @@ import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class ClickCommand extends Command {
+    public static final Identifier OPEN_CLICK_SCREEN = Automatone.id("open_click_screen");
 
     public ClickCommand() {
         super("click");
@@ -49,7 +50,7 @@ public class ClickCommand extends Command {
             if (commandOutput instanceof ServerPlayerEntity) {
                 PacketByteBuf buf = PacketByteBufs.create();
                 buf.writeUuid(baritone.getPlayerContext().entity().getUuid());
-                ((ServerPlayerEntity) commandOutput).networkHandler.sendPacket(new CustomPayloadS2CPacket(AutomatoneNetworking.OPEN_CLICK_SCREEN, buf));
+                ((ServerPlayerEntity) commandOutput).networkHandler.sendPacket(new CustomPayloadS2CPacket(OPEN_CLICK_SCREEN, buf));
             }
         } catch (Throwable t) {
             Automatone.LOGGER.error("Failed to open click screen, is this a dedicated server?", t);

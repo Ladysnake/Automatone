@@ -19,10 +19,12 @@ package baritone;
 
 import baritone.api.IBaritone;
 import baritone.api.event.events.RenderEvent;
+import baritone.api.fakeplayer.AutomatoneFakePlayer;
+import baritone.api.fakeplayer.FakeClientPlayerEntity;
+import baritone.api.fakeplayer.FakePlayers;
 import baritone.api.selection.ISelectionManager;
+import baritone.command.defaults.ClickCommand;
 import baritone.command.defaults.DefaultCommands;
-import baritone.entity.fakeplayer.AutomatoneFakePlayer;
-import baritone.entity.fakeplayer.FakeClientPlayerEntity;
 import baritone.selection.SelectionRenderer;
 import baritone.utils.GuiClick;
 import baritone.utils.PathRenderer;
@@ -36,6 +38,7 @@ import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
@@ -68,12 +71,13 @@ public final class AutomatoneClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        FakePlayers.registerClientFactory(Automatone.FAKE_PLAYER, FakeClientPlayerEntity::new);
         EntityRendererRegistry.INSTANCE.register(Automatone.FAKE_PLAYER, (r, it) -> new PlayerEntityRenderer(r));
-        ClientPlayNetworking.registerGlobalReceiver(AutomatoneNetworking.OPEN_CLICK_SCREEN, (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(ClickCommand.OPEN_CLICK_SCREEN, (client, handler, buf, responseSender) -> {
             UUID uuid = buf.readUuid();
             client.execute(() -> MinecraftClient.getInstance().openScreen(new GuiClick(uuid)));
         });
-        ClientPlayNetworking.registerGlobalReceiver(AutomatoneNetworking.FAKE_PLAYER_SPAWN, (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(FakePlayers.SPAWN_PACKET_ID, (client, handler, buf, responseSender) -> {
             int id = buf.readVarInt();
             UUID uuid = buf.readUuid();
             EntityType<?> entityTypeId = Registry.ENTITY_TYPE.get(buf.readVarInt());
@@ -84,26 +88,15 @@ public final class AutomatoneClient implements ClientModInitializer {
             float yaw = (float)(buf.readByte() * 360) / 256.0F;
             float pitch = (float)(buf.readByte() * 360) / 256.0F;
             GameProfile profile = readProfile(buf);
-            client.execute(() -> {
-                ClientWorld world = MinecraftClient.getInstance().world;
-                assert world != null;
-                // TODO allow mods to provide fake client player factories
-                FakeClientPlayerEntity other = new FakeClientPlayerEntity(entityTypeId, world, new GameProfile(uuid, name));
-                other.setEntityId(id);
-                other.resetPosition(x, y, z);
-                other.updateTrackedPosition(x, y, z);
-                other.updatePositionAndAngles(x, y, z, yaw, pitch);
-                other.setOwnerProfile(profile);
-                world.addEntity(id, other);
-            });
+            client.execute(() -> spawnPlayer(id, uuid, entityTypeId, name, x, y, z, yaw, pitch, profile));
         });
-        ClientPlayNetworking.registerGlobalReceiver(AutomatoneNetworking.PLAYER_PROFILE_SET, (client, handler, buf, responseSender) -> {
+        ClientPlayNetworking.registerGlobalReceiver(FakePlayers.PROFILE_UPDATE_PACKET_ID, (client, handler, buf, responseSender) -> {
             int entityId = buf.readVarInt();
             GameProfile profile = readProfile(buf);
             client.execute(() -> {
                         Entity entity = Objects.requireNonNull(client.world).getEntityById(entityId);
                         if (entity instanceof AutomatoneFakePlayer) {
-                            ((AutomatoneFakePlayer) entity).setOwnerProfile(profile);
+                            ((AutomatoneFakePlayer) entity).setDisplayProfile(profile);
                         }
                     }
             );
@@ -111,6 +104,18 @@ public final class AutomatoneClient implements ClientModInitializer {
         //yes, it is normal to remove an IBaritone from a Baritone set
         //noinspection SuspiciousMethodCalls
         ClientEntityEvents.ENTITY_UNLOAD.register((entity, world) -> renderList.remove(IBaritone.KEY.getNullable(entity)));
+    }
+
+    private <P extends PlayerEntity & AutomatoneFakePlayer> void spawnPlayer(int id, UUID uuid, EntityType<?> entityTypeId, String name, double x, double y, double z, float yaw, float pitch, GameProfile profile) {
+        ClientWorld world = MinecraftClient.getInstance().world;
+        assert world != null;
+        P other = FakeClientPlayerEntity.createClientFakePlayer(entityTypeId, world, new GameProfile(uuid, name));
+        other.setEntityId(id);
+        other.resetPosition(x, y, z);
+        other.updateTrackedPosition(x, y, z);
+        other.updatePositionAndAngles(x, y, z, yaw, pitch);
+        other.setDisplayProfile(profile);
+        world.addEntity(id, other);
     }
 
     @Nullable
