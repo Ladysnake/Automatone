@@ -17,12 +17,19 @@
 
 package baritone.gradle.task;
 
+import org.gradle.api.DefaultTask;
+import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.TaskAction;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
-import java.util.Arrays;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,59 +39,60 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
  * @author Brady
  * @since 10/12/2018
  */
-public class CreateDistTask extends BaritoneGradleTask {
+public class CreateDistTask extends DefaultTask {
 
-    private static MessageDigest SHA1_DIGEST;
+    private static final MessageDigest SHA1_DIGEST;
+
+    static {
+        try {
+            SHA1_DIGEST = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            // haha no thanks
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private final ConfigurableFileCollection files;
+
+    public CreateDistTask() {
+        files = getProject().getObjects().fileCollection();
+    }
 
     @TaskAction
     protected void exec() throws Exception {
-        super.verifyArtifacts();
-
         // Define the distribution file paths
-        Path api = getRelativeFile("dist/" + getFileName(artifactApiPath));
-        Path standalone = getRelativeFile("dist/" + getFileName(artifactStandalonePath));
-        Path unoptimized = getRelativeFile("dist/" + getFileName(artifactUnoptimizedPath));
+        List<Path> inputPaths = files.getFiles().stream().map(File::toPath).collect(Collectors.toList());
+        List<String> shasums = new ArrayList<>();
+        Path distDir = this.getProject().getProjectDir().toPath().resolve("dist");
 
-        // NIO will not automatically create directories
-        Path dir = getRelativeFile("dist/");
-        if (!Files.exists(dir)) {
-            Files.createDirectory(dir);
+        for (Path inputPath : inputPaths) {
+            Path output = distDir.resolve(inputPath.getFileName());
+
+            Files.createDirectories(output.getParent());
+
+            Files.copy(inputPath, output, REPLACE_EXISTING);
+
+            // Calculate all checksums and format them like "shasum"
+            String sum = String.format("%s %s", sha1(output), output.getFileName());
+            getProject().getLogger().info(sum);
+            shasums.add(sum);
         }
 
-        // Copy build jars to dist/
-        // TODO: dont copy files that dont exist
-        Files.copy(this.artifactApiPath, api, REPLACE_EXISTING);
-        Files.copy(this.artifactStandalonePath, standalone, REPLACE_EXISTING);
-        Files.copy(this.artifactUnoptimizedPath, unoptimized, REPLACE_EXISTING);
-
-        // Calculate all checksums and format them like "shasum"
-        List<String> shasum = getAllDistJars().stream()
-                .filter(Files::exists)
-                .map(path -> sha1(path) + "  " + path.getFileName().toString())
-                .collect(Collectors.toList());
-
-        shasum.forEach(System.out::println);
-
         // Write the checksums to a file
-        Files.write(getRelativeFile("dist/checksums.txt"), shasum);
+        Files.write(distDir.resolve("checksums.txt"), shasums);
     }
 
     private static String getFileName(Path p) {
         return p.getFileName().toString();
     }
 
-    private List<Path> getAllDistJars() {
-        return Arrays.asList(
-                getRelativeFile("dist/" + formatVersion(ARTIFACT_API)),
-                getRelativeFile("dist/" + formatVersion(ARTIFACT_FABRIC_API)),
-                getRelativeFile("dist/" + formatVersion(ARTIFACT_FORGE_API)),
-                getRelativeFile("dist/" + formatVersion(ARTIFACT_STANDALONE)),
-                getRelativeFile("dist/" + formatVersion(ARTIFACT_FABRIC_STANDALONE)),
-                getRelativeFile("dist/" + formatVersion(ARTIFACT_FORGE_STANDALONE)),
-                getRelativeFile("dist/" + formatVersion(ARTIFACT_UNOPTIMIZED)),
-                getRelativeFile("dist/" + formatVersion(ARTIFACT_FABRIC_UNOPTIMIZED)),
-                getRelativeFile("dist/" + formatVersion(ARTIFACT_FORGE_UNOPTIMIZED))
-        );
+    public void input(Object... inputFiles) {
+        this.files.from(inputFiles);
+    }
+
+    @InputFiles
+    public ConfigurableFileCollection getFiles() {
+        return files;
     }
 
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
@@ -100,13 +108,9 @@ public class CreateDistTask extends BaritoneGradleTask {
 
     private static synchronized String sha1(Path path) {
         try {
-            if (SHA1_DIGEST == null) {
-                SHA1_DIGEST = MessageDigest.getInstance("SHA-1");
-            }
             return bytesToHex(SHA1_DIGEST.digest(Files.readAllBytes(path))).toLowerCase();
-        } catch (Exception e) {
-            // haha no thanks
-            throw new IllegalStateException(e);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 }

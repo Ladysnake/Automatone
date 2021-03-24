@@ -73,9 +73,9 @@ publishing {
                 classifier null
                 builtBy remapJar
             }
-            artifact(new File(project.buildDir, "libs/automatone-api-fabric-${project.version}.jar")) {
+            artifact(proguard) {
                 classifier 'optimized'
-                builtBy createDist
+                builtBy proguard
             }
             artifact(sourcesJar) {
                 builtBy remapSourcesJar

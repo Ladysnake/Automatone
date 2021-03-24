@@ -22,6 +22,8 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -39,14 +41,14 @@ import java.util.stream.Collectors;
  */
 public class Determinizer {
 
-    public static void determinize(String inputPath, String outputPath) throws IOException {
+    public static void determinize(Path inputPath, Path outputPath) throws IOException {
         System.out.println("Running Determinizer");
         System.out.println(" Input path: " + inputPath);
         System.out.println(" Output path: " + outputPath);
 
         try (
-                JarFile jarFile = new JarFile(new File(inputPath));
-                JarOutputStream jos = new JarOutputStream(new FileOutputStream(new File(outputPath)))
+                JarFile jarFile = new JarFile(inputPath.toFile());
+                JarOutputStream jos = new JarOutputStream(Files.newOutputStream(outputPath))
         ) {
 
             List<JarEntry> entries = jarFile.stream()
@@ -128,7 +130,7 @@ public class Determinizer {
                 out.beginObject();
 
                 List<Map.Entry<String, JsonElement>> entries = new ArrayList<>(value.getAsJsonObject().entrySet());
-                entries.sort(Comparator.comparing(Map.Entry::getKey));
+                entries.sort(Map.Entry.comparingByKey());
                 for (Map.Entry<String, JsonElement> e : entries) {
                     out.name(e.getKey());
                     write(out, e.getValue());

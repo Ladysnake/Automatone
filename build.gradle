@@ -14,14 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Baritone.  If not, see <https://www.gnu.org/licenses/>.
  */
-import net.fabricmc.loom.LoomGradlePlugin
-import baritone.gradle.task.CreateDistTask
-import baritone.gradle.task.ProguardTask
-import org.apache.tools.ant.taskdefs.condition.Os
 
+
+import baritone.gradle.task.CreateDistTask
+import baritone.gradle.task.DeterminizingTask
+import baritone.gradle.task.ProguardTask
+import net.fabricmc.loom.LoomGradlePlugin
+
+import java.util.stream.Collectors
 
 plugins {
-    id 'fabric-loom'
+    id 'fabric-loom' version '0.6-SNAPSHOT'
     id 'com.jfrog.artifactory' version '4.20.0'
     id 'org.ajoberstar.grgit' version '3.1.1'
     id 'com.github.breadmoirai.github-release' version '2.2.9'
@@ -173,44 +176,47 @@ jar {
                 'MixinConfigs': 'mixins.automatone.json',
 
                 'Implementation-Title': 'Automatone',
-                'Implementation-Version': version
+                'Implementation-Version': project.version
         )
     }
 }
 
+remapJar.configure {
+    it.classifier = 'remapped'
+}
+
 // skidded from ProguardTask
-File getClientJar() {
-    return project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().findByName("launch").getRuntimeClasspath().getFiles()
-            .stream()
-            .filter({ f -> f.toString().endsWith("client-extra.jar") })
-            .map({ f -> new File(f.getParentFile(), "client.jar") })
-            .findFirst()
-            .get()
+task determinizeBuiltJar(type: DeterminizingTask) {
+    input = remapJar.archiveFile
+    archiveClassifier = 'unoptimized'
 }
 
-File getClientJarFabric() {
-    return project.getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().findByName("launch").getRuntimeClasspath().getFiles()
-            .stream()
-            .filter({ f -> f.getName().endsWith("-v2.jar") && f.getName().startsWith("minecraft-") })
-            .map({ f -> new File(f.getParentFile().getParentFile(), f.getName().toString().replace("mapped", "intermediary")) })
-            .findFirst()
-            .get()
-}
-
-task copyMcJar(type: Copy) {
-    def mcJar = { getClientJarFabric() }
-
-    from mcJar
-    into 'build/createMcIntermediaryJar/'
-    rename { 'client.jar' }
-}
-
-task proguard(type: ProguardTask, dependsOn: copyMcJar) {
+task proguard(type: ProguardTask, dependsOn: determinizeBuiltJar) {
+    input = determinizeBuiltJar.archiveFile
+    archiveClassifier = 'optimized'
     url 'https://github.com/Guardsquare/proguard/releases/download/v7.1.0-beta1/proguard-7.1.0-beta1.zip'
     extract 'proguard-7.1.0-beta1/lib/proguard.jar'
+    afterEvaluate {
+        def mappedMods = project.configurations.modCompileClasspathMapped.resolvedConfiguration.files
+        classpath project.files(loom.minecraftMappedProvider.intermediaryJar)
+        classpath project.files(project.configurations.modCompileClasspath.resolvedConfiguration.resolvedArtifacts
+                .stream()
+                .map{it.file}
+                .collect(Collectors.toList())
+        )
+        classpath project.files(sourceSets.launch.runtimeClasspath.files.stream()
+                .filter { it.isFile() }
+                // remove remapped jars, the intermediary versions are included above
+                .filter{!loom.minecraftMappedProvider.mappedJar.equals(it) && !mappedMods.contains(it) }
+                .collect(Collectors.toList())
+        )
+    }
+
 }
 
-task createDist(type: CreateDistTask, dependsOn: proguard)
+task createDist(type: CreateDistTask, dependsOn: proguard) {
+    input proguard.archiveFile
+}
 
 build.finalizedBy(createDist)
 
