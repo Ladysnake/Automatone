@@ -24,5 +24,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'automatone'
-
+rootProject.name = mod_name.toLowerCase(Locale.ROOT).replace(' ', '-')

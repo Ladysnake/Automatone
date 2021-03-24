@@ -22,11 +22,14 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 plugins {
     id 'fabric-loom'
+    id 'com.jfrog.artifactory' version '4.20.0'
+    id 'org.ajoberstar.grgit' version '3.1.1'
+    id 'com.github.breadmoirai.github-release' version '2.2.9'
     id 'maven-publish'
 }
 
-group 'ladysnake'
-version '0.1.0'
+group project.maven_group
+version project.mod_version
 
 apply plugin: 'java'
 apply plugin: LoomGradlePlugin
@@ -63,8 +66,8 @@ sourceSets {
     }
 }
 
-task sourceJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier 'sources'
     from sourceSets.api.allSource
 }
 
@@ -210,3 +213,5 @@ task proguard(type: ProguardTask, dependsOn: copyMcJar) {
 task createDist(type: CreateDistTask, dependsOn: proguard)
 
 build.finalizedBy(createDist)
+
+apply from: 'release.gradle'
