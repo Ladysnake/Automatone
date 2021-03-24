@@ -252,7 +252,7 @@ public class Baritone implements IBaritone {
     public void logDebug(String message) {
         Automatone.LOGGER.debug(message);
 
-        if (!BaritoneAPI.getSettings().chatDebug.get()) {
+        if (!BaritoneAPI.getGlobalSettings().chatDebug.get()) {
             return;
         }
 

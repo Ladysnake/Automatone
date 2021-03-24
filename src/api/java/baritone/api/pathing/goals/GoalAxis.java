@@ -44,7 +44,7 @@ public class GoalAxis implements Goal {
 
         double flatAxisDistance = Math.min(x, Math.min(z, diff * SQRT_2_OVER_2));
 
-        return flatAxisDistance * BaritoneAPI.getSettings().costHeuristic.get() + GoalYLevel.calculate(BaritoneAPI.getSettings().axisHeight.get(), y);
+        return flatAxisDistance * BaritoneAPI.getGlobalSettings().costHeuristic.get() + GoalYLevel.calculate(BaritoneAPI.getGlobalSettings().axisHeight.get(), y);
     }
 
     @Override

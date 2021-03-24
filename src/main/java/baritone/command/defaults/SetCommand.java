@@ -58,7 +58,7 @@ public class SetCommand extends Command {
         boolean global;
         String arg = args.hasAny() ? args.getString().toLowerCase(Locale.ROOT) : "list";
         if (Arrays.asList("g", "global").contains(arg.toLowerCase(Locale.ROOT))) {
-            settings = BaritoneAPI.getSettings();
+            settings = BaritoneAPI.getGlobalSettings();
             arg = args.hasAny() ? args.getString().toLowerCase(Locale.ROOT) : arg;
             global = true;
         } else {

@@ -72,5 +72,5 @@ public interface IBaritoneProvider {
      */
     ISchematicSystem getSchematicSystem();
 
-    Settings getSettings();
+    Settings getGlobalSettings();
 }

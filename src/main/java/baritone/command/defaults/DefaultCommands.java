@@ -107,9 +107,9 @@ public final class DefaultCommands {
     }
 
     private static void logRanCommand(ServerCommandSource source, String command, String rest) {
-        if (BaritoneAPI.getSettings().echoCommands.get()) {
+        if (BaritoneAPI.getGlobalSettings().echoCommands.get()) {
             String msg = command + rest;
-            String toDisplay = BaritoneAPI.getSettings().censorRanCommands.get() ? command + " ..." : msg;
+            String toDisplay = BaritoneAPI.getGlobalSettings().censorRanCommands.get() ? command + " ..." : msg;
             BaseText component = new LiteralText(String.format("> %s", toDisplay));
             component.setStyle(component.getStyle()
                     .withFormatting(Formatting.WHITE)
@@ -141,7 +141,7 @@ public final class DefaultCommands {
         String rest = msg.substring(pair.getLeft().length());
         ArgConsumer argc = new ArgConsumer(baritone.getCommandManager(), pair.getRight(), baritone);
         if (!argc.hasAny()) {
-            Settings.Setting<?> setting = BaritoneAPI.getSettings().byLowerName.get(command.toLowerCase(Locale.ROOT));
+            Settings.Setting<?> setting = BaritoneAPI.getGlobalSettings().byLowerName.get(command.toLowerCase(Locale.ROOT));
             if (setting != null) {
                 logRanCommand(source, command, rest);
                 if (setting.getValueClass() == Boolean.class) {
@@ -152,7 +152,7 @@ public final class DefaultCommands {
                 return true;
             }
         } else if (argc.hasExactlyOne()) {
-            for (Settings.Setting<?> setting : BaritoneAPI.getSettings().allSettings) {
+            for (Settings.Setting<?> setting : BaritoneAPI.getGlobalSettings().allSettings) {
                 if (setting.getName().equals("logger")) {
                     continue;
                 }

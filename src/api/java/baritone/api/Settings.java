@@ -1175,8 +1175,8 @@ public final class Settings {
         }
 
         public T defaultValue() {
-            if (Settings.this == BaritoneAPI.getSettings()) return this.defaultValue;
-            @SuppressWarnings("unchecked") Setting<T> globalSetting = (Setting<T>) BaritoneAPI.getSettings().byLowerName.get(this.name.toLowerCase(Locale.ROOT));
+            if (Settings.this == BaritoneAPI.getGlobalSettings()) return this.defaultValue;
+            @SuppressWarnings("unchecked") Setting<T> globalSetting = (Setting<T>) BaritoneAPI.getGlobalSettings().byLowerName.get(this.name.toLowerCase(Locale.ROOT));
             return globalSetting.get();
         }
 

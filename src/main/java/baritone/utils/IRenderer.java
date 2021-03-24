@@ -39,7 +39,7 @@ public interface IRenderer {
     Tessellator tessellator = Tessellator.getInstance();
     BufferBuilder buffer = tessellator.getBuffer();
     EntityRenderDispatcher renderManager = MinecraftClient.getInstance().getEntityRenderDispatcher();
-    Settings settings = BaritoneAPI.getSettings();
+    Settings settings = BaritoneAPI.getGlobalSettings();
 
     static void glColor(Color color, float alpha) {
         float[] colorComponents = color.getColorComponents(null);

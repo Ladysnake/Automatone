@@ -46,7 +46,7 @@ public class BlockPlaceHelper {
             return;
         }
 
-        rightClickTimer = BaritoneAPI.getSettings().rightClickSpeed.get();
+        rightClickTimer = BaritoneAPI.getGlobalSettings().rightClickSpeed.get();
         PlayerEntity player = (PlayerEntity) ctx.entity();
 
         for (Hand hand : Hand.values()) {

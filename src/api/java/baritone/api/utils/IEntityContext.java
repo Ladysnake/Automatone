@@ -102,7 +102,7 @@ public interface IEntityContext {
     }
 
     default void logDebug(String message) {
-        if (!BaritoneAPI.getSettings().chatDebug.get()) {
+        if (!BaritoneAPI.getGlobalSettings().chatDebug.get()) {
             return;
         }
         LivingEntity entity = entity();

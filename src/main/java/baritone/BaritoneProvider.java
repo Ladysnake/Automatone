@@ -111,7 +111,7 @@ public final class BaritoneProvider implements IBaritoneProvider {
     }
 
     @Override
-    public Settings getSettings() {
+    public Settings getGlobalSettings() {
         return this.settings;
     }
 }
