@@ -40,6 +40,7 @@ import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+@KeepName
 public final class Automatone implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("Automatone");
     public static final String MOD_ID = "automatone";

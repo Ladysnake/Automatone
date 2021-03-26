@@ -45,6 +45,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+@KeepName
 public final class AutomatoneClient implements ClientModInitializer {
     public static final Set<Baritone> renderList = Collections.newSetFromMap(new WeakHashMap<>());
 
