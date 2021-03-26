@@ -213,4 +213,8 @@ public class PathingControlManager implements IPathingControlManager {
         }
         return null;
     }
+
+    public boolean isActive() {
+        return !this.active.isEmpty();
+    }
 }

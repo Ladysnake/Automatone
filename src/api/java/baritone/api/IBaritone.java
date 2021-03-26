@@ -29,6 +29,7 @@ import baritone.api.utils.IInputOverrideHandler;
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
+import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.BaseText;
@@ -44,7 +45,7 @@ import java.util.stream.Stream;
  * @author Brady
  * @since 9/29/2018
  */
-public interface IBaritone extends AutoSyncedComponent {
+public interface IBaritone extends AutoSyncedComponent, ServerTickingComponent {
     ComponentKey<IBaritone> KEY = ComponentRegistry.getOrCreate(new Identifier("automatone", "core"), IBaritone.class);
 
     /**
@@ -190,19 +191,6 @@ public interface IBaritone extends AutoSyncedComponent {
     default void logDirect(String message) {
         logDirect(message, Formatting.GRAY);
     }
-
-    /**
-     * Make this baritone start ticking and running processes
-     */
-    void activate();
-
-    /**
-     * Make this baritone stop ticking.
-     *
-     * <p>This method is called every tick by this instance's
-     * {@link IPathingControlManager} when no process is active.
-     */
-    void deactivate();
 
     boolean isActive();
 

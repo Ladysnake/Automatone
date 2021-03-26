@@ -59,7 +59,6 @@ public final class GetToBlockProcess extends BaritoneProcessHelper implements IG
         start = ctx.feetPos();
         blacklist = new ArrayList<>();
         arrivalTickCount = 0;
-        this.baritone.activate();
         rescan(new ArrayList<>(), new CalculationContext(baritone));
     }
 

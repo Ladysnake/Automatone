@@ -107,7 +107,6 @@ public final class FarmProcess extends BaritoneProcessHelper implements IFarmPro
         this.range = range;
         active = true;
         locations = null;
-        this.baritone.activate();
     }
 
     private enum Harvest {

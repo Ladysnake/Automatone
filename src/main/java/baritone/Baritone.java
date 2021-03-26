@@ -230,18 +230,8 @@ public class Baritone implements IBaritone {
     }
 
     @Override
-    public void activate() {
-        BaritoneProvider.INSTANCE.activate(this);
-    }
-
-    @Override
-    public void deactivate() {
-        BaritoneProvider.INSTANCE.deactivate(this);
-    }
-
-    @Override
     public boolean isActive() {
-        return BaritoneProvider.INSTANCE.isActive(this);
+        return this.pathingControlManager.isActive();
     }
 
     public Settings settings() {
@@ -296,6 +286,11 @@ public class Baritone implements IBaritone {
             AutomatoneClient.renderList.remove(this);
         }
         this.clientPathingBehaviour.readFromPacket(buf);
+    }
+
+    @Override
+    public void serverTick() {
+        this.getGameEventHandler().onTickServer();
     }
 
     public static File getDir() {

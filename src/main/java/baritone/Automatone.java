@@ -23,8 +23,6 @@ import baritone.cache.WorldProvider;
 import baritone.command.defaults.DefaultCommands;
 import baritone.command.manager.BaritoneArgumentType;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.tag.TagRegistry;
@@ -72,7 +70,5 @@ public final class Automatone implements ModInitializer {
                 ((WorldProvider) IWorldProvider.KEY.get(serverWorld)).initWorld(serverWorld));
         ServerWorldEvents.UNLOAD.register((minecraftServer, serverWorld) ->
                 ((WorldProvider) IWorldProvider.KEY.get(serverWorld)).closeWorld());
-        ServerTickEvents.START_SERVER_TICK.register(minecraftServer -> BaritoneProvider.INSTANCE.tick());
-        ServerLifecycleEvents.SERVER_STOPPING.register(server -> BaritoneProvider.INSTANCE.shutdown());
     }
 }

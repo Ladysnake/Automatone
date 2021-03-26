@@ -107,7 +107,6 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         this.layer = baritone.settings().startAtLayer.get();
         this.numRepeats = 0;
         this.observedCompleted = new LongOpenHashSet();
-        this.baritone.activate();
     }
 
     public void resume() {

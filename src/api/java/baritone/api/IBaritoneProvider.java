@@ -22,9 +22,6 @@ import baritone.api.command.ICommand;
 import baritone.api.command.ICommandSystem;
 import baritone.api.schematic.ISchematicSystem;
 import net.minecraft.entity.LivingEntity;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Collection;
 
 /**
  * Provides the present {@link IBaritone} instances, as well as non-baritone instance related APIs.
@@ -34,22 +31,12 @@ import java.util.Collection;
 public interface IBaritoneProvider {
 
     /**
-     * Returns all of the active {@link IBaritone} instances.
-     *
-     * @return All active {@link IBaritone} instances.
-     * @see #getBaritone(LivingEntity)
-     */
-    Collection<IBaritone> getActiveBaritones();
-
-    /**
      * Provides the {@link IBaritone} instance for a given {@link LivingEntity}.
      *
      * @param player The player
      * @return The {@link IBaritone} instance.
      */
     IBaritone getBaritone(LivingEntity player);
-
-    @Nullable IBaritone getActiveBaritone(LivingEntity entity);
 
     /**
      * Returns the {@link IWorldScanner} instance. This is not a type returned by

@@ -53,7 +53,6 @@ public final class CustomGoalProcess extends BaritoneProcessHelper implements IC
         this.goal = goal;
         if (this.state == State.NONE) {
             this.state = State.GOAL_SET;
-            this.baritone.activate();
         }
         if (this.state == State.EXECUTING) {
             this.state = State.PATH_REQUESTED;

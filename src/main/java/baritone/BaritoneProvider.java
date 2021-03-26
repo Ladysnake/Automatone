@@ -23,18 +23,11 @@ import baritone.api.Settings;
 import baritone.api.cache.IWorldScanner;
 import baritone.api.command.ICommandSystem;
 import baritone.api.schematic.ISchematicSystem;
-import baritone.behavior.PathingBehavior;
 import baritone.cache.WorldScanner;
 import baritone.command.CommandSystem;
 import baritone.utils.SettingsLoader;
 import baritone.utils.schematic.SchematicSystem;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import net.minecraft.entity.LivingEntity;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * @author Brady
@@ -44,38 +37,11 @@ public final class BaritoneProvider implements IBaritoneProvider {
 
     public static final BaritoneProvider INSTANCE = new BaritoneProvider();
 
-    private final Set<IBaritone> activeBaritones = new ReferenceOpenHashSet<>();
     private final Settings settings;
 
     public BaritoneProvider() {
         this.settings = new Settings();
         SettingsLoader.readAndApply(settings);
-    }
-
-    public void tick() {
-        for (IBaritone baritone : this.activeBaritones) {
-            baritone.getGameEventHandler().onTickServer();
-        }
-    }
-
-    public void shutdown() {
-        for (Iterator<IBaritone> iterator = this.activeBaritones.iterator(); iterator.hasNext(); ) {
-            IBaritone b = iterator.next();
-            iterator.remove();  // remove first, so that the instance sees itself as deactivated
-            ((PathingBehavior) b.getPathingBehavior()).shutdown();
-        }
-    }
-
-    public void activate(IBaritone baritone) {
-        this.activeBaritones.add(baritone);
-    }
-
-    public void deactivate(IBaritone baritone) {
-        this.activeBaritones.remove(baritone);
-    }
-
-    public boolean isActive(IBaritone baritone) {
-        return this.activeBaritones.contains(baritone);
     }
 
     @Override
@@ -84,15 +50,9 @@ public final class BaritoneProvider implements IBaritoneProvider {
         return IBaritone.KEY.get(entity);
     }
 
-    @Override
-    public @Nullable IBaritone getActiveBaritone(LivingEntity entity) {
+    public boolean isPathing(LivingEntity entity) {
         IBaritone baritone = IBaritone.KEY.getNullable(entity);
-        return this.isActive(baritone) ? baritone : null;
-    }
-
-    @Override
-    public Collection<IBaritone> getActiveBaritones() {
-        return this.activeBaritones;
+        return baritone != null && baritone.isActive();
     }
 
     @Override
