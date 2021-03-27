@@ -39,11 +39,14 @@ import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.Packet;
@@ -166,6 +169,22 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
         if (!Objects.equals(profile, this.displayProfile)) {
             this.displayProfile = profile;
             this.sendProfileUpdatePacket();
+        }
+    }
+
+    @Override
+    public void readCustomDataFromTag(CompoundTag tag) {
+        super.readCustomDataFromTag(tag);
+        if (tag.contains("automatone:display_profile", NbtType.COMPOUND)) {
+            this.displayProfile = NbtHelper.toGameProfile(tag.getCompound("automatone:display_profile"));
+        }
+    }
+
+    @Override
+    public void writeCustomDataToTag(CompoundTag tag) {
+        super.writeCustomDataToTag(tag);
+        if (this.displayProfile != null) {
+            tag.put("automatone:display_profile", NbtHelper.fromGameProfile(new CompoundTag(), this.displayProfile));
         }
     }
 
