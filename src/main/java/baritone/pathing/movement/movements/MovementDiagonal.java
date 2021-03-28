@@ -31,9 +31,11 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +55,15 @@ public class MovementDiagonal extends Movement {
     }
 
     private MovementDiagonal(IBaritone baritone, BetterBlockPos start, BetterBlockPos end, BetterBlockPos dir1, BetterBlockPos dir2) {
-        super(baritone, start, end, new BetterBlockPos[]{dir1, dir1.up(), dir2, dir2.up(), end, end.up()});
+        super(baritone, start, end, computeBlocksToBreak(baritone.getPlayerContext().entity(), end, dir1, dir2));
+    }
+
+    @NotNull
+    private static BetterBlockPos[] computeBlocksToBreak(LivingEntity entity, BetterBlockPos end, BetterBlockPos dir1, BetterBlockPos dir2) {
+        if (entity.getDimensions(EntityPose.STANDING).height <= 1) {
+            return new BetterBlockPos[]{dir1, dir2, end};
+        }
+        return new BetterBlockPos[]{dir1, dir1.up(), dir2, dir2.up(), end, end.up()};
     }
 
     @Override
@@ -112,6 +122,9 @@ public class MovementDiagonal extends Movement {
         if (!MovementHelper.canWalkThrough(context.bsi, destX, y + 1, destZ, context.baritone.settings())) {
             return;
         }
+        if (context.width > 1 || context.height > 2) {    // TODO handle larger entities
+            return;
+        }
         BlockState destInto = context.get(destX, y, destZ);
         boolean ascend = false;
         BlockState destWalkOn;
@@ -162,20 +175,22 @@ public class MovementDiagonal extends Movement {
             multiplier = context.waterWalkSpeed;
             water = true;
         }
-        BlockState pb0 = context.get(x, y, destZ);
-        BlockState pb2 = context.get(destX, y, z);
+        // if the player can fit in 1 block spaces, we have fewer blocks to check
+        boolean smol = context.height <= 1;
+        BlockState diagonalA = context.get(x, y, destZ);
+        BlockState diagonalB = context.get(destX, y, z);
         if (ascend) {
-            boolean ATop = MovementHelper.canWalkThrough(context.bsi, x, y + 2, destZ, context.baritone.settings());
+            boolean ATop = smol || MovementHelper.canWalkThrough(context.bsi, x, y + 2, destZ, context.baritone.settings());
             boolean AMid = MovementHelper.canWalkThrough(context.bsi, x, y + 1, destZ, context.baritone.settings());
-            boolean ALow = MovementHelper.canWalkThrough(context.bsi, x, y, destZ, pb0, context.baritone.settings());
-            boolean BTop = MovementHelper.canWalkThrough(context.bsi, destX, y + 2, z, context.baritone.settings());
+            boolean ALow = MovementHelper.canWalkThrough(context.bsi, x, y, destZ, diagonalA, context.baritone.settings());
+            boolean BTop = smol || MovementHelper.canWalkThrough(context.bsi, destX, y + 2, z, context.baritone.settings());
             boolean BMid = MovementHelper.canWalkThrough(context.bsi, destX, y + 1, z, context.baritone.settings());
-            boolean BLow = MovementHelper.canWalkThrough(context.bsi, destX, y, z, pb2, context.baritone.settings());
+            boolean BLow = MovementHelper.canWalkThrough(context.bsi, destX, y, z, diagonalB, context.baritone.settings());
             if ((!(ATop && AMid && ALow) && !(BTop && BMid && BLow)) // no option
-                    || MovementHelper.avoidWalkingInto(pb0) // bad
-                    || MovementHelper.avoidWalkingInto(pb2) // bad
-                    || (ATop && AMid && MovementHelper.canWalkOn(context.bsi, x, y, destZ, pb0, context.baritone.settings())) // we could just ascend
-                    || (BTop && BMid && MovementHelper.canWalkOn(context.bsi, destX, y, z, pb2, context.baritone.settings())) // we could just ascend
+                    || MovementHelper.avoidWalkingInto(diagonalA) // bad
+                    || MovementHelper.avoidWalkingInto(diagonalB) // bad
+                    || (ATop && AMid && MovementHelper.canWalkOn(context.bsi, x, y, destZ, diagonalA, context.baritone.settings())) // we could just ascend
+                    || (BTop && BMid && MovementHelper.canWalkOn(context.bsi, destX, y, z, diagonalB, context.baritone.settings())) // we could just ascend
                     || (!ATop && AMid && ALow) // head bonk A
                     || (!BTop && BMid && BLow)) { // head bonk B
                 return;
@@ -186,30 +201,34 @@ public class MovementDiagonal extends Movement {
             res.y = y + 1;
             return;
         }
-        double optionA = MovementHelper.getMiningDurationTicks(context, x, y, destZ, pb0, false);
-        double optionB = MovementHelper.getMiningDurationTicks(context, destX, y, z, pb2, false);
+        double optionA = MovementHelper.getMiningDurationTicks(context, x, y, destZ, diagonalA, false);
+        double optionB = MovementHelper.getMiningDurationTicks(context, destX, y, z, diagonalB, false);
         if (optionA != 0 && optionB != 0) {
-            // check these one at a time -- if pb0 and pb2 were nonzero, we already know that (optionA != 0 && optionB != 0)
-            // so no need to check pb1 as well, might as well return early here
+            // check these one at a time -- if diagonalA and pb2 were nonzero, we already know that (optionA != 0 && optionB != 0)
+            // so no need to check diagonalUpA as well, might as well return early here
             return;
         }
-        BlockState pb1 = context.get(x, y + 1, destZ);
-        optionA += MovementHelper.getMiningDurationTicks(context, x, y + 1, destZ, pb1, true);
-        if (optionA != 0 && optionB != 0) {
-            // same deal, if pb1 makes optionA nonzero and option B already was nonzero, pb3 can't affect the result
-            return;
+        BlockState diagonalUpA = context.get(x, y + 1, destZ);
+        if (!smol) {
+            optionA += MovementHelper.getMiningDurationTicks(context, x, y + 1, destZ, diagonalUpA, true);
+            if (optionA != 0 && optionB != 0) {
+                // same deal, if diagonalUpA makes optionA nonzero and option B already was nonzero, diagonalUpB can't affect the result
+                return;
+            }
         }
-        BlockState pb3 = context.get(destX, y + 1, z);
-        if (optionA == 0 && ((MovementHelper.avoidWalkingInto(pb2) && pb2.getBlock() != Blocks.WATER) || MovementHelper.avoidWalkingInto(pb3))) {
+        BlockState diagonalUpB = context.get(destX, y + 1, z);
+        if (optionA == 0 && ((MovementHelper.avoidWalkingInto(diagonalB) && diagonalB.getBlock() != Blocks.WATER) || (!smol && MovementHelper.avoidWalkingInto(diagonalUpB)))) {
             // at this point we're done calculating optionA, so we can check if it's actually possible to edge around in that direction
             return;
         }
-        optionB += MovementHelper.getMiningDurationTicks(context, destX, y + 1, z, pb3, true);
-        if (optionA != 0 && optionB != 0) {
-            // and finally, if the cost is nonzero for both ways to approach this diagonal, it's not possible
-            return;
+        if (!smol) {
+            optionB += MovementHelper.getMiningDurationTicks(context, destX, y + 1, z, diagonalUpB, true);
+            if (optionA != 0 && optionB != 0) {
+                // and finally, if the cost is nonzero for both ways to approach this diagonal, it's not possible
+                return;
+            }
         }
-        if (optionB == 0 && ((MovementHelper.avoidWalkingInto(pb0) && pb0.getBlock() != Blocks.WATER) || MovementHelper.avoidWalkingInto(pb1))) {
+        if (optionB == 0 && ((MovementHelper.avoidWalkingInto(diagonalA) && diagonalA.getBlock() != Blocks.WATER) || (!smol && MovementHelper.avoidWalkingInto(diagonalUpA)))) {
             // and now that option B is fully calculated, see if we can edge around that way
             return;
         }
