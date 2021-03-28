@@ -18,6 +18,7 @@
 package baritone.pathing.movement.movements;
 
 import baritone.api.IBaritone;
+import baritone.api.Settings;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
 import baritone.pathing.movement.CalculationContext;
@@ -31,6 +32,18 @@ import net.minecraft.block.Blocks;
 
 import java.util.Set;
 
+/**
+ * Moves exactly one block downward, either by breaking the block the player is standing on
+ * or by going down a climbable block.
+ *
+ * <p>This movement will only be used if {@link Settings#allowDownward} is {@code true}.
+ *
+ * <p>Seen from the side:
+ * <pre>
+ *     src ⬇
+ *     dest
+ * </pre>
+ */
 public class MovementDownward extends Movement {
 
     private int numTicks = 0;

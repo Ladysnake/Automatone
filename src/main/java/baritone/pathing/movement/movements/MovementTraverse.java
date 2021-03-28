@@ -18,6 +18,7 @@
 package baritone.pathing.movement.movements;
 
 import baritone.api.IBaritone;
+import baritone.api.Settings;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.Rotation;
@@ -42,6 +43,17 @@ import net.minecraft.util.math.Vec3d;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Moves exactly one block horizontally in one of the 4 cardinal directions.
+ *
+ * <p>If {@link Settings#allowBreak} is {@code true}, this movement will break
+ * all blocks in the way.
+ *
+ * <p>Seen sideways:
+ * <pre>
+ *     src ➡ dest
+ * </pre>
+ */
 public class MovementTraverse extends Movement {
 
     /**
@@ -75,12 +87,12 @@ public class MovementTraverse extends Movement {
         int z = from.z;
         int destX = to.x;
         int destZ = to.z;
-        int movX = destX - x;
-        int movZ = destZ - z;
+        int diffX = destX - x;
+        int diffZ = destZ - z;
         EntityDimensions dimensions = e.getDimensions(EntityPose.STANDING);
         int requiredSideSpace = CalculationContext.getRequiredSideSpace(dimensions);
-        int checkedXShift = movX * requiredSideSpace;
-        int checkedZShift = movZ * requiredSideSpace;
+        int checkedXShift = diffX * requiredSideSpace;
+        int checkedZShift = diffZ * requiredSideSpace;
         int checkedX = destX + checkedXShift;
         int checkedZ = destZ + checkedZShift;
         int height = MathHelper.ceil(dimensions.height);
@@ -94,7 +106,7 @@ public class MovementTraverse extends Movement {
                 for (int dy = 0; dy < height; dy++) {
                     // + mov[z/x] * ds => make hole in the wall
                     // - mov[x/z] * df => handle unexpectedly close walls
-                    ret[i++] = new BetterBlockPos(checkedX + movZ * ds - movX * df, y + dy, checkedZ + movX * ds - movZ * df);
+                    ret[i++] = new BetterBlockPos(checkedX + diffZ * ds - diffX * df, y + dy, checkedZ + diffX * ds - diffZ * df);
                 }
             }
         }

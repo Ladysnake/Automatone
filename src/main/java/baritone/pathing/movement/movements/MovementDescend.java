@@ -18,6 +18,7 @@
 package baritone.pathing.movement.movements;
 
 import baritone.api.IBaritone;
+import baritone.api.Settings;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.Rotation;
@@ -40,6 +41,18 @@ import net.minecraft.util.math.Vec3d;
 
 import java.util.Set;
 
+/**
+ * Descends one block in a staircase.
+ *
+ * <p>If {@link Settings#allowBreak} is {@code true}, this movement will break
+ * all blocks in the way.
+ *
+ * <p>Seen from the side:
+ * <pre>
+ *     src ↘
+ *        dest
+ * </pre>
+ */
 public class MovementDescend extends Movement {
 
     private int numTicks = 0;

@@ -19,6 +19,7 @@ package baritone.pathing.movement.movements;
 
 import baritone.Baritone;
 import baritone.api.IBaritone;
+import baritone.api.Settings;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.Rotation;
@@ -44,6 +45,18 @@ import net.minecraft.util.math.Vec3d;
 
 import java.util.Set;
 
+/**
+ * Ascends exactly one block by either jumping and placing a block at the player's feet, or by climbing up.
+ *
+ * <p>If {@link Settings#allowBreak} is {@code true}, this movement will break
+ * all blocks in the way.
+ *
+ * <p>Seen from the side:
+ * <pre>
+ *     dest
+ *     src ⬆
+ * </pre>
+ */
 public class MovementPillar extends Movement {
 
     public MovementPillar(IBaritone baritone, BetterBlockPos start, BetterBlockPos end) {

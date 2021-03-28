@@ -18,6 +18,7 @@
 package baritone.pathing.movement.movements;
 
 import baritone.api.IBaritone;
+import baritone.api.Settings;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.input.Input;
@@ -35,6 +36,13 @@ import net.minecraft.util.math.Direction;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Jumps between 1 and 4 blocks horizontally.
+ *
+ * <p>This movement will only be used if {@link Settings#allowParkour} is {@code true}.
+ *
+ * <p>This movement will never attempt to break any block.
+ */
 public class MovementParkour extends Movement {
 
     private static final BetterBlockPos[] EMPTY = new BetterBlockPos[]{};

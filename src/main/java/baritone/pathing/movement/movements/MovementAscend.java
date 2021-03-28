@@ -18,6 +18,7 @@
 package baritone.pathing.movement.movements;
 
 import baritone.api.IBaritone;
+import baritone.api.Settings;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.input.Input;
@@ -34,6 +35,18 @@ import net.minecraft.util.math.Direction;
 
 import java.util.Set;
 
+/**
+ * Ascends one block in a staircase.
+ *
+ * <p>If {@link Settings#allowBreak} is {@code true}, this movement will break
+ * all blocks in the way.
+ *
+ * <p> Seen from the side:
+ * <pre>
+ *       ↗ dest
+ *     src
+ * </pre>
+ */
 public class MovementAscend extends Movement {
 
     private int ticksWithoutPlacement = 0;

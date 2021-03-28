@@ -18,6 +18,7 @@
 package baritone.pathing.movement.movements;
 
 import baritone.api.IBaritone;
+import baritone.api.Settings;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.input.Input;
@@ -41,6 +42,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Moves one block in diagonal on the horizontal plane.
+ *
+ * <p>If a block prevents a perfect diagonal straight line, this movement will attempt to edge around it.
+ * It will not attempt to break any block unless they were placed after the path is computed.
+ *
+ * <p>If {@link Settings#allowDiagonalAscend} and/or {@link Settings#allowDiagonalDescend} are {@code true},
+ * this movement can be diagonal on all 3 axes simultaneously.
+ *
+ * <p>Seen from above:
+ * <pre>
+ *     src ↘        OR  src ⮯       OR   src blk
+ *         dest         blk dest          ➥ dest
+ * </pre>
+ */
 public class MovementDiagonal extends Movement {
 
     private static final double SQRT_2 = Math.sqrt(2);

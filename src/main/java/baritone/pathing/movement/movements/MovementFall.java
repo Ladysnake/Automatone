@@ -19,6 +19,7 @@ package baritone.pathing.movement.movements;
 
 import baritone.Automatone;
 import baritone.api.IBaritone;
+import baritone.api.Settings;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.Rotation;
@@ -38,8 +39,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.LadderBlock;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.WaterFluid;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -50,6 +49,21 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Moves 1 block horizontally, then at least 2 blocks downwards.
+ *
+ * <p>If {@link Settings#allowBreak} is {@code true}, this movement will break
+ * all blocks in the way.
+ *
+ * <p>Seen from the side:
+ * <pre>
+ *     src↘
+ *         ⬇
+ *         ⬇
+ *         ⬇
+ *       dest
+ * </pre>
+ */
 public class MovementFall extends Movement {
 
     public MovementFall(IBaritone baritone, BetterBlockPos src, BetterBlockPos dest) {
