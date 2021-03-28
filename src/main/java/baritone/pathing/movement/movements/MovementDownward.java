@@ -17,16 +17,19 @@
 
 package baritone.pathing.movement.movements;
 
+import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.pathing.movement.MovementStatus;
 import baritone.api.utils.BetterBlockPos;
+import baritone.api.utils.input.Input;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
@@ -130,6 +133,9 @@ public class MovementDownward extends Movement {
             return state.setStatus(MovementStatus.SUCCESS);
         } else if (!playerInValidPosition()) {
             return state.setStatus(MovementStatus.UNREACHABLE);
+        } else if (((Baritone) this.baritone).bsi.get0(this.baritone.getPlayerContext().feetPos().down()).getBlock() == Blocks.SCAFFOLDING) {
+            // Sneak to go down scaffolding
+            state.setInput(Input.SNEAK, true);
         }
         double diffX = ctx.entity().getX() - (dest.getX() + 0.5);
         double diffZ = ctx.entity().getZ() - (dest.getZ() + 0.5);
