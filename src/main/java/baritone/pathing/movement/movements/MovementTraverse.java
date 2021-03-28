@@ -300,7 +300,8 @@ public class MovementTraverse extends Movement {
         for (BlockState bs : bss) {
             if (bs.getBlock() instanceof DoorBlock) {
                 boolean notPassable = bs.getBlock() instanceof DoorBlock && !MovementHelper.isDoorPassable(ctx, src, dest);
-                boolean canOpen = !bs.isOf(Blocks.IRON_DOOR);
+                // assume wooden doors can be opened and other doors cannot
+                boolean canOpen = DoorBlock.isWoodenDoor(bs);
 
                 if (notPassable && canOpen) {
                     return state.setTarget(new MovementState.MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.headPos(), VecUtils.calculateBlockCenter(ctx.world(), positionsToBreak[0]), ctx.entityRotations()), true))
