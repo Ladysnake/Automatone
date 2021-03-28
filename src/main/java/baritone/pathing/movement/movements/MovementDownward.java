@@ -26,9 +26,11 @@ import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.EntityPose;
+import net.minecraft.tag.BlockTags;
 
 import java.util.Set;
 
@@ -49,7 +51,28 @@ public class MovementDownward extends Movement {
     private int numTicks = 0;
 
     public MovementDownward(IBaritone baritone, BetterBlockPos start, BetterBlockPos end) {
-        super(baritone, start, end, new BetterBlockPos[]{end});
+        super(baritone, start, end, computeBlocksToBreak(baritone.getPlayerContext().entity(), end));
+    }
+
+    private static BetterBlockPos[] computeBlocksToBreak(Entity entity, BetterBlockPos end) {
+        int x = end.x;
+        int y = end.y;
+        int z = end.z;
+        EntityDimensions dims = entity.getDimensions(EntityPose.STANDING);
+        int requiredSideSpace = CalculationContext.getRequiredSideSpace(dims);
+        int sideLength = requiredSideSpace * 2 + 1;
+        BetterBlockPos[] ret = new BetterBlockPos[sideLength * sideLength];
+        int i = 0;
+
+        for (int dx = -requiredSideSpace; dx <= requiredSideSpace; dx++) {
+            for (int dz = -requiredSideSpace; dz <= requiredSideSpace; dz++) {
+                // If we are at the starting position, we already cleared enough space to stand there
+                // So only need to check the blocks below our feet
+                ret[i++] = new BetterBlockPos(x + dx, y - 1, z + dz);
+            }
+        }
+
+        return ret;
     }
 
     @Override
@@ -75,13 +98,24 @@ public class MovementDownward extends Movement {
         if (!MovementHelper.canWalkOn(context.bsi, x, y - 2, z, context.baritone.settings())) {
             return COST_INF;
         }
-        BlockState down = context.get(x, y - 1, z);
-        Block downBlock = down.getBlock();
-        if (downBlock == Blocks.LADDER || downBlock == Blocks.VINE) {
-            return LADDER_DOWN_ONE_COST;
+        if (context.get(x, y - 1, z).isIn(BlockTags.CLIMBABLE)) {
+            // Larger entities cannot use ladders and stuff
+            return context.requiredSideSpace == 0 ? LADDER_DOWN_ONE_COST : COST_INF;
         } else {
-            // we're standing on it, while it might be block falling, it'll be air by the time we get here in the movement
-            return FALL_N_BLOCKS_COST[1] + MovementHelper.getMiningDurationTicks(context, x, y - 1, z, down, false);
+            double totalHardness = 0;
+            int requiredSideSpace = context.requiredSideSpace;
+            for (int dx = -requiredSideSpace; dx <= requiredSideSpace; dx++) {
+                for (int dz = -requiredSideSpace; dz <= requiredSideSpace; dz++) {
+                    // If we are at the starting position, we already cleared enough space to stand there
+                    // So only need to check the blocks below us
+                    int checkedX = x + dx;
+                    int checkedZ = z + dz;
+                    BlockState toBreak = context.get(checkedX, y - 1, checkedZ);
+                    // we're standing on it, while it might be block falling, it'll be air by the time we get here in the movement
+                    totalHardness += MovementHelper.getMiningDurationTicks(context, checkedX, y - 1, checkedZ, toBreak, false);
+                }
+            }
+            return FALL_N_BLOCKS_COST[1] + totalHardness;
         }
     }
 
@@ -104,7 +138,7 @@ public class MovementDownward extends Movement {
         if (numTicks++ < 10 && ab < 0.2) {
             return state;
         }
-        MovementHelper.moveTowards(ctx, state, positionsToBreak[0]);
+        MovementHelper.moveTowards(ctx, state, dest);
         return state;
     }
 }
