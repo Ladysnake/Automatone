@@ -96,7 +96,7 @@ public class MovementParkour extends Movement {
             return;
         }
         int maxJump;
-        if (standingOn.getBlock() == Blocks.SOUL_SAND) {
+        if (standingOn.getBlock().getVelocityMultiplier() < 0.8) {  // arbitrary number, may need some tweaking
             maxJump = 2; // 1 block gap
         } else {
             if (context.canSprint) {

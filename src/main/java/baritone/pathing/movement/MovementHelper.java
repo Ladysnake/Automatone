@@ -536,7 +536,7 @@ public interface MovementHelper extends ActionCosts {
             return false;
         }
         // PERF: isShapeFullCube is slow, but people can install lithium to fix it
-        return Block.isShapeFullCube(state.getCollisionShape(null, null));
+        return state.isFullCube(null, null);
     }
 
     static PlaceResult attemptToPlaceABlock(MovementState state, IBaritone baritone, BlockPos placeAt, boolean preferDown, boolean wouldSneak) {

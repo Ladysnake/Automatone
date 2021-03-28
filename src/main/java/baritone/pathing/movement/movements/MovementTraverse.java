@@ -31,7 +31,6 @@ import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.*;
-import net.minecraft.block.enums.SlabType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
@@ -220,8 +219,10 @@ public class MovementTraverse extends Movement {
                     }
                 }
                 // now that we've checked all possible directions to side place, we actually need to backplace
-                if (srcOnBlock == Blocks.SOUL_SAND || (srcOnBlock instanceof SlabBlock && srcOn.get(SlabBlock.TYPE) != SlabType.DOUBLE)) {
-                    return COST_INF; // can't sneak and backplace against soul sand or half slabs (regardless of whether it's top half or bottom half) =/
+                // none of the vanilla impls do a blocking or thread unsafe call, so passing the world directly should be fine
+                // also none of the full cubes actually use the pos, so we should be fine not creating a real BlockPos for this
+                if (!srcOn.isFullCube(context.world, BlockPos.ORIGIN)) {
+                    return COST_INF; // can't sneak and backplace against eg. soul sand or half slabs (regardless of whether it's top half or bottom half) =/
                 }
                 if (srcOn.getFluidState().getFluid() instanceof WaterFluid) {
                     return COST_INF; // this is obviously impossible
@@ -368,8 +369,9 @@ public class MovementTraverse extends Movement {
             MovementHelper.moveTowards(ctx, state, against);
         } else {
             wasTheBridgeBlockAlwaysThere = false;
-            Block standingOn = BlockStateInterface.get(ctx, feet.down()).getBlock();
-            if (standingOn.equals(Blocks.SOUL_SAND) || standingOn instanceof SlabBlock) { // see issue #118
+            BlockPos standingOnPos = feet.down();
+            BlockState standingOn = BlockStateInterface.get(ctx, standingOnPos);
+            if (standingOn.getCollisionShape(ctx.world(), standingOnPos).getBoundingBox().maxY < 1) { // see issue #118
                 double dist = Math.max(Math.abs(dest.getX() + 0.5 - ctx.entity().getX()), Math.abs(dest.getZ() + 0.5 - ctx.entity().getZ()));
                 if (dist < 0.85) { // 0.5 + 0.3 + epsilon
                     MovementHelper.moveTowards(ctx, state, dest);
