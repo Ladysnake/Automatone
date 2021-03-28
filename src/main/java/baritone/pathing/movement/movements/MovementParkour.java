@@ -27,10 +27,7 @@ import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.pathing.MutableMoveResult;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.StairsBlock;
+import net.minecraft.block.*;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.fluid.WaterFluid;
 import net.minecraft.util.math.Direction;
@@ -62,6 +59,10 @@ public class MovementParkour extends Movement {
 
     public static void cost(CalculationContext context, int x, int y, int z, Direction dir, MutableMoveResult res) {
         if (!context.allowParkour) {
+            return;
+        }
+        // no parkour for large entities, sorry
+        if (context.height > 2 || context.width > 1) {
             return;
         }
         if (y == context.worldHeight && !context.allowJumpAt256) {
@@ -105,13 +106,14 @@ public class MovementParkour extends Movement {
                 maxJump = 3;
             }
         }
+        boolean smol = context.height <= 1;
         for (int i = 2; i <= maxJump; i++) {
             int destX = x + xDiff * i;
             int destZ = z + zDiff * i;
             if (!MovementHelper.fullyPassable(context, destX, y + 1, destZ)) {
                 return;
             }
-            if (!MovementHelper.fullyPassable(context, destX, y + 2, destZ)) {
+            if (!smol && !MovementHelper.fullyPassable(context, destX, y + 2, destZ)) {
                 return;
             }
             BlockState destInto = context.bsi.get0(destX, y, destZ);
@@ -125,8 +127,8 @@ public class MovementParkour extends Movement {
                 return;
             }
             BlockState landingOn = context.bsi.get0(destX, y - 1, destZ);
-            // farmland needs to be canwalkon otherwise farm can never work at all, but we want to specifically disallow ending a jumy on farmland haha
-            if (landingOn.getBlock() != Blocks.FARMLAND && MovementHelper.canWalkOn(context.bsi, destX, y - 1, destZ, landingOn, context.baritone.settings())) {
+            // farmland needs to be canWalkOn otherwise farm can never work at all, but we want to specifically disallow ending a jump on farmland haha
+            if (!(landingOn.getBlock() instanceof FarmlandBlock) && MovementHelper.canWalkOn(context.bsi, destX, y - 1, destZ, landingOn, context.baritone.settings())) {
                 if (checkOvershootSafety(context.bsi, destX + xDiff, y, destZ + zDiff)) {
                     res.x = destX;
                     res.y = y;
@@ -135,7 +137,7 @@ public class MovementParkour extends Movement {
                 }
                 return;
             }
-            if (!MovementHelper.fullyPassable(context, destX, y + 3, destZ)) {
+            if (!MovementHelper.fullyPassable(context, destX, y + context.height + 1, destZ)) {
                 return;
             }
         }
