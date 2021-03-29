@@ -30,6 +30,7 @@ import baritone.pathing.movement.MovementState;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.ScaffoldingBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
@@ -101,7 +102,20 @@ public class MovementDownward extends Movement {
         if (!MovementHelper.canWalkOn(context.bsi, x, y - 2, z, context.baritone.settings())) {
             return COST_INF;
         }
-        if (context.get(x, y - 1, z).isIn(BlockTags.CLIMBABLE)) {
+        BlockState downBlock = context.get(x, y - 1, z);
+        BlockState fromBlock = context.get(x, y, z);
+        if (fromBlock.isOf(Blocks.SCAFFOLDING) && fromBlock.get(ScaffoldingBlock.BOTTOM)) {
+            // scaffolding gains a floor when it is not supported
+            // we want to avoid breaking unsupported scaffolding, so stop here
+            return COST_INF;
+        }
+        if (downBlock.isIn(BlockTags.CLIMBABLE)) {
+            if (fromBlock.isIn(BlockTags.CLIMBABLE) && downBlock.isOf(Blocks.SCAFFOLDING) && !fromBlock.isOf(Blocks.SCAFFOLDING)) {
+                // funni edge case
+                // So like, if you try to descend into scaffolding while you are in a ladder, well you can't
+                // because ladders want you to stop sneaking, but scaffolding doesn't
+                return COST_INF;
+            }
             // Larger entities cannot use ladders and stuff
             return context.requiredSideSpace == 0 ? LADDER_DOWN_ONE_COST : COST_INF;
         } else {
@@ -133,7 +147,7 @@ public class MovementDownward extends Movement {
             return state.setStatus(MovementStatus.SUCCESS);
         } else if (!playerInValidPosition()) {
             return state.setStatus(MovementStatus.UNREACHABLE);
-        } else if (((Baritone) this.baritone).bsi.get0(this.baritone.getPlayerContext().feetPos().down()).getBlock() == Blocks.SCAFFOLDING) {
+        } else if (((Baritone) this.baritone).bsi.get0(this.baritone.getPlayerContext().feetPos().down()).isOf(Blocks.SCAFFOLDING)) {
             // Sneak to go down scaffolding
             state.setInput(Input.SNEAK, true);
         }

@@ -31,11 +31,9 @@ import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.pathing.MutableMoveResult;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FallingBlock;
+import net.minecraft.block.*;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -85,11 +83,21 @@ public class MovementDescend extends Movement {
     public static void cost(CalculationContext context, int x, int y, int z, int destX, int destZ, MutableMoveResult res) {
         double totalCost = 0;
         BlockState destDown = context.get(destX, y - 1, destZ);
+        if (destDown.isOf(Blocks.SCAFFOLDING) && destDown.get(ScaffoldingBlock.BOTTOM)) {
+            // scaffolding gains a floor when it is not supported
+            // we want to avoid breaking unsupported scaffolding, so stop here
+            return;
+        }
         totalCost += MovementHelper.getMiningDurationTicks(context, destX, y - 1, destZ, destDown, false);
         if (totalCost >= COST_INF) {
             return;
         }
-        totalCost += MovementHelper.getMiningDurationTicks(context, destX, y, destZ, false);
+        BlockState destUp = context.get(destX, y, destZ);
+        if (destUp.isOf(Blocks.SCAFFOLDING) && destUp.get(ScaffoldingBlock.BOTTOM)) {
+            // same as above
+            return;
+        }
+        totalCost += MovementHelper.getMiningDurationTicks(context, destX, y, destZ, destUp, false);
         if (totalCost >= COST_INF) {
             return;
         }
@@ -99,7 +107,7 @@ public class MovementDescend extends Movement {
         }
 
         Block fromDown = context.get(x, y - 1, z).getBlock();
-        if (fromDown == Blocks.LADDER || fromDown == Blocks.VINE) {
+        if (BlockTags.CLIMBABLE.contains(fromDown)) {
             return;
         }
 
@@ -228,6 +236,15 @@ public class MovementDescend extends Movement {
                 // Automatone.LOGGER.debug(player().getPositionVec().y + " " + playerFeet.getY() + " " + (player().getPositionVec().y - playerFeet.getY()));
             }*/
         }
+
+        double diffX = ctx.entity().getX() - (dest.getX() + 0.5);
+        double diffZ = ctx.entity().getZ() - (dest.getZ() + 0.5);
+        double ab = Math.sqrt(diffX * diffX + diffZ * diffZ);
+
+        if (ab < 0.20 && ctx.world().getBlockState(dest).isOf(Blocks.SCAFFOLDING)) {
+            state.setInput(Input.SNEAK, true);
+        }
+
         if (safeMode()) {
             double destX = (src.getX() + 0.5) * 0.17 + (dest.getX() + 0.5) * 0.83;
             double destZ = (src.getZ() + 0.5) * 0.17 + (dest.getZ() + 0.5) * 0.83;
@@ -240,9 +257,6 @@ public class MovementDescend extends Movement {
             )).setInput(Input.MOVE_FORWARD, true);
             return state;
         }
-        double diffX = ctx.entity().getX() - (dest.getX() + 0.5);
-        double diffZ = ctx.entity().getZ() - (dest.getZ() + 0.5);
-        double ab = Math.sqrt(diffX * diffX + diffZ * diffZ);
         double x = ctx.entity().getX() - (src.getX() + 0.5);
         double z = ctx.entity().getZ() - (src.getZ() + 0.5);
         double fromStart = Math.sqrt(x * x + z * z);

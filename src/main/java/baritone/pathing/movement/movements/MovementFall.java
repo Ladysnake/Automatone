@@ -33,7 +33,6 @@ import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import baritone.pathing.movement.MovementState.MovementTarget;
 import baritone.utils.pathing.MutableMoveResult;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.LadderBlock;
@@ -106,7 +105,6 @@ public class MovementFall extends Movement {
         Rotation toDest = RotationUtils.calcRotationFromVec3d(ctx.headPos(), VecUtils.getBlockPosCenter(dest), ctx.entityRotations());
         Rotation targetRotation = null;
         BlockState destState = ctx.world().getBlockState(dest);
-        Block destBlock = destState.getBlock();
         boolean isWater = destState.getFluidState().getFluid() instanceof WaterFluid;
         if (!isWater && willPlaceBucket() && !playerFeet.equals(dest)) {
             PlayerInventory inventory = ctx.inventory();
@@ -170,6 +168,9 @@ public class MovementFall extends Movement {
         if (targetRotation == null) {
             Vec3d destCenterOffset = new Vec3d(destCenter.x + 0.125 * avoid.getX(), destCenter.y, destCenter.z + 0.125 * avoid.getZ());
             state.setTarget(new MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.headPos(), destCenterOffset, ctx.entityRotations()), false));
+        }
+        if (ctx.world().getBlockState(playerFeet).isOf(Blocks.SCAFFOLDING) || ctx.world().getBlockState(playerFeet.down()).isOf(Blocks.SCAFFOLDING)) {
+            state.setInput(Input.SNEAK, true);
         }
         return state;
     }

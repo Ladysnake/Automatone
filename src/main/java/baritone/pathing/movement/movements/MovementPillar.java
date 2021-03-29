@@ -21,10 +21,7 @@ import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.pathing.movement.MovementStatus;
-import baritone.api.utils.BetterBlockPos;
-import baritone.api.utils.Rotation;
-import baritone.api.utils.RotationUtils;
-import baritone.api.utils.VecUtils;
+import baritone.api.utils.*;
 import baritone.api.utils.input.Input;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
@@ -42,6 +39,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -121,7 +119,7 @@ public class MovementPillar extends Movement {
                 BlockState toBreak = context.get(checkedX, checkedY, checkedZ);
                 BlockState underToBreak = context.get(x, checkedY - 1, z);
                 Block toBreakBlock = toBreak.getBlock();
-                if (toBreakBlock instanceof FenceGateBlock) { // see issue #172
+                if (toBreakBlock instanceof FenceGateBlock || (!climbable && toBreakBlock instanceof ScaffoldingBlock)) { // see issue #172
                     return COST_INF;
                 }
                 boolean water = MovementHelper.isWater(toBreak);
@@ -173,7 +171,12 @@ public class MovementPillar extends Movement {
     }
 
     private static boolean isClimbable(BlockStateInterface context, int x, int y, int z) {
-        return BlockTags.CLIMBABLE.contains(context.get0(x, y, z).getBlock()) || BlockTags.CLIMBABLE.contains(context.get0(x, y + 1, z).getBlock());
+        if (BlockTags.CLIMBABLE.contains(context.get0(x, y, z).getBlock())) return true;
+        if (BlockTags.CLIMBABLE.contains(context.get0(x, y + 1, z).getBlock())) {
+            // you can only use a ladder at head level if you are standing on firm ground
+            return MovementHelper.isBlockNormalCube(context.get0(x, y - 1, z));
+        }
+        return false;
     }
 
     public static BlockPos getAgainst(CalculationContext context, BetterBlockPos vine) {
@@ -206,7 +209,7 @@ public class MovementPillar extends Movement {
         BlockState fromDown = BlockStateInterface.get(ctx, src);
         if (ctx.entity().isTouchingWater()) {
             // stay centered while swimming up a water column
-            centerForAscend(state, 0.2);
+            centerForAscend(ctx, dest, state, 0.2);
             state.setInput(Input.JUMP, true);
             if (ctx.feetPos().equals(dest)) {
                 return state.setStatus(MovementStatus.SUCCESS);
@@ -227,14 +230,7 @@ public class MovementPillar extends Movement {
                 baritone.logDirect("Large entities cannot climb ladders :/");
                 return state.setStatus(MovementStatus.UNREACHABLE);
             }
-            BlockPos supportingBlock;
-            if (Block.isFaceFullSquare(fromDown.getCollisionShape(ctx.world(), src), Direction.UP)) {
-                supportingBlock = null;
-            } else if (fromDown.getBlock() instanceof LadderBlock) {
-                supportingBlock = src.offset(fromDown.get(LadderBlock.FACING).getOpposite());
-            } else {
-                supportingBlock = getAgainst(new CalculationContext(baritone), src);
-            }
+            BlockPos supportingBlock = getSupportingBlock(baritone, ctx, src, fromDown);
 
             if ((supportingBlock != null && ctx.feetPos().equals(supportingBlock.up())) || ctx.feetPos().equals(dest)) {
                 return state.setStatus(MovementStatus.SUCCESS);
@@ -244,7 +240,7 @@ public class MovementPillar extends Movement {
                 MovementHelper.moveTowards(ctx, state, supportingBlock);
             } else {
                 // stay centered while climbing up
-                centerForAscend(state, 0.3);
+                centerForAscend(ctx, dest, state, 0.27);    // trial and error
             }
             return state.setInput(Input.JUMP, true);
         } else {
@@ -300,7 +296,20 @@ public class MovementPillar extends Movement {
         return state;
     }
 
-    private void centerForAscend(MovementState state, double allowedDistance) {
+    @Nullable
+    public static BlockPos getSupportingBlock(IBaritone baritone, IEntityContext ctx, BetterBlockPos src, BlockState climbableBlock) {
+        BlockPos supportingBlock;
+        if (Block.isFaceFullSquare(climbableBlock.getCollisionShape(ctx.world(), src), Direction.UP)) {
+            supportingBlock = null;
+        } else if (climbableBlock.getBlock() instanceof LadderBlock) {
+            supportingBlock = src.offset(climbableBlock.get(LadderBlock.FACING).getOpposite());
+        } else {
+            supportingBlock = getAgainst(new CalculationContext(baritone), src);
+        }
+        return supportingBlock;
+    }
+
+    public static void centerForAscend(IEntityContext ctx, BetterBlockPos dest, MovementState state, double allowedDistance) {
         state.setTarget(new MovementState.MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.headPos(), VecUtils.getBlockPosCenter(dest), ctx.entityRotations()), false));
         Vec3d destCenter = VecUtils.getBlockPosCenter(dest);
         if (Math.abs(ctx.entity().getX() - destCenter.x) > allowedDistance || Math.abs(ctx.entity().getZ() - destCenter.z) > allowedDistance) {

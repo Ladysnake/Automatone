@@ -36,9 +36,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.fluid.WaterFluid;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
 
 import java.util.Optional;
 import java.util.Set;
@@ -308,7 +310,7 @@ public class MovementTraverse extends Movement {
         state.setInput(Input.SNEAK, false);
 
         Block fd = BlockStateInterface.get(ctx, src.down()).getBlock();
-        boolean ladder = fd == Blocks.LADDER || fd == Blocks.VINE;
+        boolean ladder = BlockTags.CLIMBABLE.contains(fd);
 
         for (BlockState bs : bss) {
             if (bs.getBlock() instanceof DoorBlock) {
@@ -370,20 +372,23 @@ public class MovementTraverse extends Movement {
             }
 
             BlockState destDown = BlockStateInterface.get(ctx, dest.down());
-            BlockPos against = positionsToBreak[0];
-            if (feet.getY() != dest.getY() && ladder && (destDown.getBlock() == Blocks.VINE || destDown.getBlock() == Blocks.LADDER)) {
-                against = destDown.getBlock() == Blocks.VINE ? MovementPillar.getAgainst(new CalculationContext(baritone), dest.down()) : dest.offset(destDown.get(LadderBlock.FACING).getOpposite());
-                if (against == null) {
-                    baritone.logDirect("Unable to climb vines. Consider disabling allowVines.");
-                    return state.setStatus(MovementStatus.UNREACHABLE);
+            if (feet.getY() != dest.getY() && ladder && (destDown.isIn(BlockTags.CLIMBABLE))) {
+                BlockPos against = MovementPillar.getSupportingBlock(baritone, ctx, src, destDown);
+                if (against != null) {
+                    MovementHelper.moveTowards(ctx, state, against);
+                } else {
+                    MovementPillar.centerForAscend(ctx, dest, state, 0.25);
                 }
+                state.setInput(Input.JUMP, true);
+            } else {
+                MovementHelper.moveTowards(ctx, state, positionsToBreak[0]);
             }
-            MovementHelper.moveTowards(ctx, state, against);
         } else {
             wasTheBridgeBlockAlwaysThere = false;
             BlockPos standingOnPos = feet.down();
             BlockState standingOn = BlockStateInterface.get(ctx, standingOnPos);
-            if (standingOn.getCollisionShape(ctx.world(), standingOnPos).getBoundingBox().maxY < 1) { // see issue #118
+            VoxelShape collisionShape = standingOn.getCollisionShape(ctx.world(), standingOnPos);
+            if (!collisionShape.isEmpty() && collisionShape.getBoundingBox().maxY < 1) { // see issue #118
                 double dist = Math.max(Math.abs(dest.getX() + 0.5 - ctx.entity().getX()), Math.abs(dest.getZ() + 0.5 - ctx.entity().getZ()));
                 if (dist < 0.85) { // 0.5 + 0.3 + epsilon
                     MovementHelper.moveTowards(ctx, state, dest);

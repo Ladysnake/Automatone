@@ -35,6 +35,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.*;
 import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -307,7 +308,7 @@ public interface MovementHelper extends ActionCosts {
         if (isBlockNormalCube(state)) {
             return true;
         }
-        if (block == Blocks.LADDER || (block == Blocks.VINE && settings.allowVines.get())) { // TODO reconsider this
+        if (state.isIn(BlockTags.CLIMBABLE)) { // TODO reconsider this
             return true;
         }
         if (block == Blocks.FARMLAND || block == Blocks.GRASS_PATH) {
