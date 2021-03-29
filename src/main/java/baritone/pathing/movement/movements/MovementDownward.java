@@ -72,7 +72,7 @@ public class MovementDownward extends Movement {
             for (int dz = -requiredSideSpace; dz <= requiredSideSpace; dz++) {
                 // If we are at the starting position, we already cleared enough space to stand there
                 // So only need to check the blocks below our feet
-                ret[i++] = new BetterBlockPos(x + dx, y - 1, z + dz);
+                ret[i++] = new BetterBlockPos(x + dx, y, z + dz);
             }
         }
 
