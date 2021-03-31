@@ -31,7 +31,10 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Set;
 
@@ -52,7 +55,13 @@ public class MovementAscend extends Movement {
     private int ticksWithoutPlacement = 0;
 
     public MovementAscend(IBaritone baritone, BetterBlockPos src, BetterBlockPos dest) {
-        super(baritone, src, dest, new BetterBlockPos[]{dest, src.up(2), dest.up()}, dest.down());
+        super(baritone, src, dest, buildPositionsToBreak(baritone.getPlayerContext().entity(), src, dest), dest.down());
+    }
+
+    private static BetterBlockPos[] buildPositionsToBreak(LivingEntity entity, BetterBlockPos src, BetterBlockPos dest) {
+        BetterBlockPos[] ceiling = MovementPillar.buildPositionsToBreak(entity, src);
+        BetterBlockPos[] wall = MovementTraverse.buildPositionsToBreak(entity, src.up(), dest);
+        return ArrayUtils.addAll(ceiling, wall);
     }
 
     @Override
@@ -78,22 +87,30 @@ public class MovementAscend extends Movement {
     }
 
     public static double cost(CalculationContext context, int x, int y, int z, int destX, int destZ) {
-        BlockState toPlace = context.get(destX, y, destZ);
+        int diffX = destX - x;
+        int diffZ = destZ - z;
+        assert Math.abs(diffX) <= 1 && Math.abs(diffZ) <= 1;
+        int placeX = destX + diffX * context.requiredSideSpace;
+        int placeZ = destZ + diffZ * context.requiredSideSpace;
+        BlockState toPlace = context.get(placeX, y, placeZ);
         double additionalPlacementCost = 0;
-        if (!MovementHelper.canWalkOn(context.bsi, destX, y, destZ, toPlace, context.baritone.settings())) {
-            additionalPlacementCost = context.costOfPlacingAt(destX, y, destZ, toPlace);
+        if (!MovementHelper.canWalkOn(context.bsi, placeX, y, placeZ, toPlace, context.baritone.settings())) {
+            // TODO maybe check if we really can place or mine at that distance, for really large entities
+            additionalPlacementCost = context.costOfPlacingAt(placeX, y, placeZ, toPlace);
             if (additionalPlacementCost >= COST_INF) {
                 return COST_INF;
             }
-            if (!MovementHelper.isReplaceable(destX, y, destZ, toPlace, context.bsi)) {
+            if (!MovementHelper.isReplaceable(placeX, y, placeZ, toPlace, context.bsi)) {
                 return COST_INF;
             }
             boolean foundPlaceOption = false;
             for (int i = 0; i < 5; i++) {
-                int againstX = destX + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getOffsetX();
+                int againstX = placeX + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getOffsetX();
                 int againstY = y + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getOffsetY();
-                int againstZ = destZ + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getOffsetZ();
-                if (againstX == x && againstZ == z) { // we might be able to backplace now, but it doesn't matter because it will have been broken by the time we'd need to use it
+                int againstZ = placeZ + HORIZONTALS_BUT_ALSO_DOWN_____SO_EVERY_DIRECTION_EXCEPT_UP[i].getOffsetZ();
+                if ((placeX - againstX) == diffX && (placeZ - againstZ) == diffZ) {
+                    // placeXZ - againstXZ == destXZ - xz => this is the direction we are coming from
+                    // we might be able to backplace now, but it doesn't matter because it will have been broken by the time we'd need to use it
                     continue;
                 }
                 if (context.canPlaceAgainst(againstX, againstY, againstZ)) {
@@ -105,24 +122,34 @@ public class MovementAscend extends Movement {
                 return COST_INF;
             }
         }
-        BlockState srcUp2 = context.get(x, y + 2, z); // used lower down anyway
-        if (context.get(x, y + 3, z).getBlock() instanceof FallingBlock && (MovementHelper.canWalkThrough(context.bsi, x, y + 1, z, context.baritone.settings()) || !(srcUp2.getBlock() instanceof FallingBlock))) {//it would fall on us and possibly suffocate us
-            // HOWEVER, we assume that we're standing in the start position
-            // that means that src and src.up(1) are both air
-            // maybe they aren't now, but they will be by the time this starts
-            // if the lower one is can't walk through and the upper one is falling, that means that by standing on src
-            // (the presupposition of this Movement)
-            // we have necessarily already cleared the entire FallingBlock stack
-            // on top of our head
+        double miningTicks = 0;
+        for (int dx = -context.requiredSideSpace; dx <= context.requiredSideSpace; dx++) {
+            for (int dz = -context.requiredSideSpace; dz <= context.requiredSideSpace; dz++) {
+                int x1 = x + dx;
+                int y1 = y + context.height;
+                int z1 = z + dz;
+                BlockState srcUp2 = context.get(x1, y1, z1); // used lower down anyway
+                if (context.get(x1, y1 + 1, z1).getBlock() instanceof FallingBlock && (MovementHelper.canWalkThrough(context.bsi, x1, y1 - 1, z1, context.baritone.settings()) || !(srcUp2.getBlock() instanceof FallingBlock))) {//it would fall on us and possibly suffocate us
+                    // HOWEVER, we assume that we're standing in the start position
+                    // that means that src and src.up(1) are both air
+                    // maybe they aren't now, but they will be by the time this starts
+                    // if the lower one is can't walk through and the upper one is falling, that means that by standing on src
+                    // (the presupposition of this Movement)
+                    // we have necessarily already cleared the entire FallingBlock stack
+                    // on top of our head
 
-            // as in, if we have a block, then two FallingBlocks on top of it
-            // and that block is x, y+1, z, and we'd have to clear it to even start this movement
-            // we don't need to worry about those FallingBlocks because we've already cleared them
-            return COST_INF;
-            // you may think we only need to check srcUp2, not srcUp
-            // however, in the scenario where glitchy world gen where unsupported sand / gravel generates
-            // it's possible srcUp is AIR from the start, and srcUp2 is falling
-            // and in that scenario, when we arrive and break srcUp2, that lets srcUp3 fall on us and suffocate us
+                    // as in, if we have a block, then two FallingBlocks on top of it
+                    // and that block is x, y+1, z, and we'd have to clear it to even start this movement
+                    // we don't need to worry about those FallingBlocks because we've already cleared them
+                    return COST_INF;
+                    // you may think we only need to check srcUp2, not srcUp
+                    // however, in the scenario where glitchy world gen where unsupported sand / gravel generates
+                    // it's possible srcUp is AIR from the start, and srcUp2 is falling
+                    // and in that scenario, when we arrive and break srcUp2, that lets srcUp3 fall on us and suffocate us
+                }
+                // includeFalling isn't needed because of the falling check above -- if srcUp3 is falling we will have already exited with COST_INF if we'd actually have to break it
+                miningTicks += MovementHelper.getMiningDurationTicks(context, x1, y1, z1, srcUp2, false);
+            }
         }
         BlockState srcDown = context.get(x, y - 1, z);
         if (srcDown.getBlock() == Blocks.LADDER || srcDown.getBlock() == Blocks.VINE) {
@@ -149,24 +176,26 @@ public class MovementAscend extends Movement {
         }
 
         double totalCost = walk + additionalPlacementCost;
-        // start with srcUp2 since we already have its state
-        // includeFalling isn't needed because of the falling check above -- if srcUp3 is falling we will have already exited with COST_INF if we'd actually have to break it
-        double miningTicks = MovementHelper.getMiningDurationTicks(context, x, y + 2, z, srcUp2, false);
         totalCost += miningTicks;
         // Not mining anything in water
         boolean inLiquid = MovementHelper.isLiquid(srcDown);
         if (totalCost >= COST_INF || (miningTicks > 0 && inLiquid)) {
             return COST_INF;
         }
-        miningTicks = MovementHelper.getMiningDurationTicks(context, destX, y + 1, destZ, false);
-        totalCost += miningTicks;
-        if (totalCost >= COST_INF || (miningTicks > 0 && inLiquid)) {
-            return COST_INF;
-        }
-        miningTicks = MovementHelper.getMiningDurationTicks(context, destX, y + 2, destZ, true);
-        totalCost += miningTicks;
-        if (totalCost >= COST_INF || (miningTicks > 0 && inLiquid)) {
-            return COST_INF;
+        for (int dxz = -context.requiredSideSpace; dxz <= context.requiredSideSpace; dxz++) {
+            for (int dy = 0; dy < context.height; dy++) {
+                miningTicks = MovementHelper.getMiningDurationTicks(
+                        context,
+                        placeX + dxz * diffZ,  // if not moving along the z axis (movZ == 0), we only need to check blocks at placeX
+                        y + dy + 1,
+                        placeZ + dxz * diffX,  // if not moving along the x axis (movX == 0), we only need to check blocks at placeZ
+                        dy == context.height - 1    // only include falling for uppermost block
+                );
+                totalCost += miningTicks;
+                if (totalCost >= COST_INF || (miningTicks > 0 && inLiquid)) {
+                    return COST_INF;
+                }
+            }
         }
         return totalCost;
     }
@@ -238,8 +267,9 @@ public class MovementAscend extends Movement {
         return state.setInput(Input.JUMP, true);
     }
 
+    // TODO handle wider entities
     public boolean headBonkClear() {
-        BetterBlockPos startUp = src.up(2);
+        BetterBlockPos startUp = src.up(MathHelper.ceil(ctx.entity().getHeight()));
         for (int i = 0; i < 4; i++) {
             BetterBlockPos check = startUp.offset(Direction.fromHorizontal(i));
             if (!MovementHelper.canWalkThrough(ctx, check)) {

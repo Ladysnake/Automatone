@@ -58,10 +58,10 @@ import java.util.Set;
 public class MovementPillar extends Movement {
 
     public MovementPillar(IBaritone baritone, BetterBlockPos start, BetterBlockPos end) {
-        super(baritone, start, end, computeBlocksToBreak(baritone.getPlayerContext().entity(), start), start);
+        super(baritone, start, end, buildPositionsToBreak(baritone.getPlayerContext().entity(), start), start);
     }
 
-    public static BetterBlockPos[] computeBlocksToBreak(Entity entity, BetterBlockPos start) {
+    public static BetterBlockPos[] buildPositionsToBreak(Entity entity, BetterBlockPos start) {
         int x = start.x;
         int y = start.y;
         int z = start.z;

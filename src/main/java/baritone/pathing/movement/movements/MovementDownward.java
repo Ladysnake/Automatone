@@ -55,10 +55,10 @@ public class MovementDownward extends Movement {
     private int numTicks = 0;
 
     public MovementDownward(IBaritone baritone, BetterBlockPos start, BetterBlockPos end) {
-        super(baritone, start, end, computeBlocksToBreak(baritone.getPlayerContext().entity(), end));
+        super(baritone, start, end, buildPositionsToBreak(baritone.getPlayerContext().entity(), end));
     }
 
-    private static BetterBlockPos[] computeBlocksToBreak(Entity entity, BetterBlockPos end) {
+    public static BetterBlockPos[] buildPositionsToBreak(Entity entity, BetterBlockPos end) {
         int x = end.x;
         int y = end.y;
         int z = end.z;

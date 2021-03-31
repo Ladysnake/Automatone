@@ -64,7 +64,7 @@ public class MovementTraverse extends Movement {
     private boolean wasTheBridgeBlockAlwaysThere = true;
 
     public MovementTraverse(IBaritone baritone, BetterBlockPos from, BetterBlockPos to) {
-        super(baritone, from, to, computeBlocksToBreak(baritone.getPlayerContext().entity(), from, to), to.down());
+        super(baritone, from, to, buildPositionsToBreak(baritone.getPlayerContext().entity(), from, to), to.down());
     }
 
     @Override
@@ -83,7 +83,7 @@ public class MovementTraverse extends Movement {
         return ImmutableSet.of(src, dest);
     }
 
-    public static BetterBlockPos[] computeBlocksToBreak(Entity e, BetterBlockPos from, BetterBlockPos to) {
+    public static BetterBlockPos[] buildPositionsToBreak(Entity e, BetterBlockPos from, BetterBlockPos to) {
         int x = from.x;
         int y = from.y;
         int z = from.z;

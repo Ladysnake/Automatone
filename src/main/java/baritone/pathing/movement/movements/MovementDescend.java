@@ -36,6 +36,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
@@ -56,7 +58,14 @@ public class MovementDescend extends Movement {
     private int numTicks = 0;
 
     public MovementDescend(IBaritone baritone, BetterBlockPos start, BetterBlockPos end) {
-        super(baritone, start, end, new BetterBlockPos[]{end.up(2), end.up(), end}, end.down());
+        super(baritone, start, end, buildPositionsToBreak(baritone.getPlayerContext().entity(), start, end), end.down());
+    }
+
+    @NotNull
+    private static BetterBlockPos[] buildPositionsToBreak(LivingEntity entity, BetterBlockPos start, BetterBlockPos end) {
+        BetterBlockPos[] wall = MovementTraverse.buildPositionsToBreak(entity, start, end.up());
+        BetterBlockPos[] floor = MovementDownward.buildPositionsToBreak(entity, end);
+        return ArrayUtils.addAll(wall, floor);
     }
 
     @Override

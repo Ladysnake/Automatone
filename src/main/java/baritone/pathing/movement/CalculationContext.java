@@ -78,6 +78,7 @@ public class CalculationContext {
     public final double walkOnWaterOnePenalty;
     public final int worldHeight;
     public final int width;
+    /**The extra space required on each side of the entity for free movement; 0 in the case of a normal size player*/
     public final int requiredSideSpace;
     public final int height;
     private final PlayerEntity player;
