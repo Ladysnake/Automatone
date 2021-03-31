@@ -17,7 +17,7 @@
 
 package baritone.launch.mixins;
 
-import baritone.Baritone;
+import baritone.Automatone;
 import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,10 +29,11 @@ import java.util.concurrent.ExecutorService;
 
 @Mixin(Util.class)
 public abstract class MixinUtil {
-    @Shadow protected static void attemptShutdown(ExecutorService service) {}
+    @Shadow
+    private static void attemptShutdown(ExecutorService service) {}
 
     @Inject(method = "shutdownExecutors", at = @At("RETURN"))
     private static void shutdownBaritoneExecutor(CallbackInfo ci) {
-        attemptShutdown(Baritone.getExecutor());
+        attemptShutdown(Automatone.getExecutor());
     }
 }

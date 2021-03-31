@@ -17,6 +17,7 @@
 
 package baritone.process;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.Settings;
 import baritone.api.pathing.goals.Goal;
@@ -188,7 +189,7 @@ public final class FarmProcess extends BaritoneProcessHelper implements IFarmPro
         }
 
         if (baritone.settings().mineGoalUpdateInterval.get() != 0 && tickCount++ % baritone.settings().mineGoalUpdateInterval.get() == 0) {
-            Baritone.getExecutor().execute(() -> locations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, 10, 10));
+            Automatone.getExecutor().execute(() -> locations = WorldScanner.INSTANCE.scanChunkRadius(ctx, scan, 256, 10, 10));
         }
         if (locations == null) {
             return new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);

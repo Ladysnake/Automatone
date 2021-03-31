@@ -17,6 +17,7 @@
 
 package baritone.process;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.pathing.goals.*;
 import baritone.api.process.IGetToBlockProcess;
@@ -109,7 +110,7 @@ public final class GetToBlockProcess extends BaritoneProcessHelper implements IG
         if (mineGoalUpdateInterval != 0 && tickCount++ % mineGoalUpdateInterval == 0) { // big brain
             List<BlockPos> current = new ArrayList<>(knownLocations);
             CalculationContext context = new CalculationContext(baritone, true);
-            Baritone.getExecutor().execute(() -> rescan(current, context));
+            Automatone.getExecutor().execute(() -> rescan(current, context));
         }
         if (goal.isInGoal(ctx.feetPos()) && goal.isInGoal(baritone.getPathingBehavior().pathStart()) && isSafeToCancel) {
             // we're there

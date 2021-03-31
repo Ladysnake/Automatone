@@ -42,23 +42,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * @author Brady
  * @since 7/31/2018
  */
 public class Baritone implements IBaritone {
-
-    private static final ThreadPoolExecutor threadPool;
-
-    static {
-        AtomicInteger threadCounter = new AtomicInteger(0);
-        threadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> new Thread(r, "Automatone Worker " + threadCounter.incrementAndGet()));
-    }
 
     private final Settings settings;
     private final GameEventHandler gameEventHandler;
@@ -279,9 +267,5 @@ public class Baritone implements IBaritone {
     @Override
     public void serverTick() {
         this.getGameEventHandler().onTickServer();
-    }
-
-    public static ThreadPoolExecutor getExecutor() {
-        return threadPool;
     }
 }

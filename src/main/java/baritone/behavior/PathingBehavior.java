@@ -17,6 +17,7 @@
 
 package baritone.behavior;
 
+import baritone.Automatone;
 import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.behavior.IPathingBehavior;
@@ -472,7 +473,7 @@ public final class PathingBehavior extends Behavior implements IPathingBehavior 
             logDebug("Simplifying " + goal.getClass() + " to GoalXZ due to distance");
         }
         inProgress = pathfinder;
-        Baritone.getExecutor().execute(() -> {
+        Automatone.getExecutor().execute(() -> {
             if (talkAboutIt) {
                 logDebug("Starting to search for path from " + start + " to " + goal);
             }

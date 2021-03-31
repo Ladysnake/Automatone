@@ -37,6 +37,11 @@ import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 @KeepName
 public final class Automatone implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("Automatone");
@@ -44,6 +49,13 @@ public final class Automatone implements ModInitializer {
 
     public static final Tag<Item> EMPTY_BUCKETS = TagRegistry.item(id("empty_buckets"));
     public static final Tag<Item> WATER_BUCKETS = TagRegistry.item(id("water_buckets"));
+
+    private static final ThreadPoolExecutor threadPool;
+
+    static {
+        AtomicInteger threadCounter = new AtomicInteger(0);
+        threadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> new Thread(r, "Automatone Worker " + threadCounter.incrementAndGet()));
+    }
 
     public static final EntityType<PlayerEntity> FAKE_PLAYER = FabricEntityTypeBuilder.<PlayerEntity>createLiving()
             .spawnGroup(SpawnGroup.MISC)
@@ -57,6 +69,10 @@ public final class Automatone implements ModInitializer {
 
     public static Identifier id(String path) {
         return new Identifier(MOD_ID, path);
+    }
+
+    public static ThreadPoolExecutor getExecutor() {
+        return threadPool;
     }
 
     @Override
