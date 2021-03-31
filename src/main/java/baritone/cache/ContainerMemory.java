@@ -21,71 +21,55 @@ import baritone.Automatone;
 import baritone.api.BaritoneAPI;
 import baritone.api.cache.IContainerMemory;
 import baritone.api.cache.IRememberedInventory;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
 import java.util.*;
 
 public class ContainerMemory implements IContainerMemory {
 
-    private final Path saveTo;
     /**
      * The current remembered inventories
      */
+    // TODO hook up to ServerBlockEntityEvents to remember every inventory ever loaded :)
     private final Map<BlockPos, RememberedInventory> inventories = new HashMap<>();
 
-
-    public ContainerMemory(Path saveTo) {
-        this.saveTo = saveTo;
+    public void read(CompoundTag tag) {
         try {
-            read(Files.readAllBytes(saveTo));
-        } catch (NoSuchFileException ignored) {
-            inventories.clear();
+            ListTag nbtInventories = tag.getList("inventories", NbtType.COMPOUND);
+            for (int i = 0; i < nbtInventories.size(); i++) {
+                CompoundTag nbtEntry = nbtInventories.getCompound(i);
+                BlockPos pos = NbtHelper.toBlockPos(nbtEntry.getCompound("pos"));
+                RememberedInventory rem = new RememberedInventory();
+                rem.fromNbt(nbtEntry.getList("content", NbtType.LIST));
+                if (rem.items.isEmpty()) {
+                    continue; // this only happens if the list has no elements, not if the list has elements that are all empty item stacks
+                }
+                inventories.put(pos, rem);
+            }
         } catch (Exception ex) {
             Automatone.LOGGER.error(ex);
             inventories.clear();
         }
     }
 
-    private void read(byte[] bytes) {
-        PacketByteBuf in = new PacketByteBuf(Unpooled.wrappedBuffer(bytes));
-        int chests = in.readInt();
-        for (int i = 0; i < chests; i++) {
-            int x = in.readInt();
-            int y = in.readInt();
-            int z = in.readInt();
-            RememberedInventory rem = new RememberedInventory();
-            rem.items.addAll(readItemStacks(in));
-            rem.size = rem.items.size();
-            rem.windowId = -1;
-            if (rem.items.isEmpty()) {
-                continue; // this only happens if the list has no elements, not if the list has elements that are all empty item stacks
+    public CompoundTag toNbt() {
+        CompoundTag tag = new CompoundTag();
+        if (BaritoneAPI.getGlobalSettings().containerMemory.get()) {
+            ListTag list = new ListTag();
+            for (Map.Entry<BlockPos, RememberedInventory> entry : inventories.entrySet()) {
+                CompoundTag nbtEntry = new CompoundTag();
+                nbtEntry.put("pos", NbtHelper.fromBlockPos(entry.getKey()));
+                nbtEntry.put("content", entry.getValue().toNbt());
+                list.add(nbtEntry);
             }
-            inventories.put(new BlockPos(x, y, z), rem);
+            tag.put("inventories", list);
         }
-    }
-
-    public synchronized void save() throws IOException {
-        if (!BaritoneAPI.getGlobalSettings().containerMemory.get()) {
-            return;
-        }
-        ByteBuf buf = Unpooled.buffer(0, Integer.MAX_VALUE);
-        PacketByteBuf out = new PacketByteBuf(buf);
-        out.writeInt(inventories.size());
-        for (Map.Entry<BlockPos, RememberedInventory> entry : inventories.entrySet()) {
-            out = new PacketByteBuf(out.writeInt(entry.getKey().getX()));
-            out = new PacketByteBuf(out.writeInt(entry.getKey().getY()));
-            out = new PacketByteBuf(out.writeInt(entry.getKey().getZ()));
-            out = writeItemStacks(entry.getValue().getContents(), out);
-        }
-        Files.write(saveTo, out.array());
+        return tag;
     }
 
     public synchronized void setup(BlockPos pos, int windowId, int slotCount) {
@@ -107,36 +91,6 @@ public class ContainerMemory implements IContainerMemory {
     public final synchronized Map<BlockPos, IRememberedInventory> getRememberedInventories() {
         // make a copy since this map is modified from the packet thread
         return new HashMap<>(inventories);
-    }
-
-    public static List<ItemStack> readItemStacks(byte[] bytes) {
-        PacketByteBuf in = new PacketByteBuf(Unpooled.wrappedBuffer(bytes));
-        return readItemStacks(in);
-    }
-
-    public static List<ItemStack> readItemStacks(PacketByteBuf in) {
-        int count = in.readInt();
-        List<ItemStack> result = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            result.add(in.readItemStack());
-        }
-        return result;
-    }
-
-    public static byte[] writeItemStacks(List<ItemStack> write) {
-        ByteBuf buf = Unpooled.buffer(0, Integer.MAX_VALUE);
-        PacketByteBuf out = new PacketByteBuf(buf);
-        out = writeItemStacks(write, out);
-        return out.array();
-    }
-
-    public static PacketByteBuf writeItemStacks(List<ItemStack> write, PacketByteBuf out2) {
-        PacketByteBuf out = out2; // avoid reassigning an argument LOL
-        out = new PacketByteBuf(out.writeInt(write.size()));
-        for (ItemStack stack : write) {
-            out = out.writeItemStack(stack);
-        }
-        return out;
     }
 
     /**
@@ -175,5 +129,20 @@ public class ContainerMemory implements IContainerMemory {
             return this.size;
         }
 
+        public ListTag toNbt() {
+            ListTag inv = new ListTag();
+            for (ItemStack item : this.items) {
+                inv.add(item.toTag(new CompoundTag()));
+            }
+            return inv;
+        }
+
+        public void fromNbt(ListTag content) {
+            for (int i = 0; i < content.size(); i++) {
+                this.items.add(ItemStack.fromTag(content.getCompound(i)));
+            }
+            this.size = this.items.size();
+            this.windowId = -1;
+        }
     }
 }

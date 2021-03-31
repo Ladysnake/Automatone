@@ -35,7 +35,6 @@ import baritone.utils.BlockStateInterface;
 import baritone.utils.InputOverrideHandler;
 import baritone.utils.PathingControlManager;
 import baritone.utils.player.EntityContext;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
@@ -43,9 +42,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -58,18 +54,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Baritone implements IBaritone {
 
     private static final ThreadPoolExecutor threadPool;
-    private static final File dir;
 
     static {
         AtomicInteger threadCounter = new AtomicInteger(0);
         threadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> new Thread(r, "Automatone Worker " + threadCounter.incrementAndGet()));
-
-        dir = FabricLoader.getInstance().getGameDir().resolve("baritone").toFile();
-        if (!Files.exists(dir.toPath())) {
-            try {
-                Files.createDirectories(dir.toPath());
-            } catch (IOException ignored) {}
-        }
     }
 
     private final Settings settings;
@@ -291,10 +279,6 @@ public class Baritone implements IBaritone {
     @Override
     public void serverTick() {
         this.getGameEventHandler().onTickServer();
-    }
-
-    public static File getDir() {
-        return dir;
     }
 
     public static ThreadPoolExecutor getExecutor() {

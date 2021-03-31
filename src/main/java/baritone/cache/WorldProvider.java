@@ -17,89 +17,33 @@
 
 package baritone.cache;
 
-import baritone.Automatone;
 import baritone.api.cache.IWorldProvider;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.WorldSavePath;
-import net.minecraft.world.dimension.DimensionType;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import net.minecraft.world.World;
 
 /**
  * @author Brady
  * @since 8/4/2018
  */
 public class WorldProvider implements IWorldProvider {
+    private final WorldData currentWorld;
 
-    private static final Map<Path, WorldData> worldCache = new HashMap<>(); // this is how the bots have the same cached world
-
-    private WorldData currentWorld;
+    public WorldProvider(World world) {
+        this.currentWorld = new WorldData(world.getRegistryKey());
+    }
 
     @Override
     public final WorldData getCurrentWorld() {
         return this.currentWorld;
     }
 
-    /**
-     * Called when a new world is initialized to discover the
-     *
-     * @param world The world being loaded
-     */
-    public final void initWorld(ServerWorld world) {
-        Path directory;
-        Path readme;
-
-        MinecraftServer server = world.getServer();
-
-        // If there is an integrated server running (Aka Singleplayer) then do magic to find the world save file
-        directory = DimensionType.getSaveDirectory(world.getRegistryKey(), server.getSavePath(WorldSavePath.ROOT).toFile()).toPath();
-
-        // Gets the "depth" of this directory relative the the game's run directory, 2 is the location of the world
-        if (directory.relativize(FabricLoader.getInstance().getGameDir()).getNameCount() != 2) {
-            // subdirectory of the main save directory for this world
-            directory = directory.getParent();
-        }
-
-        directory = directory.resolve("automatone");
-        readme = directory.resolve("readme.txt");
-
-        // We will actually store the world data in a subfolder: "DIM<id>"
-        Path dir = DimensionType.getSaveDirectory(world.getRegistryKey(), directory.toFile()).toPath();
-        try {
-            Files.createDirectories(dir);
-            // lol wtf is this baritone folder in my minecraft save?
-            // good thing we have a readme
-            Files.write(readme, "https://github.com/Ladysnake/Automatone\n".getBytes());
-        } catch (IOException ignored) {}
-
-        Automatone.LOGGER.info("Automatone world data dir: " + dir);
-        synchronized (worldCache) {
-            this.currentWorld = worldCache.computeIfAbsent(dir, d -> new WorldData(d, world.getRegistryKey()));
-        }
-    }
-
-    public final void closeWorld() {
-        WorldData worldData = this.currentWorld;
-        this.currentWorld = null;
-        if (worldData != null) {
-            worldData.onClose();
-        }
-    }
-
     @Override
     public void readFromNbt(CompoundTag tag) {
-        // NO-OP
+        this.currentWorld.readFromNbt(tag);
     }
 
     @Override
     public void writeToNbt(CompoundTag tag) {
-        // NO-OP
+        this.currentWorld.writeToNbt(tag);
     }
 }

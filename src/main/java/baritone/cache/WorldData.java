@@ -17,17 +17,13 @@
 
 package baritone.cache;
 
-import baritone.Automatone;
-import baritone.Baritone;
 import baritone.api.cache.ICachedWorld;
 import baritone.api.cache.IContainerMemory;
 import baritone.api.cache.IWaypointCollection;
 import baritone.api.cache.IWorldData;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
-
-import java.io.IOException;
-import java.nio.file.Path;
 
 /**
  * Data about a world, from baritone's point of view. Includes cached chunks, waypoints, and map data.
@@ -39,25 +35,22 @@ public class WorldData implements IWorldData {
     private final WaypointCollection waypoints;
     private final ContainerMemory containerMemory;
     //public final MapData map;
-    public final Path directory;
     public final RegistryKey<World> dimension;
 
-    WorldData(Path directory, RegistryKey<World> dimension) {
-        this.directory = directory;
-        this.waypoints = new WaypointCollection(directory.resolve("waypoints"));
-        this.containerMemory = new ContainerMemory(directory.resolve("containers"));
+    WorldData(RegistryKey<World> dimension) {
+        this.waypoints = new WaypointCollection();
+        this.containerMemory = new ContainerMemory();
         this.dimension = dimension;
     }
 
-    public void onClose() {
-        Baritone.getExecutor().execute(() -> {
-            Automatone.LOGGER.info("Started saving saved containers in a new thread");
-            try {
-                containerMemory.save();
-            } catch (IOException e) {
-                Automatone.LOGGER.error("Failed to save saved containers", e);
-            }
-        });
+    public void readFromNbt(CompoundTag tag) {
+        this.containerMemory.read(tag.getCompound("containers"));
+        this.waypoints.readFromNbt(tag.getCompound("waypoints"));
+    }
+
+    public void writeToNbt(CompoundTag tag) {
+        tag.put("containers", containerMemory.toNbt());
+        tag.put("waypoints", waypoints.toNbt());
     }
 
     @Override

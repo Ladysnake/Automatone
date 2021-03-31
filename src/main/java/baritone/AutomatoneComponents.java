@@ -44,7 +44,7 @@ public final class AutomatoneComponents implements EntityComponentInitializer, W
 
     @Override
     public void registerWorldComponentFactories(WorldComponentFactoryRegistry registry) {
-        registry.register(IWorldProvider.KEY, w -> new WorldProvider());
+        registry.register(IWorldProvider.KEY, WorldProvider::new);
         registry.register(ISelectionManager.KEY, SelectionManager::new);
     }
 }
