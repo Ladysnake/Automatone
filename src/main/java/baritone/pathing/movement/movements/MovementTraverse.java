@@ -319,12 +319,12 @@ public class MovementTraverse extends Movement {
                 boolean canOpen = DoorBlock.isWoodenDoor(bs);
 
                 if (notPassable && canOpen) {
-                    return state.setTarget(new MovementState.MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.headPos(), VecUtils.calculateBlockCenter(ctx.world(), positionsToBreak[0]), ctx.entityRotations()), true))
+                    return state.setTarget(new MovementState.MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.headPos(), VecUtils.calculateBlockCenter(ctx.world(), dest.up()), ctx.entityRotations()), true))
                             .setInput(Input.CLICK_RIGHT, true);
                 }
             } else if (bs.getBlock() instanceof FenceGateBlock) {
-                BlockPos blocked = !MovementHelper.isGatePassable(ctx, positionsToBreak[0], src.up()) ? positionsToBreak[0]
-                        : !MovementHelper.isGatePassable(ctx, positionsToBreak[1], src) ? positionsToBreak[1]
+                BlockPos blocked = !MovementHelper.isGatePassable(ctx, dest.up(), src.up()) ? dest.up()
+                        : !MovementHelper.isGatePassable(ctx, dest, src) ? dest
                         : null;
                 if (blocked != null) {
                     Optional<Rotation> rotation = RotationUtils.reachable(ctx, blocked);
@@ -381,7 +381,7 @@ public class MovementTraverse extends Movement {
                 }
                 state.setInput(Input.JUMP, true);
             } else {
-                MovementHelper.moveTowards(ctx, state, positionsToBreak[0]);
+                MovementHelper.moveTowards(ctx, state, dest.up());
             }
         } else {
             wasTheBridgeBlockAlwaysThere = false;
@@ -453,7 +453,7 @@ public class MovementTraverse extends Movement {
                 }
                 return state;
             }
-            MovementHelper.moveTowards(ctx, state, positionsToBreak[0]);
+            MovementHelper.moveTowards(ctx, state, dest.up());
             // TODO MovementManager.moveTowardsBlock(to); // move towards not look at because if we are bridging for a couple blocks in a row, it is faster if we dont spin around and walk forwards then spin around and place backwards for every block
         }
         return state;
