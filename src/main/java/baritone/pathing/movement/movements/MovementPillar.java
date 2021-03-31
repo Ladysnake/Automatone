@@ -207,7 +207,7 @@ public class MovementPillar extends Movement {
         }
 
         BlockState fromDown = BlockStateInterface.get(ctx, src);
-        if (ctx.entity().isTouchingWater()) {
+        if (ctx.entity().isTouchingWater() || MovementHelper.isWater(ctx, src.up(MathHelper.ceil(ctx.entity().getHeight())))) {
             // stay centered while swimming up a water column
             centerForAscend(ctx, dest, state, 0.2);
             state.setInput(Input.JUMP, true);
