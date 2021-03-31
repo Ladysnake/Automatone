@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -55,7 +56,17 @@ public class MovementAscend extends Movement {
     private int ticksWithoutPlacement = 0;
 
     public MovementAscend(IBaritone baritone, BetterBlockPos src, BetterBlockPos dest) {
-        super(baritone, src, dest, buildPositionsToBreak(baritone.getPlayerContext().entity(), src, dest), dest.down());
+        super(baritone, src, dest, buildPositionsToBreak(baritone.getPlayerContext().entity(), src, dest), buildPositionsToPlace(baritone.getPlayerContext().entity(), src, dest));
+    }
+
+    private static BetterBlockPos buildPositionsToPlace(LivingEntity entity, BetterBlockPos src, BetterBlockPos dest) {
+        int diffX = dest.x - src.x;
+        int diffZ = dest.z - src.z;
+        assert Math.abs(diffX) <= 1 && Math.abs(diffZ) <= 1;
+        int requiredSideSpace = CalculationContext.getRequiredSideSpace(entity.getDimensions(EntityPose.STANDING));
+        int placeX = dest.x + diffX * requiredSideSpace;
+        int placeZ = dest.z + diffZ * requiredSideSpace;
+        return new BetterBlockPos(placeX, src.y, placeZ);
     }
 
     private static BetterBlockPos[] buildPositionsToBreak(LivingEntity entity, BetterBlockPos src, BetterBlockPos dest) {
@@ -220,7 +231,7 @@ public class MovementAscend extends Movement {
         BlockState jumpingOnto = BlockStateInterface.get(ctx, positionToPlace);
         if (!MovementHelper.canWalkOn(ctx, positionToPlace, jumpingOnto)) {
             ticksWithoutPlacement++;
-            if (MovementHelper.attemptToPlaceABlock(state, baritone, dest.down(), false, true) == PlaceResult.READY_TO_PLACE) {
+            if (MovementHelper.attemptToPlaceABlock(state, baritone, positionToPlace, false, true) == PlaceResult.READY_TO_PLACE) {
                 state.setInput(Input.SNEAK, true);
                 if (ctx.entity().isSneaking()) {
                     state.setInput(Input.CLICK_RIGHT, true);
