@@ -65,7 +65,7 @@ public class SelCommand extends Command {
         if (action == null) {
             throw new CommandInvalidTypeException(args.consumed(), "an action");
         }
-        ISelectionManager manager = ISelectionManager.KEY.get(baritone.getPlayerContext().world());
+        ISelectionManager manager = ISelectionManager.KEY.get(baritone.getPlayerContext().entity());
         if (action == Action.POS1 || action == Action.POS2) {
             if (action == Action.POS2 && pos1 == null) {
                 throw new CommandInvalidStateException("Set pos1 first before using pos2");

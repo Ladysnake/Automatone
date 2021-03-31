@@ -48,6 +48,7 @@ import java.util.*;
 @KeepName
 public final class AutomatoneClient implements ClientModInitializer {
     public static final Set<Baritone> renderList = Collections.newSetFromMap(new WeakHashMap<>());
+    public static final Set<ISelectionManager> selectionRenderList = Collections.newSetFromMap(new WeakHashMap<>());
 
     public static void onRenderPass(RenderEvent renderEvent) {
         MinecraftClient mc = MinecraftClient.getInstance();
@@ -60,7 +61,9 @@ public final class AutomatoneClient implements ClientModInitializer {
             PathRenderer.render(renderEvent, baritone.getClientPathingBehaviour());
         }
 
-        SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), ISelectionManager.KEY.get(mc.world).getSelections());
+        for (ISelectionManager selectionManager : selectionRenderList) {
+            SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), selectionManager.getSelections());
+        }
 
         if (!mc.isIntegratedServerRunning()) {
             // FIXME we should really be able to render stuff in multiplayer
@@ -102,9 +105,11 @@ public final class AutomatoneClient implements ClientModInitializer {
                     }
             );
         });
-        //yes, it is normal to remove an IBaritone from a Baritone set
-        //noinspection SuspiciousMethodCalls
-        ClientEntityEvents.ENTITY_UNLOAD.register((entity, world) -> renderList.remove(IBaritone.KEY.getNullable(entity)));
+        ClientEntityEvents.ENTITY_UNLOAD.register((entity, world) -> {
+            //yes, it is normal to remove an IBaritone from a Baritone set
+            renderList.remove(IBaritone.KEY.getNullable(entity));
+            selectionRenderList.remove(ISelectionManager.KEY.getNullable(entity));
+        });
     }
 
     private <P extends PlayerEntity & AutomatoneFakePlayer> void spawnPlayer(int id, UUID uuid, EntityType<?> entityTypeId, String name, double x, double y, double z, float yaw, float pitch, GameProfile profile) {

@@ -1,31 +1,32 @@
 package baritone.selection;
 
+import baritone.AutomatoneClient;
 import baritone.api.selection.ISelection;
 import baritone.api.selection.ISelectionManager;
 import baritone.api.utils.BetterBlockPos;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
 
 public class SelectionManager implements ISelectionManager {
 
-    private final World world;
+    private final Entity holder;
     private final LinkedList<ISelection> selections = new LinkedList<>();
     private ISelection[] selectionsArr = new ISelection[0];
 
-    public SelectionManager(World world) {
-        this.world = world;
+    public SelectionManager(Entity holder) {
+        this.holder = holder;
     }
 
     private void resetSelectionsArr() {
         selectionsArr = selections.toArray(new ISelection[0]);
-        KEY.sync(this.world);
+        KEY.sync(this.holder);
     }
 
     @Override
@@ -157,6 +158,12 @@ public class SelectionManager implements ISelectionManager {
             BlockPos pos1 = buf.readBlockPos();
             BlockPos pos2 = buf.readBlockPos();
             this.addSelection(new BetterBlockPos(pos1), new BetterBlockPos(pos2));
+        }
+
+        if (this.selections.isEmpty()) {
+            AutomatoneClient.selectionRenderList.remove(this);
+        } else {
+            AutomatoneClient.selectionRenderList.add(this);
         }
     }
 }

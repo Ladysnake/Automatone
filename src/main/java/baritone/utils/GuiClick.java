@@ -97,15 +97,15 @@ public class GuiClick extends Screen {
             assert client.world != null;
             if (mouseButton == 0) {
                 if (clickStart != null && !clickStart.equals(currentMouseOver)) {
-                    client.player.sendChatMessage("/automatone sel clear");
-                    client.player.sendChatMessage(String.format("/automatone sel 1 %d %d %d", clickStart.getX(), clickStart.getY(), clickStart.getZ()));
-                    client.player.sendChatMessage(String.format("/automatone sel 2 %d %d %d", currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));
+                    client.player.sendChatMessage(String.format("/execute as %s run automatone sel clear", callerUuid));
+                    client.player.sendChatMessage(String.format("/execute as %s run automatone sel 1 %d %d %d", callerUuid, clickStart.getX(), clickStart.getY(), clickStart.getZ()));
+                    client.player.sendChatMessage(String.format("/execute as %s run automatone sel 2 %d %d %d", callerUuid, currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));
                     MutableText component = new LiteralText("").append(BaritoneAPI.getPrefix()).append(" Selection made! For usage: " + FORCE_COMMAND_PREFIX + "help sel");
                     component.setStyle(component.getStyle()
                             .withFormatting(Formatting.WHITE)
                             .withClickEvent(new ClickEvent(
                                     ClickEvent.Action.RUN_COMMAND,
-                                    FORCE_COMMAND_PREFIX + "sel"
+                                    FORCE_COMMAND_PREFIX + "help sel"
                             )));
                     client.inGameHud.getChatHud().addMessage(component);
                     clickStart = null;
