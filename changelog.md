@@ -1,4 +1,17 @@
 ------------------------------------------------------
+Version 0.1.1
+------------------------------------------------------
+**Additions**
+- Added an icon
+
+**Changes**
+- Fake players now use the name from their display profile if any is set
+- Added dependencies to fabric.mod.json
+
+**Bugfixes**
+- Fixed bridging over long distances
+
+------------------------------------------------------
 Version 0.1.0
 ------------------------------------------------------
 First alpha release of Automatone, forked from Baritone 1.6.3.

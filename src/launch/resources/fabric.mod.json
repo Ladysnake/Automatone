@@ -28,6 +28,7 @@
     "cardinal-components-base": "^2.7.13",
     "cardinal-components-entity": "^2.7.13",
     "cardinal-components-world": "^2.7.13",
+    "fabric": "*",
     "reach-entity-attributes": "*"
   },
   "custom": {
