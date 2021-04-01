@@ -10,7 +10,7 @@ Backwards compatibility is also not being considered at the current time, so avo
 
 There's a [showcase video](https://youtu.be/CZkLXWo4Fg4) made by @Adovin#0730 on Baritone. [Here's](https://www.youtube.com/watch?v=StquF69-_wI) a (very old!) video leijurv made showing off what it can do. [Tutorial playlist](https://www.youtube.com/playlist?list=PLnwnJ1qsS7CoQl9Si-RTluuzCo_4Oulpa)
 
-To install Automatone as a user, install the Fabric loader and drop the latest `api-fabric` jar from [releases](https://github.com/Ladysnake/Automatone/releases).
+To install Automatone as a user, install the Fabric loader and drop the latest `optimized` jar from [releases](https://github.com/Ladysnake/Automatone/releases).
 For more information, see [Installation & setup](SETUP.md). Once Automatone is installed, look [here](USAGE.md) for instructions on how to use it.
 
 This project is based on Baritone, which is itself an updated version of MineBot,
