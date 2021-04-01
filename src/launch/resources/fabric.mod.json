@@ -14,6 +14,7 @@
     "Brady",
     "Pyrofab"
   ],
+  "icon": "assets/automatone/icon.png",
   "contact": {
     "sources": "https://github.com/Ladysnake/automatone",
     "issues": "https://github.com/Ladysnake/automatone/issues"
