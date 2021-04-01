@@ -235,7 +235,8 @@ public class MovementTraverse extends Movement {
                 // now that we've checked all possible directions to side place, we actually need to backplace
                 // none of the vanilla impls do a blocking or thread unsafe call, so passing the world directly should be fine
                 // also none of the full cubes actually use the pos, so we should be fine not creating a real BlockPos for this
-                if (!srcOn.isFullCube(context.world, BlockPos.ORIGIN)) {
+                if (!srcOn.getMaterial().isReplaceable() && !srcOn.isFullCube(context.world, BlockPos.ORIGIN)) {
+                    // If srcOn is currently replaceable, we will have a proper block when we stand on it
                     return COST_INF; // can't sneak and backplace against eg. soul sand or half slabs (regardless of whether it's top half or bottom half) =/
                 }
                 if (srcOn.getFluidState().getFluid() instanceof WaterFluid) {
