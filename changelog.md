@@ -33,6 +33,7 @@ First alpha release of Automatone, forked from Baritone 1.6.3.
 
 **Fixes**
 - Fixed a crash when an entity fell into the void while pathfinding
+- Fixed a crash when a player attempted to auto-build with ladders in their inventory
 - Automatone will no longer attempt to place water buckets in `ultrawarm` dimensions
 - Pathfinding will now consider the speed modifiers on any block, not just soulsand
 - WIP: some moves should now work with varying player sizes

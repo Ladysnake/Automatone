@@ -838,7 +838,25 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
                 continue;
             }
             // <toxic cloud>
-            result.add(((BlockItem) stack.getItem()).getBlock().getPlacementState(new ItemPlacementContext(new ItemUsageContext(ctx.world(), player, Hand.MAIN_HAND, stack, new BlockHitResult(new Vec3d(ctx.entity().getX(), ctx.entity().getY(), ctx.entity().getZ()), Direction.UP, ctx.feetPos(), false)) {})));
+            BlockState placementState = ((BlockItem) stack.getItem()).getBlock().getPlacementState(new ItemPlacementContext(
+                    new ItemUsageContext(
+                            ctx.world(),
+                            player,
+                            Hand.MAIN_HAND,
+                            stack,
+                            new BlockHitResult(
+                                    new Vec3d(ctx.entity().getX(), ctx.entity().getY(), ctx.entity().getZ()),
+                                    Direction.UP,
+                                    ctx.feetPos(),
+                                    false
+                            )
+                    ) {})   // protected constructor
+            );
+            if (placementState != null) {
+                result.add(placementState);
+            } else {
+                result.add(Blocks.AIR.getDefaultState());
+            }
             // </toxic cloud>
         }
         return result;
