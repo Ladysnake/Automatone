@@ -56,6 +56,8 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -158,6 +160,15 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     @Override
     public boolean isSleepingLongEnough() {
         return true;    // Fake players do not delay the sleep of other players
+    }
+
+    @Override
+    public Text getName() {
+        GameProfile displayProfile = this.getDisplayProfile();
+        if (displayProfile != null) {
+            return new LiteralText(displayProfile.getName());
+        }
+        return super.getName();
     }
 
     @Nullable
