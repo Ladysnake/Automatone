@@ -23,6 +23,12 @@
   "mixins": [
     "mixins.automatone.json"
   ],
+  "depends": {
+    "cardinal-components-base": "^2.7.13",
+    "cardinal-components-entity": "^2.7.13",
+    "cardinal-components-world": "^2.7.13",
+    "reach-entity-attributes": "*"
+  },
   "custom": {
     "cardinal-components": [
       "automatone:core",
