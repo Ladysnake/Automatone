@@ -140,6 +140,15 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     @Override
+    protected void tickNewAi() {
+        super.tickNewAi();
+        if (this.release) {
+            this.clearActiveItem();
+            this.release = false;
+        }
+    }
+
+    @Override
     public boolean tryAttack(Entity target) {
         this.attack(target);
         return false;
