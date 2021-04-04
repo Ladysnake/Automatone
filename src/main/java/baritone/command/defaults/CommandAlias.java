@@ -21,6 +21,7 @@ import baritone.api.IBaritone;
 import baritone.api.command.Command;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
+import baritone.command.argument.ArgConsumer;
 import net.minecraft.server.command.ServerCommandSource;
 
 import java.util.Collections;
@@ -51,9 +52,7 @@ public class CommandAlias extends Command {
 
     @Override
     public Stream<String> tabComplete(String label, IArgConsumer args) {
-        // FIXME
-        // return baritone.getCommandManager().tabComplete(String.format("%s %s", target, args.rawRest()));
-        return Stream.empty();
+         return ((ArgConsumer) args).getBaritone().getCommandManager().tabComplete(String.format("%s %s", target, args.rawRest()));
     }
 
     @Override
