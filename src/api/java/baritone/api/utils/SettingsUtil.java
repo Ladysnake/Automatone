@@ -120,21 +120,12 @@ public class SettingsUtil {
 
     private static <T> void parseAndApply(Settings.Setting<T> setting, String settingValue) {
         Class<T> intendedType = setting.getValueClass();
-        @SuppressWarnings("unchecked") ISettingParser<T> ioMethod = (ISettingParser<T>) Parser.getParser(setting.getType());
-        T parsed = ioMethod.parse(new ParserContext(setting), settingValue);
+        Parser ioMethod = Parser.getParser(setting.getType());
+        @SuppressWarnings("unchecked") T parsed = (T) ioMethod.parse(new ParserContext(setting), settingValue);
         if (!intendedType.isInstance(parsed)) {
             throw new IllegalStateException(ioMethod + " parser returned incorrect type, expected " + intendedType + " got " + parsed + " which is " + parsed.getClass());
         }
         setting.set(parsed);
-    }
-
-    private interface ISettingParser<T> {
-
-        T parse(ParserContext context, String raw);
-
-        String toString(ParserContext context, T value);
-
-        boolean accepts(Type type);
     }
 
     private static class ParserContext {
@@ -150,7 +141,7 @@ public class SettingsUtil {
         }
     }
 
-    private enum Parser implements ISettingParser {
+    private enum Parser {
 
         DOUBLE(Double.class, Double::parseDouble),
         BOOLEAN(Boolean.class, Boolean::parseBoolean),
@@ -253,19 +244,16 @@ public class SettingsUtil {
             this.toString = x -> toString.apply(cla$$.cast(x));
         }
 
-        @Override
         public Object parse(ParserContext context, String raw) {
             Object parsed = this.parser.apply(raw);
             Objects.requireNonNull(parsed);
             return parsed;
         }
 
-        @Override
         public String toString(ParserContext context, Object value) {
             return this.toString.apply(value);
         }
 
-        @Override
         public boolean accepts(Type type) {
             return type instanceof Class && this.cla$$.isAssignableFrom((Class<?>) type);
         }
