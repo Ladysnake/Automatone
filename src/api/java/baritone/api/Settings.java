@@ -21,7 +21,6 @@ import baritone.api.utils.SettingsUtil;
 import baritone.api.utils.TypeUtils;
 import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.tag.Tag;
@@ -521,6 +520,11 @@ public final class Settings {
      * Print all the debug messages to chat
      */
     public final Setting<Boolean> chatDebug = new Setting<>(false);
+
+    /**
+     * Sends information from every baritone instance to operator players for render
+     */
+    public final Setting<Boolean> renderDebug = new Setting<>(false);
 
     /**
      * Render the path

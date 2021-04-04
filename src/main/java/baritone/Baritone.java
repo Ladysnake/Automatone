@@ -66,7 +66,7 @@ public class Baritone implements IBaritone {
     private final BackfillProcess backfillProcess;
     private final FarmProcess farmProcess;
     private final IBaritoneProcess execControlProcess;
-    
+
     private final PathingControlManager pathingControlManager;
     private final BaritoneCommandManager commandManager;
 
@@ -243,7 +243,8 @@ public class Baritone implements IBaritone {
 
     @Override
     public boolean shouldSyncWith(ServerPlayerEntity player) {
-        return player.server.getPermissionLevel(player.getGameProfile()) >= 2;
+        return player == this.playerContext.entity()
+                || (settings.renderDebug.get() && player.server.getPermissionLevel(player.getGameProfile()) >= 2);
     }
 
     @Override
