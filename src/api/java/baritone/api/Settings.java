@@ -522,9 +522,9 @@ public final class Settings {
     public final Setting<Boolean> chatDebug = new Setting<>(false);
 
     /**
-     * Sends information from every baritone instance to operator players for render
+     * Sends all logs and render information to operator players
      */
-    public final Setting<Boolean> renderDebug = new Setting<>(false);
+    public final Setting<Boolean> syncWithOps = new Setting<>(false);
 
     /**
      * Render the path

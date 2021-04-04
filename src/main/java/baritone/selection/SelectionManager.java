@@ -141,7 +141,7 @@ public class SelectionManager implements ISelectionManager {
                 IBaritone.KEY.maybeGet(this.holder)
                         .map(IBaritone::settings)
                         .orElseGet(BaritoneAPI::getGlobalSettings)
-                        .renderDebug.get()
+                        .syncWithOps.get()
                         && player.server.getPermissionLevel(player.getGameProfile()) >= 2
         );
     }

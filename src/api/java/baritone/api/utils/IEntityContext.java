@@ -107,9 +107,14 @@ public interface IEntityContext {
         }
         LivingEntity entity = entity();
         if (entity instanceof PlayerEntity) ((PlayerEntity) entity).sendMessage(new LiteralText(message).formatted(Formatting.GRAY), false);
+
+        if (!BaritoneAPI.getGlobalSettings().syncWithOps.get()) return;
+
         MinecraftServer server = world().getServer();
         for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) {
-            IBaritone.KEY.get(p).logDirect(message);
+            if (server.getPlayerManager().isOperator(p.getGameProfile())) {
+                IBaritone.KEY.get(p).logDirect(message);
+            }
         }
     }
 }
