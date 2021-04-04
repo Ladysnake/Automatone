@@ -19,11 +19,14 @@ package baritone.api;
 
 import baritone.api.utils.SettingsUtil;
 import baritone.api.utils.TypeUtils;
+import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
+import net.minecraft.tag.Tag;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3i;
 import org.jetbrains.annotations.Nullable;
 
@@ -172,47 +175,41 @@ public final class Settings {
     /**
      * Blocks that Baritone is allowed to place (as throwaway, for sneak bridging, pillaring, etc.)
      */
-    public final Setting<List<Item>> acceptableThrowawayItems = new Setting<>(new ArrayList<>(Arrays.asList(
-            Blocks.DIRT.asItem(),
-            Blocks.COBBLESTONE.asItem(),
-            Blocks.NETHERRACK.asItem(),
-            Blocks.STONE.asItem()
-    )));
+    public final Setting<Tag<Item>> acceptableThrowawayItems = new Setting<>(TagRegistry.item(
+            new Identifier("automatone", "throwaway_blocks")
+    ));
 
     /**
      * Blocks that Baritone will attempt to avoid (Used in avoidance)
      */
-    public final Setting<List<Block>> blocksToAvoid = new Setting<>(new ArrayList<>(
-            // Leave Empty by Default
+    public final Setting<Tag<Block>> blocksToAvoid = new Setting<>(TagRegistry.block(
+            new Identifier("automatone", "avoided_blocks")
     ));
 
     /**
      * Blocks that Baritone is not allowed to break
      */
-    public final Setting<List<Block>> blocksToAvoidBreaking = new Setting<>(new ArrayList<>(Arrays.asList( // TODO can this be a HashSet or ImmutableSet?
-            Blocks.CRAFTING_TABLE,
-            Blocks.FURNACE,
-            Blocks.CHEST,
-            Blocks.TRAPPED_CHEST
-    )));
+    public final Setting<Tag<Block>> blocksToAvoidBreaking = new Setting<>(TagRegistry.block(
+            new Identifier("automatone", "no_break")
+    ));
 
     /**
      * A list of blocks to be treated as if they're air.
      * <p>
      * If a schematic asks for air at a certain position, and that position currently contains a block on this list, it will be treated as correct.
      */
-    public final Setting<List<Block>> buildIgnoreBlocks = new Setting<>(new ArrayList<>(Arrays.asList(
-
-    )));
+    public final Setting<Tag<Block>> buildIgnoreBlocks = new Setting<>(TagRegistry.block(
+            new Identifier("automatone", "build/ignored_blocks")
+    ));
 
     /**
      * A list of blocks to become air
      * <p>
      * If a schematic asks for a block on this list, only air will be accepted at that location (and nothing on buildIgnoreBlocks)
      */
-    public final Setting<List<Block>> okIfAir = new Setting<>(new ArrayList<>(Arrays.asList(
-
-    )));
+    public final Setting<Tag<Block>> okIfAir = new Setting<>(TagRegistry.block(
+        new Identifier("automatone", "build/ok_if_air")
+    ));
 
     /**
      * If this is true, the builder will treat all non-air blocks as correct. It will only place new blocks.
@@ -225,14 +222,6 @@ public final class Settings {
      * I.E. it will never trigger cascading sand / gravel falls
      */
     public final Setting<Boolean> avoidUpdatingFallingBlocks = new Setting<>(true);
-
-    /**
-     * Enables some more advanced vine features. They're honestly just gimmicks and won't ever be needed in real
-     * pathing scenarios. And they can cause Baritone to get trapped indefinitely in a strange scenario.
-     * <p>
-     * Almost never turn this on lol
-     */
-    public final Setting<Boolean> allowVines = new Setting<>(false);
 
     /**
      * Slab behavior is complicated, disable this for higher path reliability. Leave enabled if you have bottom slabs
@@ -287,11 +276,6 @@ public final class Settings {
      * How many degrees to randomize the yaw every tick. Set to 0 to disable
      */
     public final Setting<Double> randomLooking113 = new Setting<>(2d);
-
-    /**
-     * Block reach distance
-     */
-    public final Setting<Float> blockReachDistance = new Setting<>(4.5f);
 
     /**
      * How many degrees to randomize the pitch and yaw every tick. Set to 0 to disable
@@ -532,18 +516,6 @@ public final class Settings {
      * Fill in blocks behind you
      */
     public final Setting<Boolean> backfill = new Setting<>(false);
-
-    /**
-     * Shows popup message in the upper right corner, similarly to when you make an advancement
-     */
-    public final Setting<Boolean> logAsToast = new Setting<>(false);
-
-    /**
-     * The time of how long the message in the pop-up will display
-     * <p>
-     * If below 1000L (1sec), it's better to disable this
-     */
-    public final Setting<Long> toastTimer = new Setting<>(5000L);
 
     /**
      * Print all the debug messages to chat

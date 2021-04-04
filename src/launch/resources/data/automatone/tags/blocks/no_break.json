@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:crafting_table",
+    "minecraft:furnace",
+    "minecraft:blast_furnace",
+    "minecraft:smoker",
+    "minecraft:chest",
+    "minecraft:trapped_chest"
+  ]
+}

@@ -869,16 +869,16 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         if (current.getBlock() instanceof FluidBlock && baritone.settings().okIfWater.get()) {
             return true;
         }
-        if (current.getBlock() instanceof AirBlock && desired.getBlock() instanceof AirBlock) {
+        if (current.isAir() && desired.isAir()) {
             return true;
         }
-        if (current.getBlock() instanceof AirBlock && baritone.settings().okIfAir.get().contains(desired.getBlock())) {
+        if (current.isAir() && baritone.settings().okIfAir.get().contains(desired.getBlock())) {
             return true;
         }
-        if (desired.getBlock() instanceof AirBlock && baritone.settings().buildIgnoreBlocks.get().contains(current.getBlock())) {
+        if (desired.isAir() && baritone.settings().buildIgnoreBlocks.get().contains(current.getBlock())) {
             return true;
         }
-        if (!(current.getBlock() instanceof AirBlock) && baritone.settings().buildIgnoreExisting.get() && !itemVerify) {
+        if (!current.isAir() && baritone.settings().buildIgnoreExisting.get() && !itemVerify) {
             return true;
         }
         return current.equals(desired);

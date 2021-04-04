@@ -139,12 +139,8 @@ public final class InventoryBehavior extends Behavior {
     }
 
     public boolean hasGenericThrowaway() {
-        for (Item item : baritone.settings().acceptableThrowawayItems.get()) {
-            if (throwaway(false, stack -> item.equals(stack.getItem()))) {
-                return true;
-            }
-        }
-        return false;
+        return throwaway(false,
+                stack -> baritone.settings().acceptableThrowawayItems.get().contains(stack.getItem()));
     }
 
     public boolean selectThrowawayForLocation(boolean select, int x, int y, int z) {
@@ -158,12 +154,8 @@ public final class InventoryBehavior extends Behavior {
         if (maybe != null && throwaway(select, stack -> stack.getItem() instanceof BlockItem && ((BlockItem) stack.getItem()).getBlock().equals(maybe.getBlock()))) {
             return true;
         }
-        for (Item item : baritone.settings().acceptableThrowawayItems.get()) {
-            if (throwaway(select, stack -> item.equals(stack.getItem()))) {
-                return true;
-            }
-        }
-        return false;
+        return throwaway(select,
+                stack -> baritone.settings().acceptableThrowawayItems.get().contains(stack.getItem()));
     }
 
     public boolean throwaway(boolean select, Predicate<? super ItemStack> desired) {
