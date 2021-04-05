@@ -19,13 +19,19 @@ package baritone.utils.player;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.cache.IWorldData;
+import baritone.api.pathing.calc.Avoidance;
 import baritone.api.utils.BetterBlockPos;
 import baritone.api.utils.IEntityContext;
 import baritone.api.utils.IPlayerController;
 import baritone.api.utils.RayTraceUtils;
 import baritone.utils.accessor.ServerChunkManagerAccessor;
 import net.minecraft.block.SlabBlock;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.EndermanEntity;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.SpiderEntity;
+import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.server.world.ServerWorld;
@@ -34,9 +40,16 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 public class EntityContext implements IEntityContext {
 
     private final LivingEntity entity;
+    private @Nullable Supplier<List<Avoidance>> avoidanceFinder;
 
     public EntityContext(LivingEntity entity) {
         this.entity = entity;
@@ -90,5 +103,42 @@ public class EntityContext implements IEntityContext {
         }
 
         return feet;
+    }
+
+    private Stream<Entity> streamHostileEntities() {
+        return this.worldEntitiesStream()
+                .filter(entity -> entity instanceof MobEntity)
+                .filter(entity -> (!(entity instanceof SpiderEntity)) || entity.getBrightnessAtEyes() < 0.5)
+                .filter(entity -> !(entity instanceof ZombifiedPiglinEntity) || ((ZombifiedPiglinEntity) entity).getAttacker() != null)
+                .filter(entity -> !(entity instanceof EndermanEntity) || ((EndermanEntity) entity).isAngry());
+    }
+
+    @Override
+    public void setAvoidanceFinder(@Nullable Supplier<List<Avoidance>> avoidanceFinder) {
+        this.avoidanceFinder = avoidanceFinder;
+    }
+
+    @Override
+    public List<Avoidance> listAvoidedAreas() {
+        if (!baritone().settings().avoidance.get()) {
+            return Collections.emptyList();
+        }
+
+        if (this.avoidanceFinder != null) {
+            return this.avoidanceFinder.get();
+        }
+
+        List<Avoidance> res = new ArrayList<>();
+        double mobCoeff = baritone().settings().mobAvoidanceCoefficient.get();
+
+        if (mobCoeff != 1.0D) {
+            streamHostileEntities().forEach(entity -> res.add(new Avoidance(
+                    entity.getBlockPos(),
+                    mobCoeff,
+                    baritone().settings().mobAvoidanceRadius.get()
+            )));
+        }
+
+        return res;
     }
 }
