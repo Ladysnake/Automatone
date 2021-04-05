@@ -21,6 +21,8 @@ import baritone.api.pathing.calc.IPath;
 import baritone.api.pathing.calc.IPathFinder;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.path.IPathExecutor;
+import baritone.api.utils.BetterBlockPos;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -130,4 +132,9 @@ public interface IPathingBehavior extends IBehavior {
      * @return The next path executor
      */
     IPathExecutor getNext();
+
+    /**
+     * @return The starting {@link BlockPos} for a new path
+     */
+    BetterBlockPos pathStart();
 }
