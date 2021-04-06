@@ -249,7 +249,7 @@ public class MovementAscend extends Movement {
             return state; // don't jump while walking from a non double slab into a bottom slab
         }
 
-        if (baritone.settings().assumeStep.get() || ctx.feetPos().equals(src.up())) {
+        if (baritone.settings().assumeStep.get() || canStopJumping()) {
             // no need to hit space if we're already jumping
             return state;
         }
@@ -276,6 +276,17 @@ public class MovementAscend extends Movement {
         // This is slightly more efficient because otherwise we might start jumping before moving, and fall down without moving onto the block we want to jump onto
         // Also wait until we are close enough, because we might jump and hit our head on an adjacent block
         return state.setInput(Input.JUMP, true);
+    }
+
+    private boolean canStopJumping() {
+        BetterBlockPos srcUp = src.up();
+        double entityY = ctx.entity().getY();
+        if (entityY < srcUp.y) {
+            return false;
+        } else if (entityY <= srcUp.y + 0.5) {
+            return !MovementHelper.isWater(ctx.world().getBlockState(srcUp));
+        }
+        return true;
     }
 
     // TODO handle wider entities
