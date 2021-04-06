@@ -124,6 +124,9 @@ public class MovementPillar extends Movement {
                 }
                 boolean water = MovementHelper.isWater(toBreak);
                 if (water || MovementHelper.isWater(underToBreak)) {
+                    if (MovementHelper.isFlowing(checkedX, checkedY, checkedZ, toBreak, context.bsi)) {
+                        return COST_INF;    // not ascending flowing water
+                    }
                     swimmable = true; // allow ascending pillars of water
                     if (totalHardness > 0) return COST_INF; // Nop, not mining stuff in a water column
                 }
