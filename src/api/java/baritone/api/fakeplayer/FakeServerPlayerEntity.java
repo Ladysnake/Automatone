@@ -140,6 +140,16 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     @Override
+    public void tickMovement() {
+        if (this.isTouchingWater() && this.isSneaking() && this.method_29920()) {
+            // Mirrors ClientPlayerEntity's sinking behaviour
+            this.setVelocity(this.getVelocity().add(0.0D, -0.04, 0.0D));
+            // TODO MC 1.17 replace with this.knockDownwards()
+        }
+        super.tickMovement();
+    }
+
+    @Override
     protected void tickNewAi() {
         super.tickNewAi();
         if (this.release) {

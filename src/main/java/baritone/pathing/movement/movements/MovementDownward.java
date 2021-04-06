@@ -150,6 +150,8 @@ public class MovementDownward extends Movement {
         } else if (((Baritone) this.baritone).bsi.get0(this.baritone.getPlayerContext().feetPos().down()).isOf(Blocks.SCAFFOLDING)) {
             // Sneak to go down scaffolding
             state.setInput(Input.SNEAK, true);
+        } else if (ctx.entity().isSubmergedInWater()) {
+            state.setInput(Input.SNEAK, true);  // go down faster in full water
         }
         double diffX = ctx.entity().getX() - (dest.getX() + 0.5);
         double diffZ = ctx.entity().getZ() - (dest.getZ() + 0.5);

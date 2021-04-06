@@ -250,7 +250,7 @@ public class MovementDescend extends Movement {
         double diffZ = ctx.entity().getZ() - (dest.getZ() + 0.5);
         double ab = Math.sqrt(diffX * diffX + diffZ * diffZ);
 
-        if (ab < 0.20 && ctx.world().getBlockState(dest).isOf(Blocks.SCAFFOLDING)) {
+        if (ab < 0.20 && ctx.world().getBlockState(dest).isOf(Blocks.SCAFFOLDING) || ctx.entity().isSubmergedInWater() && ctx.entity().getY() > src.y) {
             state.setInput(Input.SNEAK, true);
         }
 
