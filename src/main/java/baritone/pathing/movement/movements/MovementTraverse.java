@@ -339,7 +339,11 @@ public class MovementTraverse extends Movement {
 
         boolean isTheBridgeBlockThere = MovementHelper.canWalkOn(ctx, positionToPlace) || ladder;
         BlockPos feet = ctx.feetPos();
-        if (feet.getY() != dest.getY() && !ladder) {
+        BlockPos standingOnPos = feet.down();
+        BlockState standingOn = BlockStateInterface.get(ctx, standingOnPos);
+        if (MovementHelper.isWater(standingOn) && ctx.entity().getY() < src.getY() + 0.2) {
+            state.setInput(Input.JUMP, true);
+        } else if (feet.getY() != dest.getY() && !ladder) {
             baritone.logDebug("Wrong Y coordinate");
             if (feet.getY() < dest.getY()) {
                 return state.setInput(Input.JUMP, true);
@@ -386,8 +390,6 @@ public class MovementTraverse extends Movement {
             }
         } else {
             wasTheBridgeBlockAlwaysThere = false;
-            BlockPos standingOnPos = feet.down();
-            BlockState standingOn = BlockStateInterface.get(ctx, standingOnPos);
             VoxelShape collisionShape = standingOn.getCollisionShape(ctx.world(), standingOnPos);
             if (!collisionShape.isEmpty() && collisionShape.getBoundingBox().maxY < 1) { // see issue #118
                 double dist = Math.max(Math.abs(dest.getX() + 0.5 - ctx.entity().getX()), Math.abs(dest.getZ() + 0.5 - ctx.entity().getZ()));
