@@ -134,6 +134,11 @@ public class MovementAscend extends Movement {
             }
         }
         double miningTicks = 0;
+        BlockState srcDown = context.get(x, y - 1, z);
+        if (srcDown.getBlock() == Blocks.LADDER || srcDown.getBlock() == Blocks.VINE) {
+            return COST_INF;
+        }
+        boolean inLiquid = MovementHelper.isLiquid(srcDown);
         for (int dx = -context.requiredSideSpace; dx <= context.requiredSideSpace; dx++) {
             for (int dz = -context.requiredSideSpace; dz <= context.requiredSideSpace; dz++) {
                 int x1 = x + dx;
@@ -160,15 +165,15 @@ public class MovementAscend extends Movement {
                 }
                 // includeFalling isn't needed because of the falling check above -- if srcUp3 is falling we will have already exited with COST_INF if we'd actually have to break it
                 miningTicks += MovementHelper.getMiningDurationTicks(context, x1, y1, z1, srcUp2, false);
+                inLiquid |= MovementHelper.isWater(srcUp2);
+                if (miningTicks >= COST_INF || (inLiquid && miningTicks > 0)) {
+                    return COST_INF; // Not mining in water
+                }
             }
         }
-        BlockState srcDown = context.get(x, y - 1, z);
-        if (srcDown.getBlock() == Blocks.LADDER || srcDown.getBlock() == Blocks.VINE) {
-            return COST_INF;
-        }
         // we can jump from soul sand, but not from a bottom slab
-        boolean jumpingFromBottomSlab = MovementHelper.isBottomSlab(srcDown);
-        boolean jumpingToBottomSlab = MovementHelper.isBottomSlab(toPlace);
+        boolean jumpingFromBottomSlab =!inLiquid && MovementHelper.isBottomSlab(srcDown);
+        boolean jumpingToBottomSlab = !inLiquid && MovementHelper.isBottomSlab(toPlace);
         if (jumpingFromBottomSlab && !jumpingToBottomSlab) {
             return COST_INF;// the only thing we can ascend onto from a bottom slab is another bottom slab
         }
@@ -182,15 +187,18 @@ public class MovementAscend extends Movement {
             }
         } else {
             // jumpingFromBottomSlab must be false
-            walk = Math.max(JUMP_ONE_BLOCK_COST, WALK_ONE_BLOCK_COST / toPlace.getBlock().getVelocityMultiplier());
-            walk += context.jumpPenalty;
+            if (inLiquid) {
+                walk = (context.waterWalkSpeed / WALK_ONE_BLOCK_COST) * Math.max(JUMP_ONE_BLOCK_COST, WALK_ONE_BLOCK_COST);
+            } else {
+                // we are jumping and moving in parallel, hence the max
+                walk = Math.max(JUMP_ONE_BLOCK_COST, WALK_ONE_BLOCK_COST / toPlace.getBlock().getVelocityMultiplier());
+                walk += context.jumpPenalty;
+            }
         }
 
         double totalCost = walk + additionalPlacementCost;
         totalCost += miningTicks;
-        // Not mining anything in water
-        boolean inLiquid = MovementHelper.isLiquid(srcDown);
-        if (totalCost >= COST_INF || (miningTicks > 0 && inLiquid)) {
+        if (totalCost >= COST_INF) {
             return COST_INF;
         }
         for (int dxz = -context.requiredSideSpace; dxz <= context.requiredSideSpace; dxz++) {
@@ -203,6 +211,7 @@ public class MovementAscend extends Movement {
                         dy == context.height - 1    // only include falling for uppermost block
                 );
                 totalCost += miningTicks;
+                // Not mining anything in water
                 if (totalCost >= COST_INF || (miningTicks > 0 && inLiquid)) {
                     return COST_INF;
                 }
@@ -283,7 +292,7 @@ public class MovementAscend extends Movement {
         double entityY = ctx.entity().getY();
         if (entityY < srcUp.y) {
             return false;
-        } else if (entityY <= srcUp.y + 0.5) {
+        } else if (entityY <= srcUp.y + 0.1) {
             return !MovementHelper.isWater(ctx.world().getBlockState(srcUp));
         }
         return true;

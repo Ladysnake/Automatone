@@ -121,6 +121,7 @@ public class MovementDownward extends Movement {
         } else {
             double totalHardness = 0;
             int requiredSideSpace = context.requiredSideSpace;
+            boolean water = false;
             for (int dx = -requiredSideSpace; dx <= requiredSideSpace; dx++) {
                 for (int dz = -requiredSideSpace; dz <= requiredSideSpace; dz++) {
                     // If we are at the starting position, we already cleared enough space to stand there
@@ -130,9 +131,12 @@ public class MovementDownward extends Movement {
                     BlockState toBreak = context.get(checkedX, y - 1, checkedZ);
                     // we're standing on it, while it might be block falling, it'll be air by the time we get here in the movement
                     totalHardness += MovementHelper.getMiningDurationTicks(context, checkedX, y - 1, checkedZ, toBreak, false);
+                    if (MovementHelper.isWater(toBreak)) {
+                        water = true;
+                    }
                 }
             }
-            return FALL_N_BLOCKS_COST[1] + totalHardness;
+            return (water ? context.waterWalkSpeed / WALK_ONE_BLOCK_COST : 1) * FALL_N_BLOCKS_COST[1] + totalHardness;
         }
     }
 
@@ -147,17 +151,19 @@ public class MovementDownward extends Movement {
             return state.setStatus(MovementStatus.SUCCESS);
         } else if (!playerInValidPosition()) {
             return state.setStatus(MovementStatus.UNREACHABLE);
-        } else if (((Baritone) this.baritone).bsi.get0(this.baritone.getPlayerContext().feetPos().down()).isOf(Blocks.SCAFFOLDING)) {
-            // Sneak to go down scaffolding
-            state.setInput(Input.SNEAK, true);
-        } else if (ctx.entity().isSubmergedInWater()) {
-            state.setInput(Input.SNEAK, true);  // go down faster in full water
         }
+
         double diffX = ctx.entity().getX() - (dest.getX() + 0.5);
         double diffZ = ctx.entity().getZ() - (dest.getZ() + 0.5);
         double ab = Math.sqrt(diffX * diffX + diffZ * diffZ);
 
         if (numTicks++ < 10 && ab < 0.2) {
+            if (((Baritone) this.baritone).bsi.get0(this.baritone.getPlayerContext().feetPos().down()).isOf(Blocks.SCAFFOLDING)) {
+                // Sneak to go down scaffolding
+                state.setInput(Input.SNEAK, true);
+            } else if (ctx.entity().isSubmergedInWater()) {
+                state.setInput(Input.SNEAK, true);  // go down faster in full water
+            }
             return state;
         }
         MovementHelper.moveTowards(ctx, state, dest);

@@ -141,8 +141,10 @@ public class MovementDescend extends Movement {
         }
 
         // we walk half the block plus 0.3 to get to the edge, then we walk the other 0.2 while simultaneously falling (math.max because of how it's in parallel)
-        double walk = WALK_OFF_BLOCK_COST / fromDown.getVelocityMultiplier();
-        totalCost += walk + Math.max(FALL_N_BLOCKS_COST[1], CENTER_AFTER_FALL_COST);
+        boolean water = MovementHelper.isWater(destUp);
+        double waterModifier = water ? context.waterWalkSpeed / WALK_ONE_BLOCK_COST : 1;
+        double walk = waterModifier * (WALK_OFF_BLOCK_COST / fromDown.getVelocityMultiplier());
+        totalCost += walk + (waterModifier * Math.max(FALL_N_BLOCKS_COST[1], CENTER_AFTER_FALL_COST));
         res.x = destX;
         res.y = y - 1;
         res.z = destZ;
@@ -250,7 +252,7 @@ public class MovementDescend extends Movement {
         double diffZ = ctx.entity().getZ() - (dest.getZ() + 0.5);
         double ab = Math.sqrt(diffX * diffX + diffZ * diffZ);
 
-        if (ab < 0.20 && ctx.world().getBlockState(dest).isOf(Blocks.SCAFFOLDING) || ctx.entity().isSubmergedInWater() && ctx.entity().getY() > src.y) {
+        if (ab < 0.20 && (ctx.world().getBlockState(dest).isOf(Blocks.SCAFFOLDING) || ctx.entity().isSubmergedInWater() && ctx.entity().getY() > src.y)) {
             state.setInput(Input.SNEAK, true);
         }
 
