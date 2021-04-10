@@ -30,6 +30,7 @@ import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
+import baritone.utils.pathing.MutableMoveResult;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.*;
 import net.minecraft.entity.Entity;
@@ -75,7 +76,9 @@ public class MovementTraverse extends Movement {
 
     @Override
     public double calculateCost(CalculationContext context) {
-        return cost(context, src.x, src.y, src.z, dest.x, dest.z);
+        MutableMoveResult result = new MutableMoveResult();
+        cost(context, src.x, src.y, src.z, dest.x, dest.z, result);
+        return result.cost;
     }
 
     @Override
@@ -116,7 +119,7 @@ public class MovementTraverse extends Movement {
         return ret;
     }
 
-    public static double cost(CalculationContext context, int x, int y, int z, int destX, int destZ) {
+    public static void cost(CalculationContext context, int x, int y, int z, int destX, int destZ, MutableMoveResult result) {
         BlockState destOn = context.get(destX, y - 1, destZ);
         BlockState srcOn = context.get(x, y - 1, z);
         Block srcOnBlock = srcOn.getBlock();
@@ -170,7 +173,7 @@ public class MovementTraverse extends Movement {
                     ) * hardnessModifier;
 
                     if (hardness >= COST_INF) {
-                        return COST_INF;
+                        return;
                     }
                 }
             }
@@ -180,10 +183,10 @@ public class MovementTraverse extends Movement {
                 // Don't check for soul sand, since we can sprint on that too
                 WC *= SPRINT_MULTIPLIER;
             }
-            return WC + hardness;
+            result.cost = WC + hardness;
         } else {//this is a bridge, so we need to place a block
             if (srcOnBlock == Blocks.LADDER || srcOnBlock == Blocks.VINE) {
-                return COST_INF;
+                return;
             }
             if (MovementHelper.isReplaceable(destX, y - 1, destZ, destOn, context.bsi)) {
                 boolean throughWater = false;
@@ -192,7 +195,7 @@ public class MovementTraverse extends Movement {
                         throughWater = true;
                         if (MovementHelper.isWater(destOn)) {
                             // this happens when assume walk on water is true and this is a traverse in water, which isn't allowed
-                            return COST_INF;
+                            return;
                         }
                         break;
                     }
@@ -200,7 +203,7 @@ public class MovementTraverse extends Movement {
 
                 double placeCost = context.costOfPlacingAt(destX, y - 1, destZ, destOn);
                 if (placeCost >= COST_INF) {
-                    return COST_INF;
+                    return;
                 }
 
                 double hardness = 0;
@@ -215,7 +218,7 @@ public class MovementTraverse extends Movement {
                         );
 
                         if (hardness >= COST_INF) {
-                            return COST_INF;
+                            return;
                         }
                     }
                 }
@@ -229,7 +232,8 @@ public class MovementTraverse extends Movement {
                         continue;
                     }
                     if (MovementHelper.canPlaceAgainst(context.bsi, againstX, againstY, againstZ)) { // found a side place option
-                        return WC + placeCost + hardness;
+                        result.cost = WC + placeCost + hardness;
+                        return;
                     }
                 }
                 // now that we've checked all possible directions to side place, we actually need to backplace
@@ -237,15 +241,14 @@ public class MovementTraverse extends Movement {
                 // also none of the full cubes actually use the pos, so we should be fine not creating a real BlockPos for this
                 if (!srcOn.getMaterial().isReplaceable() && !srcOn.isFullCube(context.world, BlockPos.ORIGIN)) {
                     // If srcOn is currently replaceable, we will have a proper block when we stand on it
-                    return COST_INF; // can't sneak and backplace against eg. soul sand or half slabs (regardless of whether it's top half or bottom half) =/
+                    return; // can't sneak and backplace against eg. soul sand or half slabs (regardless of whether it's top half or bottom half) =/
                 }
                 if (srcOn.getFluidState().getFluid() instanceof WaterFluid) {
-                    return COST_INF; // this is obviously impossible
+                    return; // this is obviously impossible
                 }
                 WC = WC * (SNEAK_ONE_BLOCK_COST / WALK_ONE_BLOCK_COST);//since we are sneak backplacing, we are sneaking lol
-                return WC + placeCost + hardness;
+                result.cost = WC + placeCost + hardness;
             }
-            return COST_INF;
         }
     }
 
