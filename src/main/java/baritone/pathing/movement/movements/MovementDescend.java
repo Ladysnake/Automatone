@@ -306,7 +306,9 @@ public class MovementDescend extends Movement {
             return true;
         }
         for (int y = 0; y <= 2; y++) { // we could hit any of the three blocks
-            if (MovementHelper.avoidWalkingInto(BlockStateInterface.get(ctx, into.up(y)))) {
+            BlockState state = BlockStateInterface.get(ctx, into.up(y));
+            if (MovementHelper.avoidWalkingInto(state)
+                    && !(MovementHelper.isWater(state) && baritone.settings().allowSwimming.get())) {
                 return true;
             }
         }

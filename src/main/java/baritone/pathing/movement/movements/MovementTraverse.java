@@ -355,12 +355,14 @@ public class MovementTraverse extends Movement {
         BlockPos feet = ctx.feetPos();
         BlockPos standingOnPos = feet.down();
         BlockState standingOn = BlockStateInterface.get(ctx, standingOnPos);
-        if (MovementHelper.isWater(standingOn) && ctx.entity().getY() < src.getY() + 0.2) {
+        // A bit of random for slightly more natural look
+        if (MovementHelper.isWater(standingOn) && ctx.entity().getY() < src.getY() + Math.random() * 0.2) {
             state.setInput(Input.JUMP, true);
         } else if (feet.getY() != dest.getY() && !ladder) {
             baritone.logDebug("Wrong Y coordinate");
             if (feet.getY() < dest.getY()) {
-                return state.setInput(Input.JUMP, true);
+                MovementHelper.moveTowards(ctx, state, dest);
+                return state.setInput(Input.MOVE_FORWARD, false).setInput(Input.JUMP, true);
             }
             return state;
         }
@@ -386,7 +388,11 @@ public class MovementTraverse extends Movement {
             BlockPos into = dest.subtract(src).add(dest);
             BlockState intoBelow = BlockStateInterface.get(ctx, into);
             BlockState intoAbove = BlockStateInterface.get(ctx, into.up());
-            if (wasTheBridgeBlockAlwaysThere && (!MovementHelper.isLiquid(ctx, feet) || baritone.settings().sprintInWater.get()) && (!MovementHelper.avoidWalkingInto(intoBelow) || MovementHelper.isWater(intoBelow)) && !MovementHelper.avoidWalkingInto(intoAbove)) {
+            if (wasTheBridgeBlockAlwaysThere
+                    && (!MovementHelper.isLiquid(ctx, feet) || baritone.settings().sprintInWater.get())
+                    && (!MovementHelper.avoidWalkingInto(intoBelow) || MovementHelper.isWater(intoBelow))
+                    && (!MovementHelper.avoidWalkingInto(intoAbove))
+            ) {
                 state.setInput(Input.SPRINT, true);
             }
 
