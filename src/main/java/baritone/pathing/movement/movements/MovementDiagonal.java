@@ -294,7 +294,7 @@ public class MovementDiagonal extends Movement {
             return state;
         }
 
-        if (ctx.feetPos().equals(dest)) {
+        if (ctx.feetPos().equals(dest) || MovementHelper.isWater(ctx, ctx.feetPos()) && ctx.feetPos().equals(dest.down())) {
             return state.setStatus(MovementStatus.SUCCESS);
         } else if (!playerInValidPosition() && !(MovementHelper.isLiquid(ctx, src) && getValidPositions().contains(ctx.feetPos().up()))) {
             return state.setStatus(MovementStatus.UNREACHABLE);

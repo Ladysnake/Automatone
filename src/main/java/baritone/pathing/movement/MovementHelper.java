@@ -146,7 +146,7 @@ public interface MovementHelper extends ActionCosts {
                 return false;
             }
             BlockState up = bsi.get0(x, y + 1, z);
-            if (/*!up.getFluidState().isEmpty() || */up.getBlock() instanceof LilyPadBlock) {
+            if ((!settings.allowSwimming.get() && !up.getFluidState().isEmpty()) || up.getBlock() instanceof LilyPadBlock) {
                 return false;
             }
             return true;

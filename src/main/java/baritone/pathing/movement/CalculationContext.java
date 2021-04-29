@@ -87,6 +87,8 @@ public class CalculationContext {
     private final PlayerEntity player;
     private final BlockPos.Mutable blockPos;
     public final int breathTime;
+    public final int startingBreathTime;
+    public final boolean allowSwimming;
     private final int airIncreaseOnLand;
     private final int airDecreaseInWater;
 
@@ -138,7 +140,9 @@ public class CalculationContext {
         this.requiredSideSpace = getRequiredSideSpace(dimensions);
         this.height = MathHelper.ceil(dimensions.height);
         this.blockPos = new BlockPos.Mutable();
-        this.breathTime = entity.getMaxAir();
+        this.allowSwimming = baritone.settings().allowSwimming.get();
+        this.breathTime = baritone.settings().ignoreBreath.get() ? Integer.MAX_VALUE : entity.getMaxAir();
+        this.startingBreathTime = entity.getAir();
         this.airIncreaseOnLand = ((ILivingEntityAccessor) entity).automatone$getNextAirOnLand(0);
         this.airDecreaseInWater = breathTime - ((ILivingEntityAccessor) entity).automatone$getNextAirUnderwater(breathTime);
     }

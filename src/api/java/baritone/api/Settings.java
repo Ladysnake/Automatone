@@ -110,6 +110,21 @@ public final class Settings {
     public final Setting<Boolean> allowWaterBucketFall = new Setting<>(true);
 
     /**
+     * Allow Automatone to move through water while also trying to not drown
+     * Reliability: questionable
+     */
+    public final Setting<Boolean> allowSwimming = new Setting<>(false);
+    /**
+     * Ignores the entity's air counter when making underwater movements.
+     *
+     * <p>Useful if the entity has some kind of water breathing effect, or for panic modes
+     * where a path to the surface must be found no matter what.
+     * Also useful when {@link #allowSwimming} is disabled, as the only way you can be underwater
+     * in that mode is by starting the path underwater.
+     */
+    public final Setting<Boolean> ignoreBreath = new Setting<>(true);
+
+    /**
      * Allow Baritone to assume it can walk on still water just like any other block.
      * This functionality is assumed to be provided by a separate library that might have imported Baritone.
      */
