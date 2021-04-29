@@ -143,11 +143,17 @@ public class MovementTraverse extends Movement {
         if (MovementHelper.canWalkOn(context.bsi, destX, y - 1, destZ, destOn, context.baritone.settings())) {//this is a walk, not a bridge
             double WC = 0;
             boolean water = false;
-            for (int dy = 0; dy < context.height; dy++) {
-                if (MovementHelper.isWater(context.get(destX, y+dy, destZ))) {
-                    WC = context.waterWalkSpeed;
-                    water = true;
-                    break;
+            BlockState destHeadState = context.get(destX, y + context.height - 1, destZ);
+            if (MovementHelper.isWater(destHeadState)) {
+                WC = context.waterWalkSpeed;
+                water = true;
+            } else {
+                for (int dy = 0; dy < context.height - 1; dy++) {
+                    if (MovementHelper.isWater(context.get(destX, y+dy, destZ))) {
+                        WC = context.waterWalkSpeed;
+                        water = true;
+                        break;
+                    }
                 }
             }
             if (!water) {
@@ -161,7 +167,8 @@ public class MovementTraverse extends Movement {
             }
 
             double hardness = 0;
-            int hardnessModifier = srcOnBlock == Blocks.LADDER || srcOnBlock == Blocks.VINE ? 5 : 1;
+            BlockState srcHeadState = context.get(x, y + context.height - 1, z);
+            int hardnessModifier = MovementHelper.isWater(srcHeadState) || srcOnBlock == Blocks.LADDER || srcOnBlock == Blocks.VINE ? 5 : 1;
             for (int dxz = -context.requiredSideSpace; dxz <= context.requiredSideSpace; dxz++) {
                 for (int dy = 0; dy < context.height; dy++) {
                     hardness += MovementHelper.getMiningDurationTicks(
@@ -184,6 +191,8 @@ public class MovementTraverse extends Movement {
                 WC *= SPRINT_MULTIPLIER;
             }
             result.cost = WC + hardness;
+            result.oxygenCost = context.oxygenCost(WC / 2 + hardness, srcHeadState)
+                        + context.oxygenCost(WC / 2, destHeadState);
         } else {//this is a bridge, so we need to place a block
             if (srcOnBlock == Blocks.LADDER || srcOnBlock == Blocks.VINE) {
                 return;
@@ -248,6 +257,8 @@ public class MovementTraverse extends Movement {
                 }
                 WC = WC * (SNEAK_ONE_BLOCK_COST / WALK_ONE_BLOCK_COST);//since we are sneak backplacing, we are sneaking lol
                 result.cost = WC + placeCost + hardness;
+                // we are not bridging underwater, right??
+                result.oxygenCost = context.oxygenCost(result.cost, Blocks.AIR.getDefaultState());
             }
         }
     }

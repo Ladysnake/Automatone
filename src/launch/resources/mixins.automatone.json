@@ -13,6 +13,7 @@
   "mixins": [
     "MixinEntity",
     "MixinItemStack",
+    "MixinLivingEntity",
     "MixinMobEntity",
     "MixinServerChunkManager",
     "MixinServerCommandSource",

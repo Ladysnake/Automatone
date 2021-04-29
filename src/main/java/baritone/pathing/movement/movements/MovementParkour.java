@@ -131,6 +131,8 @@ public class MovementParkour extends Movement {
                     res.y = y + 1;
                     res.z = destZ;
                     res.cost = i * SPRINT_ONE_BLOCK_COST + context.jumpPenalty;
+                    // parkour cannot be done underwater, so we are breathing all the way
+                    res.oxygenCost = context.oxygenCost(res.cost, Blocks.AIR.getDefaultState());
                 }
                 return;
             }
@@ -142,6 +144,8 @@ public class MovementParkour extends Movement {
                     res.y = y;
                     res.z = destZ;
                     res.cost = costFromJumpDistance(i) + context.jumpPenalty;
+                    // parkour cannot be done underwater, so we are breathing all the way
+                    res.oxygenCost = context.oxygenCost(res.cost, Blocks.AIR.getDefaultState());
                 }
                 return;
             }
@@ -181,6 +185,8 @@ public class MovementParkour extends Movement {
                 res.y = y;
                 res.z = destZ;
                 res.cost = costFromJumpDistance(4) + placeCost + context.jumpPenalty;
+                // parkour cannot be done underwater, so we are breathing all the way
+                res.oxygenCost = context.oxygenCost(res.cost, Blocks.AIR.getDefaultState());
                 return;
             }
         }

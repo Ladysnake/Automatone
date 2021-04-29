@@ -127,6 +127,8 @@ public class MovementDownward extends Movement {
             double totalHardness = 0;
             int requiredSideSpace = context.requiredSideSpace;
             boolean waterFloor = false;
+            BlockState headState = context.get(x, y + context.height - 1, z);
+            boolean inWater = MovementHelper.isWater(headState);
             for (int dx = -requiredSideSpace; dx <= requiredSideSpace; dx++) {
                 for (int dz = -requiredSideSpace; dz <= requiredSideSpace; dz++) {
                     // If we are at the starting position, we already cleared enough space to stand there
@@ -141,7 +143,13 @@ public class MovementDownward extends Movement {
                     }
                 }
             }
-            result.cost = (waterFloor ? context.waterWalkSpeed / WALK_ONE_BLOCK_COST : 1) * FALL_N_BLOCKS_COST[1] + totalHardness;
+            if (inWater) {
+                totalHardness *= 5; // TODO handle aqua affinity
+            }
+            double fallCost = (waterFloor ? context.waterWalkSpeed / WALK_ONE_BLOCK_COST : 1) * FALL_N_BLOCKS_COST[1];
+            result.cost = fallCost + totalHardness;
+            result.oxygenCost = context.oxygenCost(fallCost * 0.5 + totalHardness, headState)
+                    + context.oxygenCost(fallCost * 0.5, fromBlock);
         }
     }
 

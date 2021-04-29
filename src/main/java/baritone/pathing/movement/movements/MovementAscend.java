@@ -147,10 +147,10 @@ public class MovementAscend extends Movement {
                 int x1 = x + dx;
                 int y1 = y + context.height;
                 int z1 = z + dz;
-                BlockState srcUp2 = context.get(x1, y1, z1); // used lower down anyway
-                if (context.get(x1, y1 + 1, z1).getBlock() instanceof FallingBlock && (MovementHelper.canWalkThrough(context.bsi, x1, y1 - 1, z1, context.baritone.settings()) || !(srcUp2.getBlock() instanceof FallingBlock))) {//it would fall on us and possibly suffocate us
+                BlockState aboveHead = context.get(x1, y1, z1); // used lower down anyway
+                if (context.get(x1, y1 + 1, z1).getBlock() instanceof FallingBlock && (MovementHelper.canWalkThrough(context.bsi, x1, y1 - 1, z1, context.baritone.settings()) || !(aboveHead.getBlock() instanceof FallingBlock))) {//it would fall on us and possibly suffocate us
                     // HOWEVER, we assume that we're standing in the start position
-                    // that means that src and src.up(1) are both air
+                    // that means that src and src.up(1) are both traversable
                     // maybe they aren't now, but they will be by the time this starts
                     // if the lower one is can't walk through and the upper one is falling, that means that by standing on src
                     // (the presupposition of this Movement)
@@ -167,8 +167,8 @@ public class MovementAscend extends Movement {
                     // and in that scenario, when we arrive and break srcUp2, that lets srcUp3 fall on us and suffocate us
                 }
                 // includeFalling isn't needed because of the falling check above -- if srcUp3 is falling we will have already exited with COST_INF if we'd actually have to break it
-                miningTicks += MovementHelper.getMiningDurationTicks(context, x1, y1, z1, srcUp2, false);
-                inLiquid |= MovementHelper.isWater(srcUp2);
+                miningTicks += MovementHelper.getMiningDurationTicks(context, x1, y1, z1, aboveHead, false);
+                inLiquid |= MovementHelper.isWater(aboveHead);
                 if (miningTicks >= COST_INF || (inLiquid && miningTicks > 0)) {
                     return; // Not mining in water
                 }
@@ -220,6 +220,9 @@ public class MovementAscend extends Movement {
                 }
             }
         }
+        result.oxygenCost = context.oxygenCost(walk/3., context.get(x, y+context.height-1, z));
+        result.oxygenCost += context.oxygenCost(walk/3., context.get(x, y+context.height, z));
+        result.oxygenCost += context.oxygenCost(walk/3., context.get(destX, y+context.height-1, destZ));
         result.cost = totalCost;
     }
 

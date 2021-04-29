@@ -25,8 +25,10 @@ import baritone.behavior.InventoryBehavior;
 import baritone.cache.WorldData;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.ToolSet;
+import baritone.utils.accessor.ILivingEntityAccessor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
@@ -35,6 +37,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -83,6 +86,9 @@ public class CalculationContext {
     public final int height;
     private final PlayerEntity player;
     private final BlockPos.Mutable blockPos;
+    public final int breathTime;
+    private final int airIncreaseOnLand;
+    private final int airDecreaseInWater;
 
     public CalculationContext(IBaritone baritone) {
         this(baritone, false);
@@ -132,6 +138,9 @@ public class CalculationContext {
         this.requiredSideSpace = getRequiredSideSpace(dimensions);
         this.height = MathHelper.ceil(dimensions.height);
         this.blockPos = new BlockPos.Mutable();
+        this.breathTime = entity.getMaxAir();
+        this.airIncreaseOnLand = ((ILivingEntityAccessor) entity).automatone$getNextAirOnLand(0);
+        this.airDecreaseInWater = breathTime - ((ILivingEntityAccessor) entity).automatone$getNextAirUnderwater(breathTime);
     }
 
     public static int getRequiredSideSpace(EntityDimensions dimensions) {
@@ -197,5 +206,12 @@ public class CalculationContext {
     public boolean isProtected(int x, int y, int z) {
         this.blockPos.set(x, y, z);
         return this.player != null && !world.canPlayerModifyAt(this.player, this.blockPos);
+    }
+
+    public double oxygenCost(double baseCost, BlockState headState) {
+        if (headState.getFluidState().isIn(FluidTags.WATER) && !headState.isOf(Blocks.BUBBLE_COLUMN)) {
+            return airDecreaseInWater * baseCost;
+        }
+        return -1 * airIncreaseOnLand * baseCost;
     }
 }

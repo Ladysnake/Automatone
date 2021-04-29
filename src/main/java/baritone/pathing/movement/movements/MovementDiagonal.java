@@ -248,12 +248,14 @@ public class MovementDiagonal extends Movement {
             // and now that option B is fully calculated, see if we can edge around that way
             return;
         }
+        BlockState optionHeadBlock;
         if (optionA != 0 || optionB != 0) {
             multiplier *= SQRT_2 - 0.001; // TODO tune
             if (startIn == Blocks.LADDER || startIn == Blocks.VINE) {
                 // edging around doesn't work if doing so would climb a ladder or vine instead of moving sideways
                 return;
             }
+            optionHeadBlock = optionA != 0 ? diagonalUpA : diagonalUpB;
         } else {
             // only can sprint if not edging around
             if (context.canSprint && !water) {
@@ -262,12 +264,23 @@ public class MovementDiagonal extends Movement {
                 // Don't check for soul sand, since we can sprint on that too
                 multiplier *= SPRINT_MULTIPLIER;
             }
+            optionHeadBlock = null;
         }
         res.cost = multiplier * SQRT_2;
+        double costPerBlock;
+        if (optionHeadBlock == null) {
+            costPerBlock = res.cost / 2;
+        } else {
+            costPerBlock = res.cost / 3;
+            res.oxygenCost += context.oxygenCost(costPerBlock, optionHeadBlock);
+        }
+        res.oxygenCost += context.oxygenCost(costPerBlock, context.get(x, y+context.height-1, z));
         if (descend) {
             res.cost += Math.max(FALL_N_BLOCKS_COST[1], CENTER_AFTER_FALL_COST);
+            res.oxygenCost += context.oxygenCost(costPerBlock, context.get(destX, y+context.height-2, destZ));
             res.y = y - 1;
         } else {
+            res.oxygenCost += context.oxygenCost(costPerBlock, context.get(destX, y+context.height-1, destZ));
             res.y = y;
         }
         res.x = destX;

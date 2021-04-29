@@ -52,6 +52,7 @@ public final class AStarPathFinder extends AbstractNodeCostSearch {
     protected Optional<IPath> calculate0(long primaryTimeout, long failureTimeout) {
         startNode = getNodeAtPosition(startX, startY, startZ, BetterBlockPos.longHash(startX, startY, startZ));
         startNode.cost = 0;
+        startNode.oxygenCost = 0;
         startNode.combinedCost = startNode.estimatedCostToGoal;
         BinaryHeapOpenSet openSet = new BinaryHeapOpenSet();
         openSet.insert(startNode);
@@ -123,6 +124,9 @@ public final class AStarPathFinder extends AbstractNodeCostSearch {
                 if (actionCost >= ActionCosts.COST_INF) {
                     continue;
                 }
+                if (res.oxygenCost + currentNode.oxygenCost >= calcContext.breathTime) {
+                    continue;
+                }
                 if (actionCost <= 0 || Double.isNaN(actionCost)) {
                     throw new IllegalStateException(moves + " calculated implausible cost " + actionCost);
                 }
@@ -146,6 +150,7 @@ public final class AStarPathFinder extends AbstractNodeCostSearch {
                 if (neighbor.cost - tentativeCost > minimumImprovement) {
                     neighbor.previous = currentNode;
                     neighbor.cost = tentativeCost;
+                    neighbor.oxygenCost = Math.max(0, currentNode.oxygenCost + res.oxygenCost);
                     neighbor.combinedCost = tentativeCost + neighbor.estimatedCostToGoal;
                     if (neighbor.isOpen()) {
                         openSet.update(neighbor);

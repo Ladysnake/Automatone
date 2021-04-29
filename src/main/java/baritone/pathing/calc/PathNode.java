@@ -21,6 +21,8 @@ import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.movement.ActionCosts;
 import baritone.api.utils.BetterBlockPos;
 
+import javax.annotation.Nonnegative;
+
 /**
  * A node in the path, containing the cost and steps to get to it.
  *
@@ -47,6 +49,15 @@ public final class PathNode {
     public double cost;
 
     /**
+     * Expected oxygen cost to get here
+     *
+     * <p>Mutable and changed by PathFinder
+     * <p>Cannot be negative, as it is impossible to store oxygen indefinitely
+     */
+    @Nonnegative
+    public double oxygenCost;
+
+    /**
      * Should always be equal to estimatedCosttoGoal + cost
      * Mutable and changed by PathFinder
      */
@@ -66,6 +77,7 @@ public final class PathNode {
     public PathNode(int x, int y, int z, Goal goal) {
         this.previous = null;
         this.cost = ActionCosts.COST_INF;
+        this.oxygenCost = 0;
         this.estimatedCostToGoal = goal.heuristic(x, y, z);
         if (Double.isNaN(estimatedCostToGoal)) {
             throw new IllegalStateException(goal + " calculated implausible heuristic");
