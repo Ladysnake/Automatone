@@ -314,28 +314,16 @@ public class MovementTraverse extends Movement {
         boolean ladder = BlockTags.CLIMBABLE.contains(fd);
 
         for (BlockState bs : bss) {
-            if (bs.getBlock() instanceof DoorBlock) {
-                boolean notPassable = bs.getBlock() instanceof DoorBlock && !MovementHelper.isDoorPassable(ctx, src, dest);
-                // assume wooden doors can be opened and other doors cannot
-                boolean canOpen = DoorBlock.isWoodenDoor(bs);
-
-                if (notPassable && canOpen) {
-                    return state.setTarget(new MovementState.MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.headPos(), VecUtils.calculateBlockCenter(ctx.world(), dest.up()), ctx.entityRotations()), true))
-                            .setInput(Input.CLICK_RIGHT, true);
-                }
-            } else if (bs.getBlock() instanceof FenceGateBlock) {
-                BlockPos blocked = !MovementHelper.isGatePassable(ctx, dest.up(), src.up()) ? dest.up()
-                        : !MovementHelper.isGatePassable(ctx, dest, src) ? dest
-                        : null;
-                if (blocked != null) {
-                    Optional<Rotation> rotation = RotationUtils.reachable(ctx, blocked);
-                    if (rotation.isPresent()) {
-                        return state.setTarget(new MovementState.MovementTarget(rotation.get(), true)).setInput(Input.CLICK_RIGHT, true);
-                    }
-                }
+            if (tryOpenDoors(state, bs, dest, src)) {
+                return state;
             }
         }
 
+        // src & dest are swapped because we are actually checking the door at the source
+        // but we still need to compute a direction
+        if (tryOpenDoors(state, BlockStateInterface.get(ctx, src), src, dest)) {
+            return state;
+        }
 
         boolean isTheBridgeBlockThere = MovementHelper.canWalkOn(ctx, positionToPlace) || ladder;
         BlockPos feet = ctx.feetPos();
@@ -458,6 +446,32 @@ public class MovementTraverse extends Movement {
             // TODO MovementManager.moveTowardsBlock(to); // move towards not look at because if we are bridging for a couple blocks in a row, it is faster if we dont spin around and walk forwards then spin around and place backwards for every block
         }
         return state;
+    }
+
+    private boolean tryOpenDoors(MovementState state, BlockState bs, BetterBlockPos dest, BetterBlockPos src) {
+        if (bs.getBlock() instanceof DoorBlock) {
+            boolean notPassable = bs.getBlock() instanceof DoorBlock && !MovementHelper.isDoorPassable(ctx, dest, src);
+            // assume wooden doors can be opened and other doors cannot
+            boolean canOpen = DoorBlock.isWoodenDoor(bs);
+
+            if (notPassable && canOpen) {
+                state.setTarget(new MovementState.MovementTarget(RotationUtils.calcRotationFromVec3d(ctx.headPos(), VecUtils.calculateBlockCenter(ctx.world(), dest.up()), ctx.entityRotations()), true))
+                        .setInput(Input.CLICK_RIGHT, true);
+                return true;
+            }
+        } else if (bs.getBlock() instanceof FenceGateBlock) {
+            BlockPos blocked = !MovementHelper.isGatePassable(ctx, dest.up(), src.up()) ? dest.up()
+                    : !MovementHelper.isGatePassable(ctx, dest, src) ? dest
+                    : null;
+            if (blocked != null) {
+                Optional<Rotation> rotation = RotationUtils.reachable(ctx, blocked);
+                if (rotation.isPresent()) {
+                    state.setTarget(new MovementState.MovementTarget(rotation.get(), true)).setInput(Input.CLICK_RIGHT, true);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

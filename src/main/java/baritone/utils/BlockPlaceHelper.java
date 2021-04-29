@@ -50,11 +50,14 @@ public class BlockPlaceHelper {
         PlayerEntity player = (PlayerEntity) ctx.entity();
 
         for (Hand hand : Hand.values()) {
-            if (ctx.playerController().processRightClickBlock(player, ctx.world(), hand, (BlockHitResult) mouseOver) == ActionResult.SUCCESS) {
-                player.swingHand(hand);
+            ActionResult actionResult = ctx.playerController().processRightClickBlock(player, ctx.world(), hand, (BlockHitResult) mouseOver);
+            if (actionResult.isAccepted()) {
+                if (actionResult.shouldSwingHand()) {
+                    player.swingHand(hand);
+                }
                 return;
             }
-            if (!player.getStackInHand(hand).isEmpty() && ctx.playerController().processRightClick(player, ctx.world(), hand) == ActionResult.SUCCESS) {
+            if (!player.getStackInHand(hand).isEmpty() && ctx.playerController().processRightClick(player, ctx.world(), hand).isAccepted()) {
                 return;
             }
         }
