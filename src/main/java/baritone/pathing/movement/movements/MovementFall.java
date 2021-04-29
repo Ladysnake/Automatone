@@ -129,6 +129,9 @@ public class MovementFall extends Movement {
         }
         if (playerFeet.equals(dest) && (ctx.entity().getY() - playerFeet.getY() < 0.094 || isWater)) { // 0.094 because lilypads
             if (isWater) { // only match water, not flowing water (which we cannot pick up with a bucket)
+                // Avoid sinking further than expected
+                state.setInput(Input.JUMP, true);
+
                 PlayerInventory inventory = ctx.inventory();
 
                 if (inventory != null && PlayerInventory.isValidHotbarIndex(InventoryBehavior.getSlotWithStack(inventory, Automatone.EMPTY_BUCKETS))) {
