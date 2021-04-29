@@ -52,7 +52,7 @@ public final class AStarPathFinder extends AbstractNodeCostSearch {
     protected Optional<IPath> calculate0(long primaryTimeout, long failureTimeout) {
         startNode = getNodeAtPosition(startX, startY, startZ, BetterBlockPos.longHash(startX, startY, startZ));
         startNode.cost = 0;
-        startNode.oxygenCost = 0;
+        startNode.oxygenCost = calcContext.breathTime - calcContext.startingBreathTime;
         startNode.combinedCost = startNode.estimatedCostToGoal;
         BinaryHeapOpenSet openSet = new BinaryHeapOpenSet();
         openSet.insert(startNode);
@@ -157,13 +157,16 @@ public final class AStarPathFinder extends AbstractNodeCostSearch {
                     } else {
                         openSet.insert(neighbor);//dont double count, dont insert into open set if it's already there
                     }
-                    for (int i = 0; i < COEFFICIENTS.length; i++) {
-                        double heuristic = neighbor.estimatedCostToGoal + neighbor.cost / COEFFICIENTS[i];
-                        if (bestHeuristicSoFar[i] - heuristic > minimumImprovement) {
-                            bestHeuristicSoFar[i] = heuristic;
-                            bestSoFar[i] = neighbor;
-                            if (failing && getDistFromStartSq(neighbor) > MIN_DIST_PATH * MIN_DIST_PATH) {
-                                failing = false;
+                    // never leave a path dangling in the middle of water, best way to drown
+                    if (res.oxygenCost <= 0 || goal.isInGoal(neighbor.x, neighbor.y, neighbor.z)) {
+                        for (int i = 0; i < COEFFICIENTS.length; i++) {
+                            double heuristic = neighbor.estimatedCostToGoal + neighbor.cost / COEFFICIENTS[i];
+                            if (bestHeuristicSoFar[i] - heuristic > minimumImprovement) {
+                                bestHeuristicSoFar[i] = heuristic;
+                                bestSoFar[i] = neighbor;
+                                if (failing && getDistFromStartSq(neighbor) > MIN_DIST_PATH * MIN_DIST_PATH) {
+                                    failing = false;
+                                }
                             }
                         }
                     }
