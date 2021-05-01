@@ -20,6 +20,7 @@ package baritone.api.utils;
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.cache.IWorldData;
+import baritone.api.pathing.calc.Avoidance;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -35,7 +36,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -65,6 +68,9 @@ public interface IEntityContext {
         return StreamSupport.stream(worldEntities().spliterator(), false);
     }
 
+    void setAvoidanceFinder(@Nullable Supplier<List<Avoidance>> avoidanceFinder);
+
+    List<Avoidance> listAvoidedAreas();
 
     IWorldData worldData();
 
@@ -107,9 +113,14 @@ public interface IEntityContext {
         }
         LivingEntity entity = entity();
         if (entity instanceof PlayerEntity) ((PlayerEntity) entity).sendMessage(new LiteralText(message).formatted(Formatting.GRAY), false);
+
+        if (!BaritoneAPI.getGlobalSettings().syncWithOps.get()) return;
+
         MinecraftServer server = world().getServer();
         for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) {
-            IBaritone.KEY.get(p).logDirect(message);
+            if (server.getPlayerManager().isOperator(p.getGameProfile())) {
+                IBaritone.KEY.get(p).logDirect(message);
+            }
         }
     }
 }

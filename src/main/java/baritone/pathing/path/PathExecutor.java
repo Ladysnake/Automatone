@@ -369,6 +369,11 @@ public class PathExecutor implements IPathExecutor {
             }
         }
 
+        // Diagonal movements can sprint underwater on their own, but we may need to cancel the swimming pose to get air
+        if (current instanceof MovementDiagonal && ctx.entity().isSubmergedInWater() && ctx.world().getBlockState(ctx.feetPos().up()).getFluidState().isEmpty()) {
+            return false;
+        }
+
         // if the movement requested sprinting, then we're done
         if (requested) {
             return true;
@@ -419,6 +424,18 @@ public class PathExecutor implements IPathExecutor {
             if (pathPosition < path.length() - 2 && prev instanceof MovementTraverse && sprintableAscend(ctx, (MovementTraverse) prev, (MovementAscend) current, path.movements().get(pathPosition + 1))) {
                 return true;
             }
+            if (pathPosition < path.length() - 1 && (prev.getDirection().getX() != 0 || prev.getDirection().getZ() != 0) && ctx.entity().isSubmergedInWater()) {
+                return true;
+            }
+        }
+        // also traverse does not sprint by itself underwater
+        if (current instanceof MovementTraverse
+                && ctx.entity().isSubmergedInWater()
+                && pathPosition != 0) {
+            IMovement prev = path.movements().get(pathPosition - 1);
+            return (prev.getDirection().getX() != 0 || prev.getDirection().getZ() != 0)
+                    // If we can get air, use regular hitbox
+                    && !ctx.world().getBlockState(ctx.feetPos().up()).getFluidState().isEmpty();
         }
         if (current instanceof MovementFall) {
             Pair<Vec3d, BlockPos> data = overrideFall((MovementFall) current);

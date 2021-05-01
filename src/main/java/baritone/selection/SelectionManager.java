@@ -1,6 +1,8 @@
 package baritone.selection;
 
 import baritone.AutomatoneClient;
+import baritone.api.BaritoneAPI;
+import baritone.api.IBaritone;
 import baritone.api.selection.ISelection;
 import baritone.api.selection.ISelectionManager;
 import baritone.api.utils.BetterBlockPos;
@@ -135,7 +137,13 @@ public class SelectionManager implements ISelectionManager {
 
     @Override
     public boolean shouldSyncWith(ServerPlayerEntity player) {
-        return player.server.getPermissionLevel(player.getGameProfile()) >= 2;
+        return player == this.holder || (
+                IBaritone.KEY.maybeGet(this.holder)
+                        .map(IBaritone::settings)
+                        .orElseGet(BaritoneAPI::getGlobalSettings)
+                        .syncWithOps.get()
+                        && player.server.getPermissionLevel(player.getGameProfile()) >= 2
+        );
     }
 
     @Override

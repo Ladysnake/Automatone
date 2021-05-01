@@ -125,10 +125,10 @@ public abstract class Movement implements IMovement, MovementHelper {
         if (ctx.entity() instanceof PlayerEntity) {
             ((PlayerEntity) ctx.entity()).abilities.flying = false;
         }
-        currentState = updateState(currentState);
-        if (MovementHelper.isLiquid(ctx, ctx.feetPos())) {
+        if (!ctx.baritone().settings().allowSwimming.get() && MovementHelper.isLiquid(ctx, ctx.feetPos())) {
             currentState.setInput(Input.JUMP, true);
         }
+        currentState = updateState(currentState);
         if (ctx.entity().isInsideWall()) {
             ctx.getSelectedBlock().ifPresent(pos -> MovementHelper.switchToBestToolFor(ctx, BlockStateInterface.get(ctx, pos)));
             currentState.setInput(Input.CLICK_LEFT, true);

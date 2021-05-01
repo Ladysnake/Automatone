@@ -90,15 +90,15 @@ public class MovementDescend extends Movement {
     }
 
     public static void cost(CalculationContext context, int x, int y, int z, int destX, int destZ, MutableMoveResult res) {
-        double totalCost = 0;
+        double frontBreak = 0;
         BlockState destDown = context.get(destX, y - 1, destZ);
         if (destDown.isOf(Blocks.SCAFFOLDING) && destDown.get(ScaffoldingBlock.BOTTOM)) {
             // scaffolding gains a floor when it is not supported
             // we want to avoid breaking unsupported scaffolding, so stop here
             return;
         }
-        totalCost += MovementHelper.getMiningDurationTicks(context, destX, y - 1, destZ, destDown, false);
-        if (totalCost >= COST_INF) {
+        frontBreak += MovementHelper.getMiningDurationTicks(context, destX, y - 1, destZ, destDown, false);
+        if (frontBreak >= COST_INF) {
             return;
         }
         BlockState destUp = context.get(destX, y, destZ);
@@ -106,12 +106,12 @@ public class MovementDescend extends Movement {
             // same as above
             return;
         }
-        totalCost += MovementHelper.getMiningDurationTicks(context, destX, y, destZ, destUp, false);
-        if (totalCost >= COST_INF) {
+        frontBreak += MovementHelper.getMiningDurationTicks(context, destX, y, destZ, destUp, false);
+        if (frontBreak >= COST_INF) {
             return;
         }
-        totalCost += MovementHelper.getMiningDurationTicks(context, destX, y + 1, destZ, true); // only the top block in the 3 we need to mine needs to consider the falling blocks above
-        if (totalCost >= COST_INF) {
+        frontBreak += MovementHelper.getMiningDurationTicks(context, destX, y + 1, destZ, true); // only the top block in the 3 we need to mine needs to consider the falling blocks above
+        if (frontBreak >= COST_INF) {
             return;
         }
 
@@ -132,23 +132,35 @@ public class MovementDescend extends Movement {
 
         BlockState below = context.get(destX, y - 2, destZ);
         if (!MovementHelper.canWalkOn(context.bsi, destX, y - 2, destZ, below, context.baritone.settings())) {
-            dynamicFallCost(context, x, y, z, destX, destZ, totalCost, below, res);
+            dynamicFallCost(context, x, y, z, destX, destZ, frontBreak, below, res);
+            res.oxygenCost += context.oxygenCost(WALK_OFF_BLOCK_COST + frontBreak, context.get(x, y+context.height-1, z));
             return;
         }
+
+        double totalCost = frontBreak;
 
         if (destDown.getBlock() == Blocks.LADDER || destDown.getBlock() == Blocks.VINE) {
             return;
         }
 
         // we walk half the block plus 0.3 to get to the edge, then we walk the other 0.2 while simultaneously falling (math.max because of how it's in parallel)
-        double walk = WALK_OFF_BLOCK_COST / fromDown.getVelocityMultiplier();
-        totalCost += walk + Math.max(FALL_N_BLOCKS_COST[1], CENTER_AFTER_FALL_COST);
+        boolean water = MovementHelper.isWater(destUp);    // TODO improve water detection
+        double waterModifier = water ? context.waterWalkSpeed / WALK_ONE_BLOCK_COST : 1;
+        double walk = waterModifier * (WALK_OFF_BLOCK_COST / fromDown.getVelocityMultiplier());
+        double fall = waterModifier * Math.max(FALL_N_BLOCKS_COST[1], CENTER_AFTER_FALL_COST);
+        totalCost += walk + fall;
         res.x = destX;
         res.y = y - 1;
         res.z = destZ;
         res.cost = totalCost;
+        res.oxygenCost = context.oxygenCost(walk / 2 + frontBreak, context.get(x, y+context.height-1, z));
+        res.oxygenCost += context.oxygenCost(fall/2, context.get(destX, y+context.height-2, destZ));
+        res.oxygenCost += context.oxygenCost(walk/2+fall/2, context.get(destX, y+context.height-1, destZ));
     }
 
+    /**
+     * @return {@code true} if a water bucket needs to be placed
+     */
     public static boolean dynamicFallCost(CalculationContext context, int x, int y, int z, int destX, int destZ, double frontBreak, BlockState below, MutableMoveResult res) {
         if (frontBreak != 0 && context.get(destX, y + 2, destZ).getBlock() instanceof FallingBlock) {
             // if frontBreak is 0 we can actually get through this without updating the falling block and making it actually fall
@@ -164,13 +176,15 @@ public class MovementDescend extends Movement {
         for (int fallHeight = 3; true; fallHeight++) {
             int newY = y - fallHeight;
             if (newY < 0) {
+                // TODO handle larger worlds
                 // when pathing in the end, where you could plausibly fall into the void
                 // this check prevents it from getting the block at y=-1 and crashing
                 return false;
             }
             BlockState ontoBlock = context.get(destX, newY, destZ);
             int unprotectedFallHeight = fallHeight - (y - effectiveStartHeight); // equal to fallHeight - y + effectiveFallHeight, which is equal to -newY + effectiveFallHeight, which is equal to effectiveFallHeight - newY
-            double tentativeCost = WALK_OFF_BLOCK_COST + FALL_N_BLOCKS_COST[unprotectedFallHeight] + frontBreak + costSoFar;
+            double fallCost = FALL_N_BLOCKS_COST[unprotectedFallHeight] + costSoFar;
+            double tentativeCost = WALK_OFF_BLOCK_COST + fallCost + frontBreak;
             if (MovementHelper.isWater(ontoBlock)) {
                 if (!MovementHelper.canWalkThrough(context.bsi, destX, newY, destZ, ontoBlock, context.baritone.settings())) {
                     return false;
@@ -190,6 +204,8 @@ public class MovementDescend extends Movement {
                 res.y = newY;
                 res.z = destZ;
                 res.cost = tentativeCost;// TODO incorporate water swim up cost?
+                // if there was water along the way, the fall would have stopped there
+                res.oxygenCost = context.oxygenCost(fallCost, Blocks.AIR.getDefaultState());
                 return false;
             }
             if (unprotectedFallHeight <= 11 && (ontoBlock.getBlock() == Blocks.VINE || ontoBlock.getBlock() == Blocks.LADDER)) {
@@ -215,6 +231,7 @@ public class MovementDescend extends Movement {
                 res.y = newY + 1;
                 res.z = destZ;
                 res.cost = tentativeCost;
+                res.oxygenCost = context.oxygenCost(fallCost, Blocks.AIR.getDefaultState());
                 return false;
             }
             if (context.hasWaterBucket && unprotectedFallHeight <= context.maxFallHeightBucket + 1) {
@@ -222,6 +239,7 @@ public class MovementDescend extends Movement {
                 res.y = newY + 1;// this is the block we're falling onto, so dest is +1
                 res.z = destZ;
                 res.cost = tentativeCost + context.placeBucketCost();
+                res.oxygenCost = context.oxygenCost(fallCost, Blocks.AIR.getDefaultState());
                 return true;
             } else {
                 return false;
@@ -250,7 +268,7 @@ public class MovementDescend extends Movement {
         double diffZ = ctx.entity().getZ() - (dest.getZ() + 0.5);
         double ab = Math.sqrt(diffX * diffX + diffZ * diffZ);
 
-        if (ab < 0.20 && ctx.world().getBlockState(dest).isOf(Blocks.SCAFFOLDING)) {
+        if (ab < 0.20 && (ctx.world().getBlockState(dest).isOf(Blocks.SCAFFOLDING) || ctx.entity().isSubmergedInWater() && ctx.entity().getY() > src.y)) {
             state.setInput(Input.SNEAK, true);
         }
 
@@ -288,7 +306,9 @@ public class MovementDescend extends Movement {
             return true;
         }
         for (int y = 0; y <= 2; y++) { // we could hit any of the three blocks
-            if (MovementHelper.avoidWalkingInto(BlockStateInterface.get(ctx, into.up(y)))) {
+            BlockState state = BlockStateInterface.get(ctx, into.up(y));
+            if (MovementHelper.avoidWalkingInto(state)
+                    && !(MovementHelper.isWater(state) && baritone.settings().allowSwimming.get())) {
                 return true;
             }
         }

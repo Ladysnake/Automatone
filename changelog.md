@@ -1,4 +1,17 @@
 ------------------------------------------------------
+Version 0.2.0
+------------------------------------------------------
+**Additions**
+- Added `syncWithOps` setting to control whether chat and render info is sent to operators
+
+**Changes**
+- Block and item lists in settings now use tags
+
+**Fixes**
+- Fixed crash at launch outside of development environments
+- Fixed tab complete for command aliases
+
+------------------------------------------------------
 Version 0.1.1
 ------------------------------------------------------
 **Additions**
@@ -8,7 +21,7 @@ Version 0.1.1
 - Fake players now use the name from their display profile if any is set
 - Added dependencies to fabric.mod.json
 
-**Bugfixes**
+**Fixes**
 - Fixed bridging over long distances
 
 ------------------------------------------------------

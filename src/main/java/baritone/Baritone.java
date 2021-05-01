@@ -66,7 +66,7 @@ public class Baritone implements IBaritone {
     private final BackfillProcess backfillProcess;
     private final FarmProcess farmProcess;
     private final IBaritoneProcess execControlProcess;
-    
+
     private final PathingControlManager pathingControlManager;
     private final BaritoneCommandManager commandManager;
 
@@ -225,9 +225,14 @@ public class Baritone implements IBaritone {
         // We won't log debug chat into toasts
         // Because only a madman would want that extreme spam -_-
         logDirect(message);
+
+        if (!this.settings.syncWithOps.get()) return;
+
         MinecraftServer server = this.getPlayerContext().world().getServer();
         for (ServerPlayerEntity p : server.getPlayerManager().getPlayerList()) {
-            KEY.get(p).logDirect(message);
+            if (server.getPlayerManager().isOperator(p.getGameProfile())) {
+                KEY.get(p).logDirect(message);
+            }
         }
     }
 
@@ -243,7 +248,8 @@ public class Baritone implements IBaritone {
 
     @Override
     public boolean shouldSyncWith(ServerPlayerEntity player) {
-        return player.server.getPermissionLevel(player.getGameProfile()) >= 2;
+        return player == this.playerContext.entity()
+                || (settings.syncWithOps.get() && player.server.getPermissionLevel(player.getGameProfile()) >= 2);
     }
 
     @Override

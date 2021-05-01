@@ -28,6 +28,7 @@ import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
+import baritone.utils.pathing.MutableMoveResult;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.SlabType;
@@ -84,7 +85,9 @@ public class MovementPillar extends Movement {
 
     @Override
     public double calculateCost(CalculationContext context) {
-        return cost(context, src.x, src.y, src.z);
+        MutableMoveResult result = new MutableMoveResult();
+        cost(context, src.x, src.y, src.z, result);
+        return result.cost;
     }
 
     @Override
@@ -92,19 +95,19 @@ public class MovementPillar extends Movement {
         return ImmutableSet.of(src, dest);
     }
 
-    public static double cost(CalculationContext context, int x, int y, int z) {
+    public static void cost(CalculationContext context, int x, int y, int z, MutableMoveResult result) {
         BlockState fromState = context.get(x, y, z);
         boolean climbable = isClimbable(context.bsi, x, y, z);
         BlockState fromDown = context.get(x, y - 1, z);
         if (!climbable) {
             if (BlockTags.CLIMBABLE.contains(fromDown.getBlock())) {
-                return COST_INF; // can't pillar from a ladder or vine onto something that isn't also climbable
+                return; // can't pillar from a ladder or vine onto something that isn't also climbable
             }
             if (fromDown.getBlock() instanceof SlabBlock && fromDown.get(SlabBlock.TYPE) == SlabType.BOTTOM) {
-                return COST_INF; // can't pillar up from a bottom slab onto a non ladder
+                return; // can't pillar up from a bottom slab onto a non ladder
             }
         } else if (context.width > 1) {
-            return COST_INF;    // Large entities simply cannot use ladders and vines
+            return;    // Large entities simply cannot use ladders and vines
         }
         double totalHardness = 0;
         boolean swimmable = false;
@@ -120,24 +123,27 @@ public class MovementPillar extends Movement {
                 BlockState underToBreak = context.get(x, checkedY - 1, z);
                 Block toBreakBlock = toBreak.getBlock();
                 if (toBreakBlock instanceof FenceGateBlock || (!climbable && toBreakBlock instanceof ScaffoldingBlock)) { // see issue #172
-                    return COST_INF;
+                    return;
                 }
                 boolean water = MovementHelper.isWater(toBreak);
                 if (water || MovementHelper.isWater(underToBreak)) {
+                    if (MovementHelper.isFlowing(checkedX, checkedY, checkedZ, toBreak, context.bsi)) {
+                        return;    // not ascending flowing water
+                    }
                     swimmable = true; // allow ascending pillars of water
-                    if (totalHardness > 0) return COST_INF; // Nop, not mining stuff in a water column
+                    if (totalHardness > 0) return; // Nop, not mining stuff in a water column
                 }
                 if (!water) {
                     double hardness = MovementHelper.getMiningDurationTicks(context, checkedX, checkedY, checkedZ, toBreak, true);
                     if (hardness > 0) {
                         if (hardness >= COST_INF || swimmable) {
-                            return COST_INF;
+                            return;
                         }
                         BlockState check = context.get(checkedX, checkedY + 1, checkedZ); // the block on top of the one we're going to break, could it fall on us?
                         if (check.getBlock() instanceof FallingBlock) {
                             // see MovementAscend's identical check for breaking a falling block above our head
                             if (!(toBreakBlock instanceof FallingBlock) || !(underToBreak.getBlock() instanceof FallingBlock)) {
-                                return COST_INF;
+                                return;
                             }
                         }
                         totalHardness += hardness;
@@ -149,14 +155,14 @@ public class MovementPillar extends Movement {
             // otherwise, if we're standing in water, we cannot pillar
             // if we're standing on water and assumeWalkOnWater is true, we cannot pillar
             // if we're standing on water and assumeWalkOnWater is false, we must have ascended to here, or sneak backplaced, so it is possible to pillar again
-            return COST_INF;
+            return;
         }
         double placeCost = 0;
         if (!climbable && !swimmable) {
             // we need to place a block where we started to jump on it
             placeCost = context.costOfPlacingAt(x, y, z, fromState);
             if (placeCost >= COST_INF) {
-                return COST_INF;
+                return;
             }
             if (fromDown.isAir()) {
                 placeCost += 0.1; // slightly (1/200th of a second) penalize pillaring on what's currently air
@@ -164,9 +170,13 @@ public class MovementPillar extends Movement {
         }
 
         if (climbable || swimmable) {
-            return LADDER_UP_ONE_COST + totalHardness * 5;
+            result.cost = LADDER_UP_ONE_COST + totalHardness * 5;
+            result.oxygenCost = context.oxygenCost(LADDER_UP_ONE_COST / 2 + totalHardness * 5, context.get(x, y + context.height - 1, z))
+                    + context.oxygenCost(LADDER_UP_ONE_COST / 2, context.get(x, y + context.height, z));
         } else {
-            return JUMP_ONE_BLOCK_COST + placeCost + context.jumpPenalty + totalHardness;
+            result.cost = JUMP_ONE_BLOCK_COST + placeCost + context.jumpPenalty + totalHardness;
+            // Not swimmable so no water
+            result.oxygenCost = context.oxygenCost(JUMP_ONE_BLOCK_COST+placeCost+totalHardness, Blocks.AIR.getDefaultState());
         }
     }
 

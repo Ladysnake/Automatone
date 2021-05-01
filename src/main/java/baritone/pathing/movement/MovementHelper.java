@@ -96,7 +96,18 @@ public interface MovementHelper extends ActionCosts {
         if (block instanceof AirBlock) { // early return for most common case
             return true;
         }
-        if (block instanceof AbstractFireBlock || block == Blocks.TRIPWIRE || block == Blocks.COBWEB || block == Blocks.END_PORTAL || block == Blocks.COCOA || block instanceof AbstractSkullBlock || block == Blocks.BUBBLE_COLUMN || block instanceof ShulkerBoxBlock || block instanceof SlabBlock || block instanceof TrapdoorBlock || block == Blocks.HONEY_BLOCK || block == Blocks.END_ROD) {
+        if (block instanceof AbstractFireBlock
+                || block == Blocks.TRIPWIRE
+                || block == Blocks.COBWEB
+                || block == Blocks.END_PORTAL
+                || block == Blocks.COCOA
+                || block instanceof AbstractSkullBlock
+                || block == Blocks.BUBBLE_COLUMN
+                || block instanceof ShulkerBoxBlock
+                || block instanceof SlabBlock
+                || block instanceof TrapdoorBlock
+                || block == Blocks.HONEY_BLOCK
+                || block == Blocks.END_ROD) {
             return false;
         }
         if (settings.blocksToAvoid.get().contains(block)) {
@@ -135,7 +146,7 @@ public interface MovementHelper extends ActionCosts {
                 return false;
             }
             BlockState up = bsi.get0(x, y + 1, z);
-            if (!up.getFluidState().isEmpty() || up.getBlock() instanceof LilyPadBlock) {
+            if ((!settings.allowSwimming.get() && !up.getFluidState().isEmpty()) || up.getBlock() instanceof LilyPadBlock) {
                 return false;
             }
             return true;

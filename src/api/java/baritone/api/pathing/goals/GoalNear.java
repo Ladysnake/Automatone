@@ -19,16 +19,16 @@ package baritone.api.pathing.goals;
 
 import baritone.api.utils.SettingsUtil;
 import baritone.api.utils.interfaces.IGoalRenderPos;
-import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
 import it.unimi.dsi.fastutil.doubles.DoubleIterator;
+import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
 import net.minecraft.util.math.BlockPos;
 
 public class GoalNear implements Goal, IGoalRenderPos {
 
-    private final int x;
-    private final int y;
-    private final int z;
-    private final int rangeSq;
+    protected final int x;
+    protected final int y;
+    protected final int z;
+    protected final int rangeSq;
 
     public GoalNear(BlockPos pos, int range) {
         this.x = pos.getX();

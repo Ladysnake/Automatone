@@ -27,6 +27,7 @@ import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
+import baritone.utils.pathing.MutableMoveResult;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -83,7 +84,9 @@ public class MovementAscend extends Movement {
 
     @Override
     public double calculateCost(CalculationContext context) {
-        return cost(context, src.x, src.y, src.z, dest.x, dest.z);
+        MutableMoveResult result = new MutableMoveResult();
+        cost(context, src.x, src.y, src.z, dest.x, dest.z, result);
+        return result.cost;
     }
 
     @Override
@@ -97,7 +100,7 @@ public class MovementAscend extends Movement {
         );
     }
 
-    public static double cost(CalculationContext context, int x, int y, int z, int destX, int destZ) {
+    public static void cost(CalculationContext context, int x, int y, int z, int destX, int destZ, MutableMoveResult result) {
         int diffX = destX - x;
         int diffZ = destZ - z;
         assert Math.abs(diffX) <= 1 && Math.abs(diffZ) <= 1;
@@ -109,10 +112,10 @@ public class MovementAscend extends Movement {
             // TODO maybe check if we really can place or mine at that distance, for really large entities
             additionalPlacementCost = context.costOfPlacingAt(placeX, y, placeZ, toPlace);
             if (additionalPlacementCost >= COST_INF) {
-                return COST_INF;
+                return;
             }
             if (!MovementHelper.isReplaceable(placeX, y, placeZ, toPlace, context.bsi)) {
-                return COST_INF;
+                return;
             }
             boolean foundPlaceOption = false;
             for (int i = 0; i < 5; i++) {
@@ -130,19 +133,24 @@ public class MovementAscend extends Movement {
                 }
             }
             if (!foundPlaceOption) { // didn't find a valid place =(
-                return COST_INF;
+                return;
             }
         }
         double miningTicks = 0;
+        BlockState srcDown = context.get(x, y - 1, z);
+        if (srcDown.getBlock() == Blocks.LADDER || srcDown.getBlock() == Blocks.VINE) {
+            return;
+        }
+        boolean inLiquid = MovementHelper.isLiquid(srcDown);
         for (int dx = -context.requiredSideSpace; dx <= context.requiredSideSpace; dx++) {
             for (int dz = -context.requiredSideSpace; dz <= context.requiredSideSpace; dz++) {
                 int x1 = x + dx;
                 int y1 = y + context.height;
                 int z1 = z + dz;
-                BlockState srcUp2 = context.get(x1, y1, z1); // used lower down anyway
-                if (context.get(x1, y1 + 1, z1).getBlock() instanceof FallingBlock && (MovementHelper.canWalkThrough(context.bsi, x1, y1 - 1, z1, context.baritone.settings()) || !(srcUp2.getBlock() instanceof FallingBlock))) {//it would fall on us and possibly suffocate us
+                BlockState aboveHead = context.get(x1, y1, z1); // used lower down anyway
+                if (context.get(x1, y1 + 1, z1).getBlock() instanceof FallingBlock && (MovementHelper.canWalkThrough(context.bsi, x1, y1 - 1, z1, context.baritone.settings()) || !(aboveHead.getBlock() instanceof FallingBlock))) {//it would fall on us and possibly suffocate us
                     // HOWEVER, we assume that we're standing in the start position
-                    // that means that src and src.up(1) are both air
+                    // that means that src and src.up(1) are both traversable
                     // maybe they aren't now, but they will be by the time this starts
                     // if the lower one is can't walk through and the upper one is falling, that means that by standing on src
                     // (the presupposition of this Movement)
@@ -152,25 +160,25 @@ public class MovementAscend extends Movement {
                     // as in, if we have a block, then two FallingBlocks on top of it
                     // and that block is x, y+1, z, and we'd have to clear it to even start this movement
                     // we don't need to worry about those FallingBlocks because we've already cleared them
-                    return COST_INF;
+                    return;
                     // you may think we only need to check srcUp2, not srcUp
                     // however, in the scenario where glitchy world gen where unsupported sand / gravel generates
                     // it's possible srcUp is AIR from the start, and srcUp2 is falling
                     // and in that scenario, when we arrive and break srcUp2, that lets srcUp3 fall on us and suffocate us
                 }
                 // includeFalling isn't needed because of the falling check above -- if srcUp3 is falling we will have already exited with COST_INF if we'd actually have to break it
-                miningTicks += MovementHelper.getMiningDurationTicks(context, x1, y1, z1, srcUp2, false);
+                miningTicks += MovementHelper.getMiningDurationTicks(context, x1, y1, z1, aboveHead, false);
+                inLiquid |= MovementHelper.isWater(aboveHead);
+                if (miningTicks >= COST_INF || (inLiquid && miningTicks > 0)) {
+                    return; // Not mining in water
+                }
             }
         }
-        BlockState srcDown = context.get(x, y - 1, z);
-        if (srcDown.getBlock() == Blocks.LADDER || srcDown.getBlock() == Blocks.VINE) {
-            return COST_INF;
-        }
         // we can jump from soul sand, but not from a bottom slab
-        boolean jumpingFromBottomSlab = MovementHelper.isBottomSlab(srcDown);
-        boolean jumpingToBottomSlab = MovementHelper.isBottomSlab(toPlace);
+        boolean jumpingFromBottomSlab =!inLiquid && MovementHelper.isBottomSlab(srcDown);
+        boolean jumpingToBottomSlab = !inLiquid && MovementHelper.isBottomSlab(toPlace);
         if (jumpingFromBottomSlab && !jumpingToBottomSlab) {
-            return COST_INF;// the only thing we can ascend onto from a bottom slab is another bottom slab
+            return;// the only thing we can ascend onto from a bottom slab is another bottom slab
         }
         double walk;
         if (jumpingToBottomSlab) {
@@ -182,16 +190,19 @@ public class MovementAscend extends Movement {
             }
         } else {
             // jumpingFromBottomSlab must be false
-            walk = Math.max(JUMP_ONE_BLOCK_COST, WALK_ONE_BLOCK_COST / toPlace.getBlock().getVelocityMultiplier());
-            walk += context.jumpPenalty;
+            if (inLiquid) {
+                walk = (context.waterWalkSpeed / WALK_ONE_BLOCK_COST) * Math.max(JUMP_ONE_BLOCK_COST, WALK_ONE_BLOCK_COST);
+            } else {
+                // we are jumping and moving in parallel, hence the max
+                walk = Math.max(JUMP_ONE_BLOCK_COST, WALK_ONE_BLOCK_COST / toPlace.getBlock().getVelocityMultiplier());
+                walk += context.jumpPenalty;
+            }
         }
 
         double totalCost = walk + additionalPlacementCost;
         totalCost += miningTicks;
-        // Not mining anything in water
-        boolean inLiquid = MovementHelper.isLiquid(srcDown);
-        if (totalCost >= COST_INF || (miningTicks > 0 && inLiquid)) {
-            return COST_INF;
+        if (totalCost >= COST_INF) {
+            return;
         }
         for (int dxz = -context.requiredSideSpace; dxz <= context.requiredSideSpace; dxz++) {
             for (int dy = 0; dy < context.height; dy++) {
@@ -203,12 +214,16 @@ public class MovementAscend extends Movement {
                         dy == context.height - 1    // only include falling for uppermost block
                 );
                 totalCost += miningTicks;
+                // Not mining anything in water
                 if (totalCost >= COST_INF || (miningTicks > 0 && inLiquid)) {
-                    return COST_INF;
+                    return;
                 }
             }
         }
-        return totalCost;
+        result.oxygenCost = context.oxygenCost(walk/3., context.get(x, y+context.height-1, z));
+        result.oxygenCost += context.oxygenCost(walk/3., context.get(x, y+context.height, z));
+        result.oxygenCost += context.oxygenCost(walk/3., context.get(destX, y+context.height-1, destZ));
+        result.cost = totalCost;
     }
 
     @Override
@@ -249,7 +264,7 @@ public class MovementAscend extends Movement {
             return state; // don't jump while walking from a non double slab into a bottom slab
         }
 
-        if (baritone.settings().assumeStep.get() || ctx.feetPos().equals(src.up())) {
+        if (baritone.settings().assumeStep.get() || canStopJumping()) {
             // no need to hit space if we're already jumping
             return state;
         }
@@ -276,6 +291,17 @@ public class MovementAscend extends Movement {
         // This is slightly more efficient because otherwise we might start jumping before moving, and fall down without moving onto the block we want to jump onto
         // Also wait until we are close enough, because we might jump and hit our head on an adjacent block
         return state.setInput(Input.JUMP, true);
+    }
+
+    private boolean canStopJumping() {
+        BetterBlockPos srcUp = src.up();
+        double entityY = ctx.entity().getY();
+        if (entityY < srcUp.y) {
+            return false;
+        } else if (entityY <= srcUp.y + 0.1) {
+            return !MovementHelper.isWater(ctx.world().getBlockState(srcUp));
+        }
+        return true;
     }
 
     // TODO handle wider entities

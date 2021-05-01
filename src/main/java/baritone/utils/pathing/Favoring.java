@@ -17,9 +17,9 @@
 
 package baritone.utils.pathing;
 
+import baritone.api.pathing.calc.Avoidance;
 import baritone.api.pathing.calc.IPath;
 import baritone.api.utils.BetterBlockPos;
-import baritone.api.utils.Helper;
 import baritone.api.utils.IEntityContext;
 import baritone.pathing.movement.CalculationContext;
 import it.unimi.dsi.fastutil.longs.Long2DoubleOpenHashMap;
@@ -30,7 +30,7 @@ public final class Favoring {
 
     public Favoring(IEntityContext ctx, IPath previous, CalculationContext context) {
         this(previous, context);
-        for (Avoidance avoid : Avoidance.create(ctx)) {
+        for (Avoidance avoid : ctx.listAvoidedAreas()) {
             avoid.applySpherical(favorings);
         }
         ctx.logDebug("Favoring size: " + favorings.size());

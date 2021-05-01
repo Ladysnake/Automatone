@@ -27,6 +27,7 @@ import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
 import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
+import baritone.utils.pathing.MutableMoveResult;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -87,7 +88,9 @@ public class MovementDownward extends Movement {
 
     @Override
     public double calculateCost(CalculationContext context) {
-        return cost(context, src.x, src.y, src.z);
+        MutableMoveResult result = new MutableMoveResult();
+        cost(context, src.x, src.y, src.z, result);
+        return result.cost;
     }
 
     @Override
@@ -95,32 +98,37 @@ public class MovementDownward extends Movement {
         return ImmutableSet.of(src, dest);
     }
 
-    public static double cost(CalculationContext context, int x, int y, int z) {
+    public static void cost(CalculationContext context, int x, int y, int z, MutableMoveResult result) {
         if (!context.allowDownward) {
-            return COST_INF;
+            return;
         }
         if (!MovementHelper.canWalkOn(context.bsi, x, y - 2, z, context.baritone.settings())) {
-            return COST_INF;
+            return;
         }
         BlockState downBlock = context.get(x, y - 1, z);
         BlockState fromBlock = context.get(x, y, z);
         if (fromBlock.isOf(Blocks.SCAFFOLDING) && fromBlock.get(ScaffoldingBlock.BOTTOM)) {
             // scaffolding gains a floor when it is not supported
             // we want to avoid breaking unsupported scaffolding, so stop here
-            return COST_INF;
+            return;
         }
         if (downBlock.isIn(BlockTags.CLIMBABLE)) {
             if (fromBlock.isIn(BlockTags.CLIMBABLE) && downBlock.isOf(Blocks.SCAFFOLDING) && !fromBlock.isOf(Blocks.SCAFFOLDING)) {
                 // funni edge case
                 // So like, if you try to descend into scaffolding while you are in a ladder, well you can't
                 // because ladders want you to stop sneaking, but scaffolding doesn't
-                return COST_INF;
+                return;
             }
             // Larger entities cannot use ladders and stuff
-            return context.requiredSideSpace == 0 ? LADDER_DOWN_ONE_COST : COST_INF;
+            if (context.requiredSideSpace == 0) {
+                result.cost = LADDER_DOWN_ONE_COST;
+            }
         } else {
             double totalHardness = 0;
             int requiredSideSpace = context.requiredSideSpace;
+            boolean waterFloor = false;
+            BlockState headState = context.get(x, y + context.height - 1, z);
+            boolean inWater = MovementHelper.isWater(headState);
             for (int dx = -requiredSideSpace; dx <= requiredSideSpace; dx++) {
                 for (int dz = -requiredSideSpace; dz <= requiredSideSpace; dz++) {
                     // If we are at the starting position, we already cleared enough space to stand there
@@ -130,9 +138,18 @@ public class MovementDownward extends Movement {
                     BlockState toBreak = context.get(checkedX, y - 1, checkedZ);
                     // we're standing on it, while it might be block falling, it'll be air by the time we get here in the movement
                     totalHardness += MovementHelper.getMiningDurationTicks(context, checkedX, y - 1, checkedZ, toBreak, false);
+                    if (MovementHelper.isWater(toBreak)) {
+                        waterFloor = true;
+                    }
                 }
             }
-            return FALL_N_BLOCKS_COST[1] + totalHardness;
+            if (inWater) {
+                totalHardness *= 5; // TODO handle aqua affinity
+            }
+            double fallCost = (waterFloor ? context.waterWalkSpeed / WALK_ONE_BLOCK_COST : 1) * FALL_N_BLOCKS_COST[1];
+            result.cost = fallCost + totalHardness;
+            result.oxygenCost = context.oxygenCost(fallCost * 0.5 + totalHardness, headState)
+                    + context.oxygenCost(fallCost * 0.5, fromBlock);
         }
     }
 
@@ -147,15 +164,19 @@ public class MovementDownward extends Movement {
             return state.setStatus(MovementStatus.SUCCESS);
         } else if (!playerInValidPosition()) {
             return state.setStatus(MovementStatus.UNREACHABLE);
-        } else if (((Baritone) this.baritone).bsi.get0(this.baritone.getPlayerContext().feetPos().down()).isOf(Blocks.SCAFFOLDING)) {
-            // Sneak to go down scaffolding
-            state.setInput(Input.SNEAK, true);
         }
+
         double diffX = ctx.entity().getX() - (dest.getX() + 0.5);
         double diffZ = ctx.entity().getZ() - (dest.getZ() + 0.5);
         double ab = Math.sqrt(diffX * diffX + diffZ * diffZ);
 
         if (numTicks++ < 10 && ab < 0.2) {
+            if (((Baritone) this.baritone).bsi.get0(this.baritone.getPlayerContext().feetPos().down()).isOf(Blocks.SCAFFOLDING)) {
+                // Sneak to go down scaffolding
+                state.setInput(Input.SNEAK, true);
+            } else if (ctx.entity().isSubmergedInWater()) {
+                state.setInput(Input.SNEAK, true);  // go down faster in full water
+            }
             return state;
         }
         MovementHelper.moveTowards(ctx, state, dest);
