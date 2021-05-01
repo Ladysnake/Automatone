@@ -1,4 +1,23 @@
 ------------------------------------------------------
+Version 0.3.0
+------------------------------------------------------
+**Additions**
+- Added experimental swimming abilities
+  - Can be enabled with `Settings#enableSwimming`
+  - Automatone will attempt to keep the entity from drowning on the way
+    - This can be disabled with `Settings#ignoreBreath`
+
+**Changes**
+- Some methods and fields have been made available from API:
+  - `IPathingBehavior#pathStart`
+  - `GoalNear#x`/`y`/`z`
+  - `RotationUtils#calcRotationFromVec3d`
+- Avoidance lists can now be externally supplied
+
+**Fixes**
+- Fixed fake players being unable to open doors while pathing
+
+------------------------------------------------------
 Version 0.2.0
 ------------------------------------------------------
 **Additions**
