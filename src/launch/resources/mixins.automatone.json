@@ -20,6 +20,7 @@
     "MixinServerPlayerInteractionManager",
     "MixinServerWorld",
     "MixinUtil",
+    "player.EntityMixin",
     "player.PlayerAdvancementTrackerMixin",
     "player.PlayerEntityMixin",
     "player.ServerPlayerEntityMixin",
