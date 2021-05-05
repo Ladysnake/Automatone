@@ -43,6 +43,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
 
     private final BlockBreakHelper blockBreakHelper;
     private final BlockPlaceHelper blockPlaceHelper;
+    private boolean needsUpdate;
 
     public InputOverrideHandler(Baritone baritone) {
         super(baritone);
@@ -74,6 +75,7 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
         } else {
             this.inputForceStateMap.remove(input);
         }
+        this.needsUpdate = true;
     }
 
     /**
@@ -85,13 +87,17 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
         // PERF: entity flags use a lock, see if we can put this elsewhere to reduce the number of calls
         if (this.ctx.entity().isSprinting()) this.ctx.entity().setSprinting(false);
         this.inputForceStateMap.clear();
+        this.needsUpdate = true;
     }
 
     @Override
     public final void onTickServer() {
+        if (!this.needsUpdate) return;
+
         if (isInputForcedDown(Input.CLICK_LEFT)) {
             setInputForceState(Input.CLICK_RIGHT, false);
         }
+
         LivingEntity entity = this.ctx.entity();
         entity.sidewaysSpeed = 0.0F;
         entity.forwardSpeed = 0.0F;
@@ -120,8 +126,11 @@ public final class InputOverrideHandler extends Behavior implements IInputOverri
             entity.sidewaysSpeed *= 0.3D;
             entity.forwardSpeed *= 0.3D;
         }
+
         blockBreakHelper.tick(isInputForcedDown(Input.CLICK_LEFT));
         blockPlaceHelper.tick(isInputForcedDown(Input.CLICK_RIGHT));
+
+        this.needsUpdate = false;
     }
 
     public BlockBreakHelper getBlockBreakHelper() {
