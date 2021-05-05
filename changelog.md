@@ -3,6 +3,8 @@ Version 0.3.3
 ------------------------------------------------------
 **Fixes**
 - Fixed a crash on dedicated servers (yup, caused by the last fix)
+- Fixed sneaking being reset every tick for all players, preventing sneak interactions
+- Fixed fake players not being properly unloaded with their chunk
 
 ------------------------------------------------------
 Version 0.3.2
