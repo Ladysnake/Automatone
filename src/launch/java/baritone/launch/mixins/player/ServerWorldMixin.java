@@ -39,6 +39,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,6 +52,7 @@ import java.util.List;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin {
+    private @Nullable Entity automatone$despawningFakePlayer;
 
     @Shadow
     public abstract ServerChunkManager getChunkManager();
@@ -83,6 +85,30 @@ public abstract class ServerWorldMixin {
         if (entity instanceof AutomatoneFakePlayer) {
             this.players.add((ServerPlayerEntity) entity);
         }
+    }
+
+    /**
+     * Chunk unloading performs a {@code !(entity instanceof ServerPlayerEntity)} check.
+     *
+     * <p>We force the check to succeed by temporarily setting {@code entity} to {@code null}
+     */
+    @ModifyVariable(method = "unloadEntities", at = @At(value = "LOAD", ordinal = 0), allow = 1)
+    private Entity unloadFakePlayers(Entity checked) {
+        if (checked instanceof AutomatoneFakePlayer) {
+            automatone$despawningFakePlayer = checked;
+            return null;
+        }
+        return checked;
+    }
+
+    @ModifyVariable(method = "unloadEntities", at = @At(value = "CONSTANT", ordinal = 0, args = "classValue=net/minecraft/server/network/ServerPlayerEntity"), allow = 1)
+    private Entity unloadFakePlayers2(Entity checked) {
+        Entity ret = automatone$despawningFakePlayer;
+        if (ret != null) {
+            automatone$despawningFakePlayer = null;
+            return ret;
+        }
+        return checked;
     }
 
     /**
