@@ -17,14 +17,13 @@
 
 package baritone;
 
-import baritone.api.fakeplayer.FakeClientPlayerEntity;
+import baritone.api.fakeplayer.FakePlayers;
 import baritone.api.fakeplayer.FakeServerPlayerEntity;
 import baritone.command.defaults.DefaultCommands;
 import baritone.command.manager.BaritoneArgumentType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.tag.TagRegistry;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.argument.ArgumentTypes;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.entity.EntityDimensions;
@@ -32,7 +31,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -61,9 +59,7 @@ public final class Automatone implements ModInitializer {
 
     public static final EntityType<PlayerEntity> FAKE_PLAYER = FabricEntityTypeBuilder.<PlayerEntity>createLiving()
             .spawnGroup(SpawnGroup.MISC)
-            .entityFactory((type, world) -> world.isClient
-                    ? new FakeClientPlayerEntity(type, (ClientWorld) world)
-                    : new FakeServerPlayerEntity(type, (ServerWorld) world))
+            .entityFactory(FakePlayers.entityFactory(FakeServerPlayerEntity::new))
             .defaultAttributes(PlayerEntity::createPlayerAttributes)
             .dimensions(EntityDimensions.changing(EntityType.PLAYER.getWidth(), EntityType.PLAYER.getHeight()))
             .trackRangeBlocks(64)

@@ -38,7 +38,6 @@ import baritone.api.utils.IEntityAccessor;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -50,19 +49,12 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.CheckForNull;
-import java.util.UUID;
 
 public class FakeClientPlayerEntity extends OtherClientPlayerEntity implements AutomatoneFakePlayer {
     protected PlayerListEntry listEntry;
 
-    public static <P extends PlayerEntity & AutomatoneFakePlayer> P createClientFakePlayer(EntityType<?> type, ClientWorld world, GameProfile profile) {
-        @SuppressWarnings("unchecked") FakePlayers.FakePlayerFactory<ClientWorld, P> factory = (FakePlayers.FakePlayerFactory<ClientWorld, P>) FakePlayers.clientFactories.getOrDefault(type, FakeClientPlayerEntity::new);
-        @SuppressWarnings("unchecked") EntityType<? super P> playerType = (EntityType<? super P>) type;
-        return factory.create(playerType, world, profile);
-    }
-
-    public FakeClientPlayerEntity(EntityType<?> type, ClientWorld clientWorld) {
-        this(type, clientWorld, new GameProfile(UUID.randomUUID(), I18n.translate(type.getTranslationKey())));
+    public static <P extends PlayerEntity & AutomatoneFakePlayer> P createClientFakePlayer(EntityType<P> type, ClientWorld world, GameProfile profile) {
+        return FakePlayers.<ClientWorld, P>getFakeClientPlayerFactory(type).create(type, world, profile);
     }
 
     public FakeClientPlayerEntity(EntityType<?> type, ClientWorld clientWorld, GameProfile gameProfile) {

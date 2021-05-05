@@ -43,6 +43,7 @@ import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
@@ -73,14 +74,14 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     protected @Nullable GameProfile displayProfile;
     private boolean release;
 
-    public FakeServerPlayerEntity(EntityType<?> type, ServerWorld world) {
+    public FakeServerPlayerEntity(EntityType<? extends PlayerEntity> type, ServerWorld world) {
         this(type, world, new GameProfile(UUID.randomUUID(), "FakePlayer"));
-        this.stepHeight = 0.6f; // same step height as LivingEntity
     }
 
-    public FakeServerPlayerEntity(EntityType<?> type, ServerWorld world, GameProfile profile) {
+    public FakeServerPlayerEntity(EntityType<? extends PlayerEntity> type, ServerWorld world, GameProfile profile) {
         super(world.getServer(), world, profile, new ServerPlayerInteractionManager(world));
         ((IEntityAccessor)this).automatone$setType(type);
+        this.stepHeight = 0.6f; // same step height as LivingEntity
         // Side effects go brr
         new ServerPlayNetworkHandler(world.getServer(), new ClientConnection(NetworkSide.CLIENTBOUND), this);
     }

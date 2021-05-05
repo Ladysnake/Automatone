@@ -23,11 +23,13 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public final class FakePlayers {
     /**
@@ -40,6 +42,10 @@ public final class FakePlayers {
 
     @CheckEnv(Env.CLIENT)
     static final Map<EntityType<? extends PlayerEntity>, FakePlayerFactory<ClientWorld, ?>> clientFactories = new HashMap<>();
+
+    public static <P extends PlayerEntity & AutomatoneFakePlayer> EntityType.EntityFactory<PlayerEntity> entityFactory(ServerFakePlayerFactory<? extends P> serverFactory) {
+        return (type, world) -> world.isClient ? FakePlayers.getFakeClientPlayerFactory(type).create(type, world) : serverFactory.create(type, (ServerWorld) world);
+    }
 
     /**
      * Registers a clientside factory for the default fake player spawn packet.
@@ -62,7 +68,24 @@ public final class FakePlayers {
         clientFactories.put(type, clientFactory);
     }
 
+    public static GameProfile generateGameProfile() {
+        return new GameProfile(UUID.randomUUID(), "Fake Player");
+    }
+
+    static <W extends World, P extends PlayerEntity & AutomatoneFakePlayer> FakePlayerFactory<W, P> getFakeClientPlayerFactory(EntityType<? super P> type) {
+        @SuppressWarnings("unchecked") FakePlayerFactory<W, P> factory = (FakePlayerFactory<W, P>) clientFactories.getOrDefault(type, FakeClientPlayerEntity::new);
+        return factory;
+    }
+
+    public interface ServerFakePlayerFactory<P extends PlayerEntity> {
+        P create(EntityType<? extends PlayerEntity> type, ServerWorld world);
+    }
+
     public interface FakePlayerFactory<W extends World, P extends PlayerEntity & AutomatoneFakePlayer> {
+        default P create(EntityType<? super P> type, W world) {
+            return create(type, world, generateGameProfile());
+        }
+
         P create(EntityType<? super P> type, W world, GameProfile profile);
     }
 }

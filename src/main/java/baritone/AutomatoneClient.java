@@ -115,7 +115,8 @@ public final class AutomatoneClient implements ClientModInitializer {
     private <P extends PlayerEntity & AutomatoneFakePlayer> void spawnPlayer(int id, UUID uuid, EntityType<?> entityTypeId, String name, double x, double y, double z, float yaw, float pitch, GameProfile profile) {
         ClientWorld world = MinecraftClient.getInstance().world;
         assert world != null;
-        P other = FakeClientPlayerEntity.createClientFakePlayer(entityTypeId, world, new GameProfile(uuid, name));
+        @SuppressWarnings("unchecked") EntityType<P> playerType = (EntityType<P>) entityTypeId;
+        P other = FakeClientPlayerEntity.createClientFakePlayer(playerType, world, new GameProfile(uuid, name));
         other.setEntityId(id);
         other.resetPosition(x, y, z);
         other.updateTrackedPosition(x, y, z);
