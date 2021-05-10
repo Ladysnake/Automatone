@@ -35,11 +35,12 @@
 package baritone.launch.mixins.player;
 
 import baritone.api.fakeplayer.AutomatoneFakePlayer;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -52,8 +53,6 @@ import java.util.List;
 
 @Mixin(ServerWorld.class)
 public abstract class ServerWorldMixin {
-    private @Nullable Entity automatone$despawningFakePlayer;
-
     @Shadow
     public abstract ServerChunkManager getChunkManager();
     @Shadow
@@ -62,6 +61,11 @@ public abstract class ServerWorldMixin {
     @Shadow
     @Final
     private List<ServerPlayerEntity> players;
+
+    @Shadow boolean inEntityTick;
+    @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
+
+    @Shadow public abstract void unloadEntity(Entity entity);
 
     private boolean requiem$fakePlayerSleeping = false;
 
@@ -90,23 +94,19 @@ public abstract class ServerWorldMixin {
     /**
      * Chunk unloading performs a {@code !(entity instanceof ServerPlayerEntity)} check.
      *
-     * <p>We force the check to succeed by temporarily setting {@code entity} to {@code null}
+     * <p><strike>We force the check to succeed by temporarily setting {@code entity} to {@code null}</strike>
+     * That was not a good idea, so we just copy the unloading code.
      */
+    // ModifyVariable for easy capture
     @ModifyVariable(method = "unloadEntities", at = @At(value = "LOAD", ordinal = 0), allow = 1)
     private Entity unloadFakePlayers(Entity checked) {
         if (checked instanceof AutomatoneFakePlayer) {
-            automatone$despawningFakePlayer = checked;
-            return null;
-        }
-        return checked;
-    }
+            if (this.inEntityTick) {
+                throw Util.throwOrPause(new IllegalStateException("Removing entity while ticking!"));
+            }
 
-    @ModifyVariable(method = "unloadEntities", at = @At(value = "CONSTANT", ordinal = 0, args = "classValue=net/minecraft/server/network/ServerPlayerEntity"), allow = 1)
-    private Entity unloadFakePlayers2(Entity checked) {
-        Entity ret = automatone$despawningFakePlayer;
-        if (ret != null) {
-            automatone$despawningFakePlayer = null;
-            return ret;
+            this.entitiesById.remove(checked.getEntityId());
+            this.unloadEntity(checked);
         }
         return checked;
     }
