@@ -1,4 +1,13 @@
 ------------------------------------------------------
+Version 0.3.5
+------------------------------------------------------
+**Changes**
+- Automatone no longer comes with a default fake player type - making it usable as a serverside-only
+
+**Fixes**
+- Fixed a crash when a player stood on a block with a dynamic collision box
+
+------------------------------------------------------
 Version 0.3.4
 ------------------------------------------------------
 - Hopefully fixed chunk saving error when unloading fake players
