@@ -547,8 +547,13 @@ public interface MovementHelper extends ActionCosts {
                 || block instanceof ShulkerBoxBlock) {
             return false;
         }
-        // PERF: isShapeFullCube is slow, but people can install lithium to fix it
-        return state.isFullCube(null, null);
+        try {
+            // PERF: isShapeFullCube is slow, but people can install lithium to fix it
+            // World lookups too slow, just pass null and pray
+            return state.isFullCube(null, BlockPos.ORIGIN);
+        } catch (NullPointerException npe) {
+            return false;
+        }
     }
 
     static PlaceResult attemptToPlaceABlock(MovementState state, IBaritone baritone, BlockPos placeAt, boolean preferDown, boolean wouldSneak) {
