@@ -8,9 +8,9 @@
 -overloadaggressively
 -dontusemixedcaseclassnames
 
-# instead of renaming to a, b, c, rename to baritone.a, baritone.b, baritone.c so as to not conflict with minecraft's obfd classes
+# instead of renaming to a, b, c, rename to ladysnake.automatone.a, ladysnake.automatone.b, ladysnake.automatone.c so as to not conflict with minecraft's obfd classes
 -flattenpackagehierarchy
--repackageclasses 'baritone'
+-repackageclasses ladysnake.automatone
 
 # lwjgl is weird
 -dontwarn org.lwjgl.**
