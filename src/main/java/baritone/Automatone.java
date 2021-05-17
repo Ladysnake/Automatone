@@ -17,23 +17,15 @@
 
 package baritone;
 
-import baritone.api.fakeplayer.FakePlayers;
-import baritone.api.fakeplayer.FakeServerPlayerEntity;
 import baritone.command.defaults.DefaultCommands;
 import baritone.command.manager.BaritoneArgumentType;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.minecraft.command.argument.ArgumentTypes;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,16 +49,6 @@ public final class Automatone implements ModInitializer {
         threadPool = new ThreadPoolExecutor(4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), r -> new Thread(r, "Automatone Worker " + threadCounter.incrementAndGet()));
     }
 
-    public static final EntityType<PlayerEntity> FAKE_PLAYER = FabricEntityTypeBuilder.<PlayerEntity>createLiving()
-            .spawnGroup(SpawnGroup.MISC)
-            .entityFactory(FakePlayers.entityFactory(FakeServerPlayerEntity::new))
-            .defaultAttributes(PlayerEntity::createPlayerAttributes)
-            .dimensions(EntityDimensions.changing(EntityType.PLAYER.getWidth(), EntityType.PLAYER.getHeight()))
-            .trackRangeBlocks(64)
-            .trackedUpdateRate(1)
-            .forceTrackedVelocityUpdates(true)
-            .build();
-
     public static Identifier id(String path) {
         return new Identifier(MOD_ID, path);
     }
@@ -79,6 +61,5 @@ public final class Automatone implements ModInitializer {
     public void onInitialize() {
         DefaultCommands.registerAll();
         ArgumentTypes.register("automatone:command", BaritoneArgumentType.class, new ConstantArgumentSerializer<>(BaritoneArgumentType::baritone));
-        Registry.register(Registry.ENTITY_TYPE, id("fake_player"), FAKE_PLAYER);
     }
 }

@@ -59,6 +59,10 @@ sourceSets {
         compileClasspath += main.compileClasspath + main.runtimeClasspath + main.output
         runtimeClasspath += main.compileClasspath + main.runtimeClasspath + main.output
     }
+    testmod {
+        compileClasspath += launch.compileClasspath + launch.runtimeClasspath + launch.output
+        runtimeClasspath += launch.compileClasspath + launch.runtimeClasspath + launch.output
+    }
 
     schematica_api {
         compileClasspath += main.compileClasspath
