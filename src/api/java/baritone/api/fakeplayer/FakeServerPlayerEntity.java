@@ -209,6 +209,9 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
         if (tag.contains("automatone:display_profile", NbtType.COMPOUND)) {
             this.displayProfile = NbtHelper.toGameProfile(tag.getCompound("automatone:display_profile"));
         }
+        if (tag.contains("head_yaw")) {
+            this.headYaw = tag.getFloat("head_yaw");
+        }
     }
 
     @Override
@@ -217,6 +220,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
         if (this.displayProfile != null) {
             tag.put("automatone:display_profile", NbtHelper.fromGameProfile(new CompoundTag(), this.displayProfile));
         }
+        tag.putFloat("head_yaw", this.headYaw);
     }
 
     @Override
@@ -236,6 +240,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
         buf.writeDouble(this.getZ());
         buf.writeByte((byte)((int)(this.yaw * 256.0F / 360.0F)));
         buf.writeByte((byte)((int)(this.pitch * 256.0F / 360.0F)));
+        buf.writeByte((byte)((int)(this.headYaw * 256.0F / 360.0F)));
         writeProfile(buf, this.getDisplayProfile());
     }
 

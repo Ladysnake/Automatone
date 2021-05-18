@@ -41,7 +41,11 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.WeakHashMap;
 
 @KeepName
 public final class AutomatoneClient implements ClientModInitializer {
@@ -87,8 +91,9 @@ public final class AutomatoneClient implements ClientModInitializer {
             double z = buf.readDouble();
             float yaw = (float)(buf.readByte() * 360) / 256.0F;
             float pitch = (float)(buf.readByte() * 360) / 256.0F;
+            float headYaw = (float)(buf.readByte() * 360) / 256.0F;
             GameProfile profile = readProfile(buf);
-            client.execute(() -> spawnPlayer(id, uuid, entityTypeId, name, x, y, z, yaw, pitch, profile));
+            client.execute(() -> spawnPlayer(id, uuid, entityTypeId, name, x, y, z, yaw, pitch, headYaw, profile));
         });
         ClientPlayNetworking.registerGlobalReceiver(FakePlayers.PROFILE_UPDATE_PACKET_ID, (client, handler, buf, responseSender) -> {
             int entityId = buf.readVarInt();
@@ -108,7 +113,7 @@ public final class AutomatoneClient implements ClientModInitializer {
         });
     }
 
-    private <P extends PlayerEntity & AutomatoneFakePlayer> void spawnPlayer(int id, UUID uuid, EntityType<?> entityTypeId, String name, double x, double y, double z, float yaw, float pitch, GameProfile profile) {
+    private <P extends PlayerEntity & AutomatoneFakePlayer> void spawnPlayer(int id, UUID uuid, EntityType<?> entityTypeId, String name, double x, double y, double z, float yaw, float pitch, float headYaw, GameProfile profile) {
         ClientWorld world = MinecraftClient.getInstance().world;
         assert world != null;
         @SuppressWarnings("unchecked") EntityType<P> playerType = (EntityType<P>) entityTypeId;
@@ -116,6 +121,10 @@ public final class AutomatoneClient implements ClientModInitializer {
         other.setEntityId(id);
         other.resetPosition(x, y, z);
         other.updateTrackedPosition(x, y, z);
+        other.bodyYaw = headYaw;
+        other.prevBodyYaw = headYaw;
+        other.headYaw = headYaw;
+        other.prevHeadYaw = headYaw;
         other.updatePositionAndAngles(x, y, z, yaw, pitch);
         other.setDisplayProfile(profile);
         world.addEntity(id, other);
