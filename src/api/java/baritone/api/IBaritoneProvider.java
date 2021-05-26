@@ -21,6 +21,7 @@ import baritone.api.cache.IWorldScanner;
 import baritone.api.command.ICommand;
 import baritone.api.command.ICommandSystem;
 import baritone.api.schematic.ISchematicSystem;
+import dev.onyxstudios.cca.api.v3.entity.EntityComponentFactory;
 import net.minecraft.entity.LivingEntity;
 
 /**
@@ -60,4 +61,6 @@ public interface IBaritoneProvider {
     ISchematicSystem getSchematicSystem();
 
     Settings getGlobalSettings();
+
+    <E extends LivingEntity> EntityComponentFactory<IBaritone, E> componentFactory();
 }

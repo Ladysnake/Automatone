@@ -27,6 +27,7 @@ import baritone.cache.WorldScanner;
 import baritone.command.CommandSystem;
 import baritone.utils.SettingsLoader;
 import baritone.utils.schematic.SchematicSystem;
+import dev.onyxstudios.cca.api.v3.entity.EntityComponentFactory;
 import net.minecraft.entity.LivingEntity;
 
 /**
@@ -73,5 +74,10 @@ public final class BaritoneProvider implements IBaritoneProvider {
     @Override
     public Settings getGlobalSettings() {
         return this.settings;
+    }
+
+    @Override
+    public <E extends LivingEntity> EntityComponentFactory<IBaritone, E> componentFactory() {
+        return Baritone::new;
     }
 }

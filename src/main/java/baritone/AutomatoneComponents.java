@@ -17,6 +17,7 @@
 
 package baritone;
 
+import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.cache.IWorldProvider;
 import baritone.api.selection.ISelectionManager;
@@ -39,7 +40,7 @@ public final class AutomatoneComponents implements EntityComponentInitializer, W
     public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
         registry.registerFor(LivingEntity.class, IPlayerController.KEY, entity -> DummyEntityController.INSTANCE);
         registry.registerFor(LivingEntity.class, ISelectionManager.KEY, SelectionManager::new);
-        registry.registerFor(PlayerEntity.class, IBaritone.KEY, Baritone::new);
+        registry.registerFor(PlayerEntity.class, IBaritone.KEY, BaritoneAPI.getProvider().componentFactory());
         registry.registerFor(ServerPlayerEntity.class, IPlayerController.KEY, ServerPlayerController::new);
     }
 

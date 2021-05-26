@@ -48,6 +48,30 @@ baritone.settings().primaryTimeoutMS.set(2000L);
 baritone.getCustomGoalProcess().setGoalAndPath(new GoalXZ(10000, 20000));
 ```
 
+### Making your own non-player entity use Automatone
+You need to register the relevant component for your entity, using the component factory provided
+by Automatone:
+
+```java
+public final class MyComponents implements EntityComponentInitializer {
+    @Override
+    public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
+        registry.registerFor(MyEntity.class, IBaritone.KEY, BaritoneAPI.getProvider().componentFactory());
+    }
+}
+```
+> Do not forget to add that class as an entrypoint with the `cardinal-components-entity` key !
+```json
+{
+  "entrypoints": {
+    "cardinal-components-entity": [
+      "my.package.MyComponents"
+    ]
+  }
+}
+```
+For more information on how components work, refer to [Cardinal Components API's documentation](https://github.com/OnyxStudios/Cardinal-Components-API/wiki).
+
 ## FAQ
 
 ### Can I use Automatone as a library in my mob mod?
