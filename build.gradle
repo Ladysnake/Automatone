@@ -19,27 +19,24 @@
 import baritone.gradle.task.CreateDistTask
 import baritone.gradle.task.DeterminizingTask
 import baritone.gradle.task.ProguardTask
-import net.fabricmc.loom.LoomGradlePlugin
+import net.fabricmc.loom.task.RemapJarTask
 
 import java.util.stream.Collectors
 
 plugins {
-    id 'fabric-loom' version '0.6-SNAPSHOT'
-    id 'com.jfrog.artifactory' version '4.20.0'
+    id 'fabric-loom' version '0.8-SNAPSHOT'
+    id 'com.jfrog.artifactory' version '4.21.0'
     id 'org.ajoberstar.grgit' version '3.1.1'
-    id 'com.github.breadmoirai.github-release' version '2.2.9'
+    id 'com.github.breadmoirai.github-release' version '2.2.12'
     id 'maven-publish'
 }
 
 group project.maven_group
 version project.mod_version
 
-apply plugin: 'java'
-apply plugin: LoomGradlePlugin
-
-sourceCompatibility = targetCompatibility = '1.8'
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
 compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
     options.encoding = "UTF-8" // allow emoji in comments :^)
 }
 
@@ -73,15 +70,6 @@ sourceSets {
     }
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier 'sources'
-    from sourceSets.api.allSource
-}
-
-minecraft {
-    refmapName = 'mixins.automatone.refmap.json'
-}
-
 repositories {
     mavenCentral()
 
@@ -99,17 +87,6 @@ repositories {
             includeGroup 'com.jamieswhiteshirt'
         }
     }
-    maven {
-        name = 'SpongePowered'
-        url = 'https://repo.spongepowered.org/repository/maven-public/'
-    }
-    maven {
-        name = 'impactdevelopment-repo'
-        url = 'https://impactdevelopment.github.io/maven/'
-    }
-    maven {
-        url = 'https://www.dogforce-games.com/maven/'
-    }
 }
 
 dependencies {
@@ -125,22 +102,31 @@ dependencies {
     compileOnly "com.demonwav.mcdev:annotations:1.0"
 
     testImplementation 'junit:junit:4.12'
+}
 
-    // this makes it compile with the forge tweak stuff
-    compile ('net.minecraft:launchwrapper:1.12') {
-        transitive = false
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier 'sources'
+    from sourceSets.api.allSource
+}
+
+task testmodJar(type: Jar, dependsOn: testmodClasses) {
+    archiveBaseName.set('Otomaton')
+    archiveClassifier.set('dev')
+    filesMatching('fabric.mod.json') {
+        expand 'version': project.version
     }
-    compile 'net.sf.jopt-simple:jopt-simple:5.0.3'
+}
+
+task remapTestmodJar(type: RemapJarTask, dependsOn: project.testmodJar) {
+    archiveBaseName.set('Otomaton')
+    input.set(testmodJar.archiveFile)
+    addNestedDependencies.set(false)
 }
 
 processLaunchResources {
     inputs.property "version", project.version
-    from(sourceSets.launch.resources.srcDirs) {
-        include "fabric.mod.json"
+    filesMatching('fabric.mod.json') {
         expand "version": project.version
-    }
-    from(sourceSets.launch.resources.srcDirs) {
-        exclude "fabric.mod.json"
     }
 }
 
@@ -160,13 +146,8 @@ tasks.withType(JavaCompile).configureEach {
     // If Javadoc is generated, this must be specified in that task too.
     it.options.encoding = "UTF-8"
 
-    // The Minecraft launcher currently installs Java 8 for users, so your mod probably wants to target Java 8 too
-    // JDK 9 introduced a new way of specifying this that will make sure no newer classes or methods are used.
-    // We'll use that if it's available, but otherwise we'll use the older option.
-    def targetVersion = 8
-    if (JavaVersion.current().isJava9Compatible()) {
-        it.options.release = targetVersion
-    }
+    // Minecraft 1.17 (21w19a) upwards uses Java 16.
+    it.options.release.set(16)
 }
 
 jar {
@@ -191,13 +172,13 @@ remapJar.configure {
 
 // skidded from ProguardTask
 task determinizeBuiltJar(type: DeterminizingTask) {
-    input = remapJar.archiveFile
-    archiveClassifier = 'unoptimized'
+    input.set(remapJar.archiveFile)
+    archiveClassifier.set('unoptimized')
 }
 
 task proguard(type: ProguardTask, dependsOn: determinizeBuiltJar) {
-    input = determinizeBuiltJar.archiveFile
-    archiveClassifier = 'optimized'
+    input.set(determinizeBuiltJar.archiveFile)
+    archiveClassifier.set('optimized')
     url 'https://github.com/Guardsquare/proguard/releases/download/v7.1.0-beta1/proguard-7.1.0-beta1.zip'
     extract 'proguard-7.1.0-beta1/lib/proguard.jar'
     afterEvaluate {
@@ -215,7 +196,6 @@ task proguard(type: ProguardTask, dependsOn: determinizeBuiltJar) {
                 .collect(Collectors.toList())
         )
     }
-
 }
 
 task createDist(type: CreateDistTask, dependsOn: proguard) {
