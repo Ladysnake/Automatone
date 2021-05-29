@@ -26,7 +26,12 @@ import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.jvm.tasks.Jar;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -107,7 +112,7 @@ public class ProguardTask extends Jar {
         }
     }
 
-    protected Path getProguardConfigFile() {
+    private Path getProguardConfigFile() {
         return Paths.get(new File(this.getProject().getProjectDir(), ProguardTask.PROGUARD_CONFIG_TEMPLATE).getAbsolutePath());
     }
 
@@ -139,6 +144,14 @@ public class ProguardTask extends Jar {
             Files.delete(this.proguardOut);
         } catch (IOException ignored) {
         }
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getExtract() {
+        return extract;
     }
 
     public void setUrl(String url) {
