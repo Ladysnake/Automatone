@@ -17,14 +17,11 @@
 
 package baritone.api.utils.gui;
 
-import net.minecraft.client.util.math.MatrixStack;
-
-import com.mojang.blaze3d.platform.GlStateManager;
-
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 public class BaritoneToast implements Toast
 {
@@ -47,7 +44,6 @@ public class BaritoneToast implements Toast
         }
 
         toastGui.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
-        GlStateManager.color4f(1.0F, 1.0F, 1.0F, 255.0f);
         toastGui.drawTexture(stack, 0, 0, 0, 32, 160, 32);
 
         if (this.subtitle == null) {

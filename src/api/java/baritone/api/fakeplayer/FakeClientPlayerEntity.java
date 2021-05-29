@@ -71,7 +71,7 @@ public class FakeClientPlayerEntity extends OtherClientPlayerEntity implements A
     public void setPlayerListEntry(@Nullable GameProfile profile) {
         this.listEntry = profile == null
             ? null
-            : new PlayerListEntry(new PlayerListS2CPacket(). new Entry(profile, 0, null, null));
+            : new PlayerListEntry(new PlayerListS2CPacket.Entry(profile, 0, null, null));
     }
 
     @Override

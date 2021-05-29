@@ -180,7 +180,7 @@ public final class RotationUtils {
              *
              * or if you're a normal person literally all this does it ensure that we don't nudge the pitch to a normal level
              */
-            Rotation hypothetical = new Rotation(entity.yaw, entity.pitch + 0.0001F);
+            Rotation hypothetical = new Rotation(entity.getYaw(), entity.getPitch() + 0.0001F);
             if (wouldSneak) {
                 // the concern here is: what if we're looking at it now, but as soon as we start sneaking we no longer are
                 HitResult result = RayTraceUtils.rayTraceTowards(entity, hypothetical, blockReachDistance, true);
@@ -227,7 +227,7 @@ public final class RotationUtils {
      */
     public static Optional<Rotation> reachableOffset(Entity entity, BlockPos pos, Vec3d offsetPos, double blockReachDistance, boolean wouldSneak) {
         Vec3d eyes = wouldSneak ? RayTraceUtils.inferSneakingEyePosition(entity) : entity.getCameraPosVec(1.0F);
-        Rotation rotation = calcRotationFromVec3d(eyes, offsetPos, new Rotation(entity.yaw, entity.pitch));
+        Rotation rotation = calcRotationFromVec3d(eyes, offsetPos, new Rotation(entity.getYaw(), entity.getPitch()));
         HitResult result = RayTraceUtils.rayTraceTowards(entity, rotation, blockReachDistance, wouldSneak);
         //Automatone.LOGGER.debug(result);
         if (result != null && result.getType() == HitResult.Type.BLOCK) {

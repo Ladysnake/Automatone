@@ -21,7 +21,11 @@ import baritone.Baritone;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.pathing.movement.MovementStatus;
-import baritone.api.utils.*;
+import baritone.api.utils.BetterBlockPos;
+import baritone.api.utils.IEntityContext;
+import baritone.api.utils.Rotation;
+import baritone.api.utils.RotationUtils;
+import baritone.api.utils.VecUtils;
 import baritone.api.utils.input.Input;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
@@ -30,7 +34,14 @@ import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.pathing.MutableMoveResult;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FallingBlock;
+import net.minecraft.block.FenceGateBlock;
+import net.minecraft.block.LadderBlock;
+import net.minecraft.block.ScaffoldingBlock;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
@@ -229,9 +240,9 @@ public class MovementPillar extends Movement {
         boolean ladder = isClimbable(((Baritone) baritone).bsi, src.x, src.y, src.z);
         Rotation rotation = RotationUtils.calcRotationFromVec3d(ctx.headPos(),
                 VecUtils.getBlockPosCenter(positionToPlace),
-                new Rotation(ctx.entity().yaw, ctx.entity().pitch));
+                new Rotation(ctx.entity().getYaw(), ctx.entity().getPitch()));
         if (!ladder) {
-            state.setTarget(new MovementState.MovementTarget(new Rotation(ctx.entity().yaw, rotation.getPitch()), true));
+            state.setTarget(new MovementState.MovementTarget(new Rotation(ctx.entity().getYaw(), rotation.getPitch()), true));
         }
 
         boolean blockIsThere = MovementHelper.canWalkOn(ctx, src) || ladder;

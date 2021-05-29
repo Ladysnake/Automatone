@@ -87,7 +87,7 @@ public interface IEntityContext {
     }
 
     default Rotation entityRotations() {
-        return new Rotation(entity().yaw, entity().pitch);
+        return new Rotation(entity().getYaw(), entity().getPitch());
     }
 
     /**

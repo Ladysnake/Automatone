@@ -22,7 +22,12 @@ import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.pathing.movement.ActionCosts;
 import baritone.api.pathing.movement.MovementStatus;
-import baritone.api.utils.*;
+import baritone.api.utils.BetterBlockPos;
+import baritone.api.utils.IEntityContext;
+import baritone.api.utils.RayTraceUtils;
+import baritone.api.utils.Rotation;
+import baritone.api.utils.RotationUtils;
+import baritone.api.utils.VecUtils;
 import baritone.api.utils.input.Input;
 import baritone.pathing.movement.MovementState.MovementTarget;
 import baritone.utils.BlockStateInterface;
@@ -33,7 +38,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.fluid.*;
+import net.minecraft.fluid.FlowableFluid;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.fluid.WaterFluid;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.tag.FluidTags;
@@ -322,7 +331,7 @@ public interface MovementHelper extends ActionCosts {
         if (state.isIn(BlockTags.CLIMBABLE)) { // TODO reconsider this
             return true;
         }
-        if (block == Blocks.FARMLAND || block == Blocks.GRASS_PATH) {
+        if (block == Blocks.FARMLAND || block == Blocks.DIRT_PATH) {
             return true;
         }
         if (block == Blocks.ENDER_CHEST || block == Blocks.CHEST || block == Blocks.TRAPPED_CHEST) {
@@ -469,7 +478,7 @@ public interface MovementHelper extends ActionCosts {
         state.setTarget(new MovementTarget(
                 new Rotation(RotationUtils.calcRotationFromVec3d(ctx.headPos(),
                         VecUtils.getBlockPosCenter(pos),
-                        ctx.entityRotations()).getYaw(), ctx.entity().pitch),
+                        ctx.entityRotations()).getYaw(), ctx.entity().getPitch()),
                 false
         )).setInput(Input.MOVE_FORWARD, true);
     }

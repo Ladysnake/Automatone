@@ -73,7 +73,7 @@ public class BlockStateInterface {
     }
 
     public BlockState get0(int x, int y, int z) { // Mickey resigned
-        if (World.isOutOfBuildLimitVertically(y)) return AIR;
+        if (this.world.isOutOfHeightLimit(y)) return AIR;
 
         WorldChunk cached = prev;
         // there's great cache locality in block state lookups

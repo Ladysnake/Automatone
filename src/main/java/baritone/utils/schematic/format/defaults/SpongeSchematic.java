@@ -23,7 +23,7 @@ import baritone.utils.type.VarInt;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -40,14 +40,14 @@ import java.util.regex.Pattern;
  */
 public final class SpongeSchematic extends StaticSchematic {
 
-    public SpongeSchematic(CompoundTag nbt) {
+    public SpongeSchematic(NbtCompound nbt) {
         this.x = nbt.getInt("Width");
         this.y = nbt.getInt("Height");
         this.z = nbt.getInt("Length");
         this.states = new BlockState[this.x][this.z][this.y];
 
         Int2ObjectArrayMap<BlockState> palette = new Int2ObjectArrayMap<>();
-        CompoundTag paletteTag = nbt.getCompound("Palette");
+        NbtCompound paletteTag = nbt.getCompound("Palette");
         for (String tag : paletteTag.getKeys()) {
             int index = paletteTag.getInt(tag);
 

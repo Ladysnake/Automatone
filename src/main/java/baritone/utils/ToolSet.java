@@ -111,7 +111,7 @@ public class ToolSet {
         possible, this lets us make pathing depend on the actual tool to be used (if auto tool is disabled)
         */
         if (baritone.settings().disableAutoTool.get() && pathingCalculation) {
-            return player.inventory.selectedSlot;
+            return player.getInventory().selectedSlot;
         }
 
         int best = 0;
@@ -120,7 +120,7 @@ public class ToolSet {
         boolean bestSilkTouch = false;
         BlockState blockState = b.getDefaultState();
         for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = player.inventory.getStack(i);
+            ItemStack itemStack = player.getInventory().getStack(i);
             if (!baritone.settings().useSwordToMine.get() && itemStack.getItem() instanceof SwordItem) {
                 continue;
             }
@@ -156,7 +156,7 @@ public class ToolSet {
      * @return A double containing the destruction ticks with the best tool
      */
     private double getBestDestructionTime(Block b) {
-        ItemStack stack = player.inventory.getStack(getBestSlot(b, false, true));
+        ItemStack stack = player.getInventory().getStack(getBestSlot(b, false, true));
         return calculateSpeedVsBlock(stack, b.getDefaultState()) * avoidanceMultiplier(b);
     }
 
@@ -187,7 +187,7 @@ public class ToolSet {
         }
 
         speed /= hardness;
-        if (!state.isToolRequired() || (!item.isEmpty() && item.isEffectiveOn(state))) {
+        if (!state.isToolRequired() || (!item.isEmpty() && item.isSuitableFor(state))) {
             return speed / 30;
         } else {
             return speed / 100;
@@ -210,18 +210,10 @@ public class ToolSet {
         StatusEffectInstance fatigueEffect = player.getStatusEffect(StatusEffects.MINING_FATIGUE);
         if (fatigueEffect != null) {
             switch (fatigueEffect.getAmplifier()) {
-                case 0:
-                    speed *= 0.3;
-                    break;
-                case 1:
-                    speed *= 0.09;
-                    break;
-                case 2:
-                    speed *= 0.0027; // you might think that 0.09*0.3 = 0.027 so that should be next, that would make too much sense. it's 0.0027.
-                    break;
-                default:
-                    speed *= 0.00081;
-                    break;
+                case 0 -> speed *= 0.3;
+                case 1 -> speed *= 0.09;
+                case 2 -> speed *= 0.0027; // you might think that 0.09*0.3 = 0.027 so that should be next, that would make too much sense. it's 0.0027.
+                default -> speed *= 0.00081;
             }
         }
         return speed;

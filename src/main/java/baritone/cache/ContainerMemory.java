@@ -23,12 +23,17 @@ import baritone.api.cache.IContainerMemory;
 import baritone.api.cache.IRememberedInventory;
 import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class ContainerMemory implements IContainerMemory {
 
@@ -38,11 +43,11 @@ public class ContainerMemory implements IContainerMemory {
     // TODO hook up to ServerBlockEntityEvents to remember every inventory ever loaded :)
     private final Map<BlockPos, RememberedInventory> inventories = new HashMap<>();
 
-    public void read(CompoundTag tag) {
+    public void read(NbtCompound tag) {
         try {
-            ListTag nbtInventories = tag.getList("inventories", NbtType.COMPOUND);
+            NbtList nbtInventories = tag.getList("inventories", NbtType.COMPOUND);
             for (int i = 0; i < nbtInventories.size(); i++) {
-                CompoundTag nbtEntry = nbtInventories.getCompound(i);
+                NbtCompound nbtEntry = nbtInventories.getCompound(i);
                 BlockPos pos = NbtHelper.toBlockPos(nbtEntry.getCompound("pos"));
                 RememberedInventory rem = new RememberedInventory();
                 rem.fromNbt(nbtEntry.getList("content", NbtType.LIST));
@@ -57,12 +62,12 @@ public class ContainerMemory implements IContainerMemory {
         }
     }
 
-    public CompoundTag toNbt() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toNbt() {
+        NbtCompound tag = new NbtCompound();
         if (BaritoneAPI.getGlobalSettings().containerMemory.get()) {
-            ListTag list = new ListTag();
+            NbtList list = new NbtList();
             for (Map.Entry<BlockPos, RememberedInventory> entry : inventories.entrySet()) {
-                CompoundTag nbtEntry = new CompoundTag();
+                NbtCompound nbtEntry = new NbtCompound();
                 nbtEntry.put("pos", NbtHelper.fromBlockPos(entry.getKey()));
                 nbtEntry.put("content", entry.getValue().toNbt());
                 list.add(nbtEntry);
@@ -129,17 +134,17 @@ public class ContainerMemory implements IContainerMemory {
             return this.size;
         }
 
-        public ListTag toNbt() {
-            ListTag inv = new ListTag();
+        public NbtList toNbt() {
+            NbtList inv = new NbtList();
             for (ItemStack item : this.items) {
-                inv.add(item.toTag(new CompoundTag()));
+                inv.add(item.writeNbt(new NbtCompound()));
             }
             return inv;
         }
 
-        public void fromNbt(ListTag content) {
+        public void fromNbt(NbtList content) {
             for (int i = 0; i < content.size(); i++) {
-                this.items.add(ItemStack.fromTag(content.getCompound(i)));
+                this.items.add(ItemStack.fromNbt(content.getCompound(i)));
             }
             this.size = this.items.size();
             this.windowId = -1;

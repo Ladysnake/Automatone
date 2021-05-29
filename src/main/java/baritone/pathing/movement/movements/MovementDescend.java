@@ -31,7 +31,11 @@ import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.pathing.MutableMoveResult;
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FallingBlock;
+import net.minecraft.block.ScaffoldingBlock;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
@@ -279,7 +283,7 @@ public class MovementDescend extends Movement {
             state.setTarget(new MovementState.MovementTarget(
                     new Rotation(RotationUtils.calcRotationFromVec3d(ctx.headPos(),
                             new Vec3d(destX, dest.getY(), destZ),
-                            new Rotation(player.yaw, player.pitch)).getYaw(), player.pitch),
+                            new Rotation(player.getYaw(), player.getPitch())).getYaw(), player.getPitch()),
                     false
             )).setInput(Input.MOVE_FORWARD, true);
             return state;

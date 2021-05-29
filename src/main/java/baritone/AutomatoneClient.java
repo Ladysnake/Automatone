@@ -18,7 +18,6 @@
 package baritone;
 
 import baritone.api.IBaritone;
-import baritone.api.event.events.RenderEvent;
 import baritone.api.fakeplayer.AutomatoneFakePlayer;
 import baritone.api.fakeplayer.FakeClientPlayerEntity;
 import baritone.api.fakeplayer.FakePlayers;
@@ -32,6 +31,8 @@ import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -52,19 +53,19 @@ public final class AutomatoneClient implements ClientModInitializer {
     public static final Set<Baritone> renderList = Collections.newSetFromMap(new WeakHashMap<>());
     public static final Set<ISelectionManager> selectionRenderList = Collections.newSetFromMap(new WeakHashMap<>());
 
-    public static void onRenderPass(RenderEvent renderEvent) {
+    public static void onRenderPass(WorldRenderContext context) {
         MinecraftClient mc = MinecraftClient.getInstance();
 
         if (mc.currentScreen instanceof GuiClick) {
-            ((GuiClick) mc.currentScreen).onRender(renderEvent.getModelViewStack(), renderEvent.getProjectionMatrix());
+            ((GuiClick) mc.currentScreen).onRender(context.matrixStack(), context.projectionMatrix());
         }
 
         for (Baritone baritone : renderList) {
-            PathRenderer.render(renderEvent, baritone.getClientPathingBehaviour());
+            PathRenderer.render(context, baritone.getClientPathingBehaviour());
         }
 
         for (ISelectionManager selectionManager : selectionRenderList) {
-            SelectionRenderer.renderSelections(renderEvent.getModelViewStack(), selectionManager.getSelections());
+            SelectionRenderer.renderSelections(selectionManager.getSelections());
         }
 
         if (!mc.isIntegratedServerRunning()) {
@@ -72,11 +73,12 @@ public final class AutomatoneClient implements ClientModInitializer {
             return;
         }
 
-        DefaultCommands.selCommand.renderSelectionBox(renderEvent);
+        DefaultCommands.selCommand.renderSelectionBox();
     }
 
     @Override
     public void onInitializeClient() {
+        WorldRenderEvents.BEFORE_DEBUG_RENDER.register(AutomatoneClient::onRenderPass);
         ClientPlayNetworking.registerGlobalReceiver(ClickCommand.OPEN_CLICK_SCREEN, (client, handler, buf, responseSender) -> {
             UUID uuid = buf.readUuid();
             client.execute(() -> MinecraftClient.getInstance().openScreen(new GuiClick(uuid)));
@@ -119,7 +121,7 @@ public final class AutomatoneClient implements ClientModInitializer {
         @SuppressWarnings("unchecked") EntityType<P> playerType = (EntityType<P>) entityTypeId;
         P other = FakeClientPlayerEntity.createClientFakePlayer(playerType, world, new GameProfile(uuid, name));
         other.setEntityId(id);
-        other.resetPosition(x, y, z);
+        other.setPosition(x, y, z);
         other.updateTrackedPosition(x, y, z);
         other.bodyYaw = headYaw;
         other.prevBodyYaw = headYaw;

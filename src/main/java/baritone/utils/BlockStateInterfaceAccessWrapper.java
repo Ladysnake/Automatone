@@ -53,4 +53,14 @@ public final class BlockStateInterfaceAccessWrapper implements BlockView {
     public FluidState getFluidState(BlockPos blockPos) {
         return getBlockState(blockPos).getFluidState();
     }
+
+    @Override
+    public int getHeight() {
+        return this.bsi.world.getHeight();
+    }
+
+    @Override
+    public int getBottomY() {
+        return this.bsi.world.getBottomY();
+    }
 }

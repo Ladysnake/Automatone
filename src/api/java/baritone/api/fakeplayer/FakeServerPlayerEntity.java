@@ -46,7 +46,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
@@ -55,7 +55,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.ServerPlayerInteractionManager;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
@@ -79,7 +78,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     public FakeServerPlayerEntity(EntityType<? extends PlayerEntity> type, ServerWorld world, GameProfile profile) {
-        super(world.getServer(), world, profile, new ServerPlayerInteractionManager(world));
+        super(world.getServer(), world, profile);
         ((IEntityAccessor)this).automatone$setType(type);
         this.stepHeight = 0.6f; // same step height as LivingEntity
         // Side effects go brr
@@ -88,11 +87,11 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
 
     public void selectHotbarSlot(int hotbarSlot) {
         Preconditions.checkArgument(PlayerInventory.isValidHotbarIndex(hotbarSlot));
-        if (this.inventory.selectedSlot != hotbarSlot && this.getActiveHand() == Hand.MAIN_HAND) {
+        if (this.getInventory().selectedSlot != hotbarSlot && this.getActiveHand() == Hand.MAIN_HAND) {
             this.clearActiveItem();
         }
 
-        this.inventory.selectedSlot = hotbarSlot;
+        this.getInventory().selectedSlot = hotbarSlot;
         this.updateLastActionTime();
     }
 
@@ -142,10 +141,9 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
 
     @Override
     public void tickMovement() {
-        if (this.isTouchingWater() && this.isSneaking() && this.method_29920()) {
+        if (this.isTouchingWater() && this.isSneaking() && this.shouldSwimInFluids()) {
             // Mirrors ClientPlayerEntity's sinking behaviour
-            this.setVelocity(this.getVelocity().add(0.0D, -0.04, 0.0D));
-            // TODO MC 1.17 replace with this.knockDownwards()
+            this.knockDownwards();
         }
         super.tickMovement();
     }
@@ -166,9 +164,9 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     @Override
-    public void takeKnockback(float f, double d, double e) {
+    public void takeKnockback(double strength, double x, double z) {
         if (this.velocityModified) {
-            super.takeKnockback(f, d, e);
+            super.takeKnockback(strength, x, z);
         }
     }
 
@@ -180,6 +178,16 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     @Override
     public boolean isSleepingLongEnough() {
         return true;    // Fake players do not delay the sleep of other players
+    }
+
+    /**
+     * Controls whether this should be considered a player for ticking and tracking purposes
+     *
+     * <p>We want fake players to behave like regular entities, so for once we pretend they are not players.
+     */
+    @Override
+    public boolean isPlayer() {
+        return false;
     }
 
     @Override
@@ -204,8 +212,8 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     @Override
-    public void readCustomDataFromTag(CompoundTag tag) {
-        super.readCustomDataFromTag(tag);
+    public void readCustomDataFromNbt(NbtCompound tag) {
+        super.readCustomDataFromNbt(tag);
         if (tag.contains("automatone:display_profile", NbtType.COMPOUND)) {
             this.displayProfile = NbtHelper.toGameProfile(tag.getCompound("automatone:display_profile"));
         }
@@ -215,10 +223,10 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     @Override
-    public void writeCustomDataToTag(CompoundTag tag) {
-        super.writeCustomDataToTag(tag);
+    public void writeCustomDataToNbt(NbtCompound tag) {
+        super.writeCustomDataToNbt(tag);
         if (this.displayProfile != null) {
-            tag.put("automatone:display_profile", NbtHelper.fromGameProfile(new CompoundTag(), this.displayProfile));
+            tag.put("automatone:display_profile", NbtHelper.writeGameProfile(new NbtCompound(), this.displayProfile));
         }
         tag.putFloat("head_yaw", this.headYaw);
     }
@@ -231,22 +239,22 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     protected void writeToSpawnPacket(PacketByteBuf buf) {
-        buf.writeVarInt(this.getEntityId());
+        buf.writeVarInt(this.getId());
         buf.writeUuid(this.getUuid());
         buf.writeVarInt(Registry.ENTITY_TYPE.getRawId(this.getType()));
         buf.writeString(this.getGameProfile().getName());
         buf.writeDouble(this.getX());
         buf.writeDouble(this.getY());
         buf.writeDouble(this.getZ());
-        buf.writeByte((byte)((int)(this.yaw * 256.0F / 360.0F)));
-        buf.writeByte((byte)((int)(this.pitch * 256.0F / 360.0F)));
+        buf.writeByte((byte)((int)(this.getYaw() * 256.0F / 360.0F)));
+        buf.writeByte((byte)((int)(this.getPitch() * 256.0F / 360.0F)));
         buf.writeByte((byte)((int)(this.headYaw * 256.0F / 360.0F)));
         writeProfile(buf, this.getDisplayProfile());
     }
 
     public void sendProfileUpdatePacket() {
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeVarInt(this.getEntityId());
+        buf.writeVarInt(this.getId());
         writeProfile(buf, this.getDisplayProfile());
 
         CustomPayloadS2CPacket packet = new CustomPayloadS2CPacket(FakePlayers.PROFILE_UPDATE_PACKET_ID, buf);

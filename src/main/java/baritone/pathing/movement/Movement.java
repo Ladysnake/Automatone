@@ -20,7 +20,11 @@ package baritone.pathing.movement;
 import baritone.api.IBaritone;
 import baritone.api.pathing.movement.IMovement;
 import baritone.api.pathing.movement.MovementStatus;
-import baritone.api.utils.*;
+import baritone.api.utils.BetterBlockPos;
+import baritone.api.utils.IEntityContext;
+import baritone.api.utils.Rotation;
+import baritone.api.utils.RotationUtils;
+import baritone.api.utils.VecUtils;
 import baritone.api.utils.input.Input;
 import baritone.behavior.PathingBehavior;
 import baritone.utils.BlockStateInterface;
@@ -30,7 +34,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 public abstract class Movement implements IMovement, MovementHelper {
 
@@ -123,7 +131,7 @@ public abstract class Movement implements IMovement, MovementHelper {
     @Override
     public MovementStatus update() {
         if (ctx.entity() instanceof PlayerEntity) {
-            ((PlayerEntity) ctx.entity()).abilities.flying = false;
+            ((PlayerEntity) ctx.entity()).getAbilities().flying = false;
         }
         if (!ctx.baritone().settings().allowSwimming.get() && MovementHelper.isLiquid(ctx, ctx.feetPos())) {
             currentState.setInput(Input.JUMP, true);
@@ -159,7 +167,7 @@ public abstract class Movement implements IMovement, MovementHelper {
         }
         boolean somethingInTheWay = false;
         for (BetterBlockPos blockPos : positionsToBreak) {
-            if (!ctx.world().getEntitiesIncludingUngeneratedChunks(FallingBlockEntity.class, new Box(0, 0, 0, 1, 1.1, 1).offset(blockPos)).isEmpty() && baritone.settings().pauseMiningForFallingBlocks.get()) {
+            if (!ctx.world().getEntitiesByClass(FallingBlockEntity.class, new Box(0, 0, 0, 1, 1.1, 1).offset(blockPos), e -> true).isEmpty() && baritone.settings().pauseMiningForFallingBlocks.get()) {
                 return false;
             }
             if (!MovementHelper.canWalkThrough(ctx, blockPos)) { // can't break air, so don't try

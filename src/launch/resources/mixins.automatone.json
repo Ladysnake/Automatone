@@ -1,14 +1,12 @@
 {
   "required": true,
   "package": "baritone.launch.mixins",
-  "refmap": "mixins.automatone.refmap.json",
   "compatibilityLevel": "JAVA_8",
   "verbose": false,
   "injectors": {
     "maxShiftBy": 2
   },
   "client": [
-    "MixinWorldRenderer"
   ],
   "mixins": [
     "MixinEntity",
@@ -24,7 +22,7 @@
     "player.PlayerAdvancementTrackerMixin",
     "player.PlayerEntityMixin",
     "player.ServerPlayerEntityMixin",
-    "player.ServerWorldMixin",
+    "player.SleepManagerMixin",
     "player.ThreadedAnvilChunkStorageMixin"
   ]
 }

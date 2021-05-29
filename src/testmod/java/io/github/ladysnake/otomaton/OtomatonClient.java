@@ -21,12 +21,17 @@ import baritone.api.fakeplayer.FakeClientPlayerEntity;
 import baritone.api.fakeplayer.FakePlayers;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 
 public class OtomatonClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         FakePlayers.registerClientFactory(Otomaton.FAKE_PLAYER, FakeClientPlayerEntity::new);
-        EntityRendererRegistry.INSTANCE.register(Otomaton.FAKE_PLAYER, (r, it) -> new PlayerEntityRenderer(r));
+        // shh, it's fine
+        @SuppressWarnings("unchecked") EntityType<? extends AbstractClientPlayerEntity> fakePlayerType = (EntityType<? extends AbstractClientPlayerEntity>) (EntityType<? extends PlayerEntity>) Otomaton.FAKE_PLAYER;
+        EntityRendererRegistry.INSTANCE.register(fakePlayerType, (ctx) -> new PlayerEntityRenderer(ctx, false));
     }
 }

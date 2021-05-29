@@ -21,7 +21,7 @@ import baritone.utils.schematic.StaticSchematic;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.datafixer.fix.ItemIdFix;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -31,7 +31,7 @@ import net.minecraft.util.registry.Registry;
  */
 public final class MCEditSchematic extends StaticSchematic {
 
-    public MCEditSchematic(CompoundTag schematic) {
+    public MCEditSchematic(NbtCompound schematic) {
         String type = schematic.getString("Materials");
         if (!type.equals("Alpha")) {
             throw new IllegalStateException("bad schematic " + type);

@@ -25,9 +25,9 @@
     "mixins.automatone.json"
   ],
   "depends": {
-    "cardinal-components-base": "^2.7.13",
-    "cardinal-components-entity": "^2.7.13",
-    "cardinal-components-world": "^2.7.13",
+    "cardinal-components-base": "^3.0.0-",
+    "cardinal-components-entity": "^3.0.0-",
+    "cardinal-components-world": "^3.0.0-",
     "fabric": "*",
     "reach-entity-attributes": "*"
   },

@@ -24,19 +24,30 @@ import baritone.api.cache.IWorldProvider;
 import baritone.api.event.listener.IEventBus;
 import baritone.api.process.IBaritoneProcess;
 import baritone.api.utils.IEntityContext;
-import baritone.behavior.*;
+import baritone.behavior.Behavior;
+import baritone.behavior.InventoryBehavior;
+import baritone.behavior.LookBehavior;
+import baritone.behavior.MemoryBehavior;
+import baritone.behavior.PathingBehavior;
 import baritone.cache.WorldProvider;
 import baritone.command.defaults.DefaultCommands;
 import baritone.command.manager.BaritoneCommandManager;
 import baritone.event.GameEventHandler;
-import baritone.process.*;
+import baritone.process.BackfillProcess;
+import baritone.process.BuilderProcess;
+import baritone.process.CustomGoalProcess;
+import baritone.process.ExploreProcess;
+import baritone.process.FarmProcess;
+import baritone.process.FollowProcess;
+import baritone.process.GetToBlockProcess;
+import baritone.process.MineProcess;
 import baritone.render.ClientPathingBehaviour;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.InputOverrideHandler;
 import baritone.utils.PathingControlManager;
 import baritone.utils.player.EntityContext;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -237,12 +248,12 @@ public class Baritone implements IBaritone {
     }
 
     @Override
-    public void readFromNbt(CompoundTag tag) {
+    public void readFromNbt(NbtCompound tag) {
         // NO-OP
     }
 
     @Override
-    public void writeToNbt(CompoundTag tag) {
+    public void writeToNbt(NbtCompound tag) {
         // NO-OP
     }
 

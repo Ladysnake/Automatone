@@ -30,7 +30,11 @@ import baritone.api.schematic.FillSchematic;
 import baritone.api.schematic.ISchematic;
 import baritone.api.schematic.IStaticSchematic;
 import baritone.api.schematic.format.ISchematicFormat;
-import baritone.api.utils.*;
+import baritone.api.utils.BetterBlockPos;
+import baritone.api.utils.BlockOptionalMeta;
+import baritone.api.utils.RayTraceUtils;
+import baritone.api.utils.Rotation;
+import baritone.api.utils.RotationUtils;
 import baritone.api.utils.input.Input;
 import baritone.pathing.movement.CalculationContext;
 import baritone.pathing.movement.Movement;
@@ -57,12 +61,22 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.Pair;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.shape.VoxelShape;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 import static baritone.api.pathing.movement.ActionCosts.COST_INF;
@@ -125,7 +139,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
     @Override
     public boolean build(String name, File schematic, Vec3i origin) {
         Optional<ISchematicFormat> format = SchematicSystem.INSTANCE.getByFile(schematic);
-        if (!format.isPresent()) {
+        if (format.isEmpty()) {
             return false;
         }
 
@@ -307,19 +321,18 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
     }
 
     private OptionalInt hasAnyItemThatWouldPlace(BlockState desired, HitResult result, Rotation rot) {
-        if (!(ctx.entity() instanceof PlayerEntity)) return OptionalInt.empty();
-        PlayerEntity player = (PlayerEntity) ctx.entity();
+        if (!(ctx.entity() instanceof PlayerEntity player)) return OptionalInt.empty();
 
         for (int i = 0; i < 9; i++) {
-            ItemStack stack = player.inventory.main.get(i);
+            ItemStack stack = player.getInventory().main.get(i);
             if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) {
                 continue;
             }
-            float originalYaw = player.yaw;
-            float originalPitch = player.pitch;
+            float originalYaw = player.getYaw();
+            float originalPitch = player.getPitch();
             // the state depends on the facing of the player sometimes
-            player.yaw = rot.getYaw();
-            player.pitch = rot.getPitch();
+            player.setYaw(rot.getYaw());
+            player.setPitch(rot.getPitch());
             ItemPlacementContext meme = new ItemPlacementContext(new ItemUsageContext(
                     ctx.world(),
                     player,
@@ -328,8 +341,8 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
                     (BlockHitResult) result
             ) {}); // that {} gives us access to a protected constructor lmfao
             BlockState wouldBePlaced = ((BlockItem) stack.getItem()).getBlock().getPlacementState(meme);
-            player.yaw = originalYaw;
-            player.pitch = originalPitch;
+            player.setYaw(originalYaw);
+            player.setPitch(originalPitch);
             if (wouldBePlaced == null) {
                 continue;
             }
@@ -832,7 +845,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
         List<BlockState> result = new ArrayList<>();
         PlayerEntity player = (PlayerEntity) ctx.entity();
         for (int i = 0; i < size; i++) {
-            ItemStack stack = player.inventory.main.get(i);
+            ItemStack stack = player.getInventory().main.get(i);
             if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem)) {
                 result.add(Blocks.AIR.getDefaultState());
                 continue;

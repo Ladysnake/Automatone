@@ -62,7 +62,7 @@ public class EntityContext implements IEntityContext {
 
     @Override
     public @Nullable PlayerInventory inventory() {
-        return entity instanceof PlayerEntity ? ((PlayerEntity) entity).inventory : null;
+        return entity instanceof PlayerEntity ? ((PlayerEntity) entity).getInventory() : null;
     }
 
     @Override
