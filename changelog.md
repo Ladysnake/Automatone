@@ -1,4 +1,16 @@
 ------------------------------------------------------
+Version 0.4.1
+------------------------------------------------------
+**Fixes**
+- Fixed instant crash when a player went below zero in a world with customized height limits
+- Somewhat fixed pathfinding outside of default height limits
+
+------------------------------------------------------
+Version 0.4.0
+------------------------------------------------------
+Updated to Minecraft 1.17
+
+------------------------------------------------------
 Version 0.3.7
 ------------------------------------------------------
 **Additions**

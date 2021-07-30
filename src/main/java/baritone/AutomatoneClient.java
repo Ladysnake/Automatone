@@ -81,7 +81,7 @@ public final class AutomatoneClient implements ClientModInitializer {
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register(AutomatoneClient::onRenderPass);
         ClientPlayNetworking.registerGlobalReceiver(ClickCommand.OPEN_CLICK_SCREEN, (client, handler, buf, responseSender) -> {
             UUID uuid = buf.readUuid();
-            client.execute(() -> MinecraftClient.getInstance().openScreen(new GuiClick(uuid)));
+            client.execute(() -> MinecraftClient.getInstance().setScreen(new GuiClick(uuid)));
         });
         ClientPlayNetworking.registerGlobalReceiver(FakePlayers.SPAWN_PACKET_ID, (client, handler, buf, responseSender) -> {
             int id = buf.readVarInt();
@@ -120,7 +120,7 @@ public final class AutomatoneClient implements ClientModInitializer {
         assert world != null;
         @SuppressWarnings("unchecked") EntityType<P> playerType = (EntityType<P>) entityTypeId;
         P other = FakeClientPlayerEntity.createClientFakePlayer(playerType, world, new GameProfile(uuid, name));
-        other.setEntityId(id);
+        other.setId(id);
         other.setPosition(x, y, z);
         other.updateTrackedPosition(x, y, z);
         other.bodyYaw = headYaw;
