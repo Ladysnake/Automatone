@@ -64,7 +64,7 @@ public interface ActionCosts {
 
 
     static double[] generateFallNBlocksCost() {
-        double[] costs = new double[257];   // FIXME not cubic chunks friendly
+        double[] costs = new double[513];   // FIXME not cubic chunks friendly
         for (int i = 0; i < 257; i++) {
             costs[i] = distanceToTicks(i);
         }

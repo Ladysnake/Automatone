@@ -179,8 +179,7 @@ public class MovementDescend extends Movement {
         int effectiveStartHeight = y;
         for (int fallHeight = 3; true; fallHeight++) {
             int newY = y - fallHeight;
-            if (newY < 0) {
-                // TODO handle larger worlds
+            if (newY < context.worldBottom) {
                 // when pathing in the end, where you could plausibly fall into the void
                 // this check prevents it from getting the block at y=-1 and crashing
                 return false;
