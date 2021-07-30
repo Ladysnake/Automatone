@@ -28,7 +28,11 @@ import baritone.pathing.movement.MovementHelper;
 import baritone.pathing.movement.MovementState;
 import baritone.utils.BlockStateInterface;
 import baritone.utils.pathing.MutableMoveResult;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FarmlandBlock;
+import net.minecraft.block.StairsBlock;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.fluid.WaterFluid;
 import net.minecraft.util.math.Direction;
@@ -73,7 +77,7 @@ public class MovementParkour extends Movement {
         if (context.height > 2 || context.width > 1) {
             return;
         }
-        if (y == context.worldHeight && !context.allowJumpAt256) {
+        if (y == context.worldTop && !context.allowJumpAt256) {
             return;
         }
 
