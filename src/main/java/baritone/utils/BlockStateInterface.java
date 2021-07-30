@@ -83,12 +83,12 @@ public class BlockStateInterface {
         // which is a Long2ObjectOpenHashMap.get
         // see issue #113
         if (cached != null && cached.getPos().x == x >> 4 && cached.getPos().z == z >> 4) {
-            return getFromChunk(cached, x, y, z);
+            return getFromChunk(this.world, cached, x, y, z);
         }
         WorldChunk chunk = provider.automatone$getChunkNow(x >> 4, z >> 4);
         if (chunk != null && !chunk.isEmpty()) {
             prev = chunk;
-            return getFromChunk(chunk, x, y, z);
+            return getFromChunk(this.world, chunk, x, y, z);
         }
         return AIR;
     }
@@ -107,8 +107,8 @@ public class BlockStateInterface {
     }
 
     // get the block at x,y,z from this chunk WITHOUT creating a single blockpos object
-    public static BlockState getFromChunk(Chunk chunk, int x, int y, int z) {
-        ChunkSection section = chunk.getSectionArray()[y >> 4];
+    public static BlockState getFromChunk(BlockView world, Chunk chunk, int x, int y, int z) {
+        ChunkSection section = chunk.getSectionArray()[world.getSectionIndex(y)];
         if (ChunkSection.isEmpty(section)) {
             return AIR;
         }
