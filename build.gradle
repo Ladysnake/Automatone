@@ -24,7 +24,7 @@ import net.fabricmc.loom.task.RemapJarTask
 import java.util.stream.Collectors
 
 plugins {
-    id 'fabric-loom' version '0.8-SNAPSHOT'
+    id 'fabric-loom' version '0.10-SNAPSHOT'
     id 'com.jfrog.artifactory' version '4.21.0'
     id 'org.ajoberstar.grgit' version '3.1.1'
     id 'com.github.breadmoirai.github-release' version '2.2.12'
@@ -69,6 +69,39 @@ sourceSets {
         compileClasspath += schematica_api.output
     }
 }
+
+loom {
+    runs {
+        testmodClient {
+            client()
+            name = "Testmod Client"
+            source sourceSets.testmod
+        }
+        testmodServer {
+            server()
+            name = "Testmod Server"
+            source sourceSets.testmod
+        }
+        gametest {
+            inherit testmodServer
+
+            name "Game Test"
+
+            // Enable the gametest runner
+            vmArg "-Dfabric-api.gametest"
+            vmArg "-Dfabric-api.gametest.report-file=${project.buildDir}/junit.xml"
+            runDir "build/gametest"
+        }
+        autoTestServer {
+            inherit testmodServer
+
+            name "Auto Test Server"
+
+            vmArg "-Dfabric.autoTest"
+        }
+    }
+}
+check.dependsOn(runGametest)
 
 repositories {
     mavenCentral()

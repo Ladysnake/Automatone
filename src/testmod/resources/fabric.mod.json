@@ -21,6 +21,9 @@
     ],
     "client": [
       "io.github.ladysnake.otomaton.OtomatonClient"
+    ],
+    "fabric-gametest": [
+      "io.github.ladysnake.otomaton.OtomatonTestSuite"
     ]
   },
   "depends": {

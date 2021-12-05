@@ -155,7 +155,7 @@ public enum WorldScanner implements IWorldScanner {
         for (int yIndex = 0; yIndex < chunkInternalStorageArray.length; yIndex++) {
             int y0 = coordinateIterationOrder[yIndex];
             ChunkSection section = chunkInternalStorageArray[y0];
-            if (section == null || ChunkSection.isEmpty(section)) {
+            if (section == null || section.isEmpty()) {
                 continue;
             }
             // No need to waste CPU cycles if the section does not contain any block of the right kind
@@ -164,7 +164,7 @@ public enum WorldScanner implements IWorldScanner {
                 continue;
             }
             int yReal = y0 << 4;
-            PalettedContainer<BlockState> bsc = section.getContainer();
+            PalettedContainer<BlockState> bsc = section.getBlockStateContainer();
             for (int yy = 0; yy < 16; yy++) {
                 for (int z = 0; z < 16; z++) {
                     for (int x = 0; x < 16; x++) {

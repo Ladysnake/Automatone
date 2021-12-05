@@ -109,7 +109,7 @@ public class BlockStateInterface {
     // get the block at x,y,z from this chunk WITHOUT creating a single blockpos object
     public static BlockState getFromChunk(BlockView world, Chunk chunk, int x, int y, int z) {
         ChunkSection section = chunk.getSectionArray()[world.getSectionIndex(y)];
-        if (ChunkSection.isEmpty(section)) {
+        if (section.isEmpty()) {
             return AIR;
         }
         return section.getBlockState(x & 15, y & 15, z & 15);

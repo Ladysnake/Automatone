@@ -121,7 +121,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
         if (!stack.isEmpty()) {
             ActionResult actionResult = this.interactionManager.interactItem(
                 this,
-                this.getServerWorld(),
+                this.getWorld(),
                 stack,
                 hand
             );
@@ -176,7 +176,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     @Override
-    public boolean isSleepingLongEnough() {
+    public boolean canResetTimeBySleeping() {
         return true;    // Fake players do not delay the sleep of other players
     }
 

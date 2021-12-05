@@ -128,7 +128,7 @@ public class GuiClick extends Screen {
 
     public void onRender(MatrixStack modelViewStack, Matrix4f projectionMatrix) {
         this.projectionViewMatrix = projectionMatrix.copy();
-        this.projectionViewMatrix.multiply(modelViewStack.peek().getModel());
+        this.projectionViewMatrix.multiply(modelViewStack.peek().getPositionMatrix());
         this.projectionViewMatrix.invert();
 
         if (currentMouseOver != null) {

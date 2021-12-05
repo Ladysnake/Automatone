@@ -57,7 +57,7 @@ public class ServerPlayerController implements IPlayerController {
         if (interactionManager.isMining()) {
             int progress = interactionManager.getBlockBreakingProgress();
             if (progress >= 10) {
-                this.player.interactionManager.processBlockBreakingAction(interactionManager.getMiningPos(), PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, side, this.player.getServerWorld().getTopY());
+                this.player.interactionManager.processBlockBreakingAction(interactionManager.getMiningPos(), PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, side, this.player.getWorld().getTopY());
             }
             return true;
         }
@@ -68,7 +68,7 @@ public class ServerPlayerController implements IPlayerController {
     public void resetBlockRemoving() {
         IServerPlayerInteractionManager interactionManager = (IServerPlayerInteractionManager) this.player.interactionManager;
         if (interactionManager.isMining()) {
-            this.player.interactionManager.processBlockBreakingAction(interactionManager.getMiningPos(), PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, Direction.UP, this.player.getServerWorld().getTopY());
+            this.player.interactionManager.processBlockBreakingAction(interactionManager.getMiningPos(), PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, Direction.UP, this.player.getWorld().getTopY());
         }
     }
 
@@ -92,7 +92,7 @@ public class ServerPlayerController implements IPlayerController {
         BlockState state = this.player.world.getBlockState(loc);
         if (state.isAir()) return false;
 
-        this.player.interactionManager.processBlockBreakingAction(loc, PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, face, this.player.getServerWorld().getTopY());
+        this.player.interactionManager.processBlockBreakingAction(loc, PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, face, this.player.getWorld().getTopY());
         // Success = starting the mining process or insta-mining
         return ((IServerPlayerInteractionManager) this.player.interactionManager).isMining() || this.player.world.isAir(loc);
     }
