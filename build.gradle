@@ -213,8 +213,8 @@ task determinizeBuiltJar(type: DeterminizingTask) {
 task proguard(type: ProguardTask, dependsOn: determinizeBuiltJar) {
     input.set(determinizeBuiltJar.archiveFile)
     archiveClassifier.set('optimized')
-    url 'https://github.com/Guardsquare/proguard/releases/download/v7.1.0-beta1/proguard-7.1.0-beta1.zip'
-    extract 'proguard-7.1.0-beta1/lib/proguard.jar'
+    url 'https://github.com/Guardsquare/proguard/releases/download/v7.2.0-beta2/proguard-7.2.0-beta2.zip'
+    extract 'proguard-7.2.0-beta2/lib/proguard.jar'
     afterEvaluate {
         def mappedMods = project.configurations.modCompileClasspathMapped.resolvedConfiguration.files
         classpath project.files(loom.minecraftMappedProvider.intermediaryJar)
