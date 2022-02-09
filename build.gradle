@@ -18,13 +18,12 @@
 
 import baritone.gradle.task.CreateDistTask
 import baritone.gradle.task.DeterminizingTask
-import baritone.gradle.task.ProguardTask
 import net.fabricmc.loom.task.RemapJarTask
 
 import java.util.stream.Collectors
 
 plugins {
-    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'fabric-loom' version '0.11-SNAPSHOT'    // FIXME actually update the buildscript
     id 'com.jfrog.artifactory' version '4.21.0'
     id 'org.ajoberstar.grgit' version '3.1.1'
     id 'com.github.breadmoirai.github-release' version '2.2.12'
@@ -133,6 +132,7 @@ dependencies {
     modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${cca_version}"
     modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-world:${cca_version}"
     modImplementation "com.jamieswhiteshirt:reach-entity-attributes:${reach_version}"
+    modCompileOnly modLocalRuntime("io.github.ladysnake:elmendorf:${elmendorf_version}")
     compileOnly "com.demonwav.mcdev:annotations:1.0"
 
     testImplementation 'junit:junit:4.12'
@@ -209,33 +209,5 @@ task determinizeBuiltJar(type: DeterminizingTask) {
     input.set(remapJar.archiveFile)
     archiveClassifier.set('unoptimized')
 }
-
-task proguard(type: ProguardTask, dependsOn: determinizeBuiltJar) {
-    input.set(determinizeBuiltJar.archiveFile)
-    archiveClassifier.set('optimized')
-    url 'https://github.com/Guardsquare/proguard/releases/download/v7.2.0-beta2/proguard-7.2.0-beta2.zip'
-    extract 'proguard-7.2.0-beta2/lib/proguard.jar'
-    afterEvaluate {
-        def mappedMods = project.configurations.modCompileClasspathMapped.resolvedConfiguration.files
-        classpath project.files(loom.minecraftMappedProvider.intermediaryJar)
-        classpath project.files(project.configurations.modCompileClasspath.resolvedConfiguration.resolvedArtifacts
-                .stream()
-                .map{it.file}
-                .collect(Collectors.toList())
-        )
-        classpath project.files(sourceSets.launch.runtimeClasspath.files.stream()
-                .filter { it.isFile() }
-                // remove remapped jars, the intermediary versions are included above
-                .filter{!loom.minecraftMappedProvider.mappedJar.equals(it) && !mappedMods.contains(it) }
-                .collect(Collectors.toList())
-        )
-    }
-}
-
-task createDist(type: CreateDistTask, dependsOn: proguard) {
-    input proguard.archiveFile
-}
-
-build.finalizedBy(createDist)
 
 apply from: 'release.gradle'

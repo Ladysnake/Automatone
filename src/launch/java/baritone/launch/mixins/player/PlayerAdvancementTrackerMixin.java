@@ -49,7 +49,7 @@ public abstract class PlayerAdvancementTrackerMixin {
     @Shadow
     private ServerPlayerEntity owner;
 
-    @Inject(method = "grantCriterion", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcastChatMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"), cancellable = true)
+    @Inject(method = "grantCriterion", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/PlayerManager;broadcast(Lnet/minecraft/text/Text;Lnet/minecraft/network/MessageType;Ljava/util/UUID;)V"), cancellable = true)
     private void cancelAdvancementProgress(Advancement advancement, String criterionName, CallbackInfoReturnable<Boolean> cir) {
         if (this.owner instanceof AutomatoneFakePlayer) cir.setReturnValue(true);
     }

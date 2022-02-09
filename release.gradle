@@ -73,10 +73,6 @@ publishing {
                 classifier null
                 builtBy remapJar
             }
-            artifact(proguard) {
-                classifier 'optimized'
-                builtBy proguard
-            }
             artifact(sourcesJar) {
                 builtBy remapSourcesJar
             }

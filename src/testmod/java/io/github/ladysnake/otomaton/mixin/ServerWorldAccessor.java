@@ -15,21 +15,15 @@
  * along with Baritone.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package baritone.launch.mixins;
+package io.github.ladysnake.otomaton.mixin;
 
-import baritone.api.IBaritone;
-import baritone.behavior.PathingBehavior;
-import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.world.SleepManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ServerWorld.class)
-public abstract class MixinServerWorld {
-    @Inject(method = "unloadEntity", at = @At("RETURN"))
-    private void unloadEntity(Entity entity, CallbackInfo ci) {
-        IBaritone.KEY.maybeGet(entity).ifPresent(b -> ((PathingBehavior) b.getPathingBehavior()).shutdown());
-    }
+public interface ServerWorldAccessor {
+    @Accessor("sleepManager")
+    SleepManager requiem$getSleepManager();
 }

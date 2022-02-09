@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "verbose": false,
   "injectors": {
-    "maxShiftBy": 2
+    "maxShiftBy": 2,
+    "defaultRequire": 1
   },
   "client": [
   ],
@@ -16,7 +17,6 @@
     "MixinServerChunkManager",
     "MixinServerCommandSource",
     "MixinServerPlayerInteractionManager",
-    "MixinServerWorld",
     "MixinUtil",
     "player.EntityMixin",
     "player.PlayerAdvancementTrackerMixin",

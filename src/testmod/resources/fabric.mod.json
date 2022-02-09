@@ -28,5 +28,10 @@
   },
   "depends": {
     "fabric": "*"
-  }
+  },
+  "mixins": [
+    {
+      "config": "mixins.otomaton.json"
+    }
+  ]
 }

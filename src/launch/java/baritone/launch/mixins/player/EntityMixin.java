@@ -20,12 +20,15 @@ package baritone.launch.mixins.player;
 import baritone.api.fakeplayer.AutomatoneFakePlayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import org.spongepowered.asm.mixin.Dynamic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Set;
 
@@ -34,11 +37,11 @@ public abstract class EntityMixin {
     @SuppressWarnings("unused") // makes the field mutable for use by IEntityAccessor
     @Shadow @Mutable @Final private EntityType<?> type;
 
-    @ModifyVariable(method = "collectPassengers", at = @At(value = "INVOKE", target = "Ljava/util/Set;add(Ljava/lang/Object;)Z", shift = At.Shift.AFTER))
-    private Entity removeFakePlayers(Entity captured, boolean playersOnly, Set<Entity> output) {
-        if (playersOnly && captured instanceof AutomatoneFakePlayer) {
-            output.remove(captured);
+    @Dynamic("hasPlayerRider player check lambda")
+    @Inject(method = "method_31469", at = @At(value = "HEAD"), cancellable = true)
+    private static void removeFakePlayers(Entity entity, CallbackInfoReturnable<Boolean> cir) {
+        if (entity instanceof AutomatoneFakePlayer) {
+            cir.setReturnValue(false);
         }
-        return captured;
     }
 }

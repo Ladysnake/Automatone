@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "io.github.ladysnake.otomaton.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "minVersion": "0.7.11-SNAPSHOT",
+  "mixins": [
+    "ServerWorldAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

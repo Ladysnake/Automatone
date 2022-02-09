@@ -17,7 +17,9 @@
 
 package baritone.launch.mixins;
 
+import baritone.api.IBaritone;
 import baritone.api.utils.IEntityAccessor;
+import baritone.behavior.PathingBehavior;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
@@ -25,6 +27,9 @@ import net.minecraft.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Entity.class)
 public abstract class MixinEntity implements IEntityAccessor {
@@ -34,4 +39,9 @@ public abstract class MixinEntity implements IEntityAccessor {
     @Override
     @Accessor("type")
     public abstract void automatone$setType(EntityType<?> type);
+
+    @Inject(method = "setRemoved", at = @At("RETURN"))
+    private void shutdownPathingOnUnloading(Entity.RemovalReason reason, CallbackInfo ci) {
+        IBaritone.KEY.maybeGet(this).ifPresent(b -> ((PathingBehavior) b.getPathingBehavior()).shutdown());
+    }
 }
