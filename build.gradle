@@ -23,19 +23,25 @@ import net.fabricmc.loom.task.RemapJarTask
 import java.util.stream.Collectors
 
 plugins {
-    id 'fabric-loom' version '0.11-SNAPSHOT'    // FIXME actually update the buildscript
-    id 'com.jfrog.artifactory' version '4.21.0'
-    id 'org.ajoberstar.grgit' version '3.1.1'
-    id 'com.github.breadmoirai.github-release' version '2.2.12'
-    id 'maven-publish'
+    id 'io.github.ladysnake.chenille' version "0.2.0" apply false
+    id 'io.github.juuxel.loom-quiltflower' version "1.6.0"
 }
+
+apply plugin: 'com.github.breadmoirai.github-release'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'maven-publish'
+apply plugin: 'io.github.ladysnake.chenille'
 
 group project.maven_group
 version project.mod_version
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
+chenille {
+    configureTestmod()
+
+    javaVersion = 17
+}
+
 compileJava {
-    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
     options.encoding = "UTF-8" // allow emoji in comments :^)
 }
 
@@ -69,56 +75,14 @@ sourceSets {
     }
 }
 
-loom {
-    runs {
-        testmodClient {
-            client()
-            name = "Testmod Client"
-            source sourceSets.testmod
-        }
-        testmodServer {
-            server()
-            name = "Testmod Server"
-            source sourceSets.testmod
-        }
-        gametest {
-            inherit testmodServer
-
-            name "Game Test"
-
-            // Enable the gametest runner
-            vmArg "-Dfabric-api.gametest"
-            vmArg "-Dfabric-api.gametest.report-file=${project.buildDir}/junit.xml"
-            runDir "build/gametest"
-        }
-        autoTestServer {
-            inherit testmodServer
-
-            name "Auto Test Server"
-
-            vmArg "-Dfabric.autoTest"
-        }
-    }
-}
-check.dependsOn(runGametest)
-
 repositories {
     mavenCentral()
 
-    maven {
-        name = "Ladysnake Mods"
-        url = 'https://ladysnake.jfrog.io/artifactory/mods'
-        content {
-            includeGroup 'io.github.ladysnake'
-            includeGroupByRegex 'io\\.github\\.onyxstudios.*'
-        }
+    chenille.repositories {
+        ladysnake()
+        jamieswhiteshirt()
     }
-    maven {
-        url = 'https://maven.jamieswhiteshirt.com/libs-release/'
-        content {
-            includeGroup 'com.jamieswhiteshirt'
-        }
-    }
+
     mavenLocal()
 }
 
@@ -128,19 +92,14 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${loader_version}"
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-    modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:${cca_version}"
-    modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-entity:${cca_version}"
-    modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-world:${cca_version}"
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${cca_version}"
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${cca_version}"
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-world:${cca_version}"
     modImplementation "com.jamieswhiteshirt:reach-entity-attributes:${reach_version}"
-    modCompileOnly modLocalRuntime("io.github.ladysnake:elmendorf:${elmendorf_version}")
+    modTestImplementation("io.github.ladysnake:elmendorf:${elmendorf_version}")
     compileOnly "com.demonwav.mcdev:annotations:1.0"
 
     testImplementation 'junit:junit:4.12'
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier 'sources'
-    from sourceSets.api.allSource
 }
 
 task testmodJar(type: Jar, dependsOn: testmodClasses) {
@@ -153,7 +112,7 @@ task testmodJar(type: Jar, dependsOn: testmodClasses) {
 
 task remapTestmodJar(type: RemapJarTask, dependsOn: project.testmodJar) {
     archiveBaseName.set('Otomaton')
-    input.set(testmodJar.archiveFile)
+    inputFile.set(testmodJar.archiveFile)
     addNestedDependencies.set(false)
 }
 
@@ -164,24 +123,16 @@ processLaunchResources {
     }
 }
 
+java {
+    withSourcesJar()
+}
+
 javadoc {
     options.addStringOption('Xwerror', '-quiet') // makes the build fail on travis when there is a javadoc error
     options.linkSource true
     options.encoding "UTF-8" // allow emoji in comments :^)
     source = sourceSets.api.allJava
     classpath += sourceSets.api.compileClasspath
-}
-
-// skidded from fabric-example-mod (comments and all)
-tasks.withType(JavaCompile).configureEach {
-    // ensure that the encoding is set to UTF-8, no matter what the system default is
-    // this fixes some edge cases with special characters not displaying correctly
-    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-    // If Javadoc is generated, this must be specified in that task too.
-    it.options.encoding = "UTF-8"
-
-    // Minecraft 1.17 (21w19a) upwards uses Java 16.
-    it.options.release.set(16)
 }
 
 jar {
@@ -209,5 +160,3 @@ task determinizeBuiltJar(type: DeterminizingTask) {
     input.set(remapJar.archiveFile)
     archiveClassifier.set('unoptimized')
 }
-
-apply from: 'release.gradle'

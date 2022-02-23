@@ -286,7 +286,7 @@ public final class BuilderProcess extends BaritoneProcessHelper implements IBuil
 
     public boolean placementPlausible(BlockPos pos, BlockState state) {
         VoxelShape voxelshape = state.getCollisionShape(ctx.world(), pos);
-        return voxelshape.isEmpty() || ctx.world().intersectsEntities(null, voxelshape.offset(pos.getX(), pos.getY(), pos.getZ()));
+        return voxelshape.isEmpty() || ctx.world().doesNotIntersectEntities(null, voxelshape.offset(pos.getX(), pos.getY(), pos.getZ()));
     }
 
     private Optional<Placement> possibleToPlace(BlockState toPlace, int x, int y, int z, BlockStateInterface bsi) {
