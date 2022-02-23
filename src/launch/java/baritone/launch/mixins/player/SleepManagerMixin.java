@@ -20,26 +20,19 @@ package baritone.launch.mixins.player;
 import baritone.api.fakeplayer.AutomatoneFakePlayer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.SleepManager;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(SleepManager.class)
 public abstract class SleepManagerMixin {
-    private boolean requiem$fakePlayerSleeping = false;
+    @Shadow private int total;
 
-    @ModifyVariable(method = "update", at = @At(value = "STORE"))
+    @ModifyVariable(method = "update", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/server/world/SleepManager;total:I", ordinal = 1, shift = At.Shift.AFTER))
     private ServerPlayerEntity captureSleepingPlayer(ServerPlayerEntity player) {
-        requiem$fakePlayerSleeping = player instanceof AutomatoneFakePlayer;
+        if (player instanceof AutomatoneFakePlayer) this.total--;
         return player;
-    }
-
-    @ModifyVariable(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerEntity;isSleeping()Z"), ordinal = 0)
-    private int discountFakePlayers(int spectatorPlayers) {
-        if (requiem$fakePlayerSleeping) {
-            requiem$fakePlayerSleeping = false;
-            return spectatorPlayers + 1;
-        }
-        return spectatorPlayers;
     }
 }
