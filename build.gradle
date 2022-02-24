@@ -16,14 +16,12 @@
  */
 
 
-import baritone.gradle.task.CreateDistTask
-import baritone.gradle.task.DeterminizingTask
 import net.fabricmc.loom.task.RemapJarTask
 
 import java.util.stream.Collectors
 
 plugins {
-    id 'io.github.ladysnake.chenille' version "0.2.0" apply false
+    id 'io.github.ladysnake.chenille' version "0.3.0" apply false
     id 'io.github.juuxel.loom-quiltflower' version "1.6.0"
 }
 
@@ -36,7 +34,10 @@ group project.maven_group
 version project.mod_version
 
 chenille {
-    configureTestmod()
+    configureTestmod {
+        withBaseTestRuns()
+        withDependencyConfiguration()
+    }
 
     javaVersion = 17
 }
@@ -151,12 +152,19 @@ jar {
     }
 }
 
-remapJar.configure {
-    it.classifier = 'remapped'
-}
-
-// skidded from ProguardTask
-task determinizeBuiltJar(type: DeterminizingTask) {
-    input.set(remapJar.archiveFile)
-    archiveClassifier.set('unoptimized')
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = project.mod_name
+                licenses {
+                    license {
+                        name = 'GNU Lesser General Public License 3.0'
+                        url = 'https://www.gnu.org/licenses/lgpl-3.0.html'
+                    }
+                }
+            }
+        }
+    }
 }
