@@ -1,4 +1,11 @@
 ------------------------------------------------------
+Version 0.6.0
+------------------------------------------------------
+**Fixes**
+- Fixed fake players preventing real players from skipping the night
+- Fixed fake players broadcasting advancements
+
+------------------------------------------------------
 Version 0.5.0
 ------------------------------------------------------
 - Updated to MC 1.18
