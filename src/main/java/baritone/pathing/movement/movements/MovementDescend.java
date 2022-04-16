@@ -119,8 +119,8 @@ public class MovementDescend extends Movement {
             return;
         }
 
-        Block fromDown = context.get(x, y - 1, z).getBlock();
-        if (BlockTags.CLIMBABLE.contains(fromDown)) {
+        BlockState fromDown = context.get(x, y - 1, z);
+        if (fromDown.isIn(BlockTags.CLIMBABLE)) {
             return;
         }
 
@@ -150,7 +150,7 @@ public class MovementDescend extends Movement {
         // we walk half the block plus 0.3 to get to the edge, then we walk the other 0.2 while simultaneously falling (math.max because of how it's in parallel)
         boolean water = MovementHelper.isWater(destUp);    // TODO improve water detection
         double waterModifier = water ? context.waterWalkSpeed / WALK_ONE_BLOCK_COST : 1;
-        double walk = waterModifier * (WALK_OFF_BLOCK_COST / fromDown.getVelocityMultiplier());
+        double walk = waterModifier * (WALK_OFF_BLOCK_COST / fromDown.getBlock().getVelocityMultiplier());
         double fall = waterModifier * Math.max(FALL_N_BLOCKS_COST[1], CENTER_AFTER_FALL_COST);
         totalCost += walk + fall;
         res.x = destX;

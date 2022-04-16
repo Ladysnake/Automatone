@@ -19,12 +19,11 @@ package baritone.api.utils;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.Settings;
-import net.fabricmc.fabric.api.tag.TagRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
-import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
@@ -176,13 +175,13 @@ public class SettingsUtil {
                 Type type = ((ParameterizedType) context.getSetting().getType()).getActualTypeArguments()[0];
                 Identifier id = new Identifier(raw);
                 if (type == Block.class) {
-                    return TagRegistry.block(id);
+                    return TagKey.of(Registry.BLOCK_KEY, id);
                 } else if (type == Item.class) {
-                    return TagRegistry.item(id);
+                    return TagKey.of(Registry.ITEM_KEY, id);
                 } else if (type == EntityType.class) {
-                    return TagRegistry.entityType(id);
+                    return TagKey.of(Registry.ENTITY_TYPE_KEY, id);
                 } else if (type == Fluid.class) {
-                    return TagRegistry.fluid(id);
+                    return TagKey.of(Registry.FLUID_KEY, id);
                 } else {
                     throw new IllegalArgumentException();
                 }
@@ -190,12 +189,12 @@ public class SettingsUtil {
 
             @Override
             public String toString(ParserContext context, Object value) {
-                return ((Tag.Identified<?>) value).getId().toString();
+                return ((TagKey<?>) value).id().toString();
             }
 
             @Override
             public boolean accepts(Type type) {
-                return Tag.Identified.class.isAssignableFrom(TypeUtils.resolveBaseClass(type));
+                return TagKey.class.isAssignableFrom(TypeUtils.resolveBaseClass(type));
             }
         },
         LIST() {

@@ -119,7 +119,7 @@ public interface MovementHelper extends ActionCosts {
                 || block == Blocks.END_ROD) {
             return false;
         }
-        if (settings.blocksToAvoid.get().contains(block)) {
+        if (state.isIn(settings.blocksToAvoid.get())) {
             return false;
         }
         if (block instanceof DoorBlock || block instanceof FenceGateBlock) {
@@ -491,8 +491,7 @@ public interface MovementHelper extends ActionCosts {
      * @return Whether or not the block is water
      */
     static boolean isWater(BlockState state) {
-        Fluid f = state.getFluidState().getFluid();
-        return FluidTags.WATER.contains(f);
+        return state.getFluidState().isIn(FluidTags.WATER);
     }
 
     /**

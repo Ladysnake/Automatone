@@ -111,7 +111,7 @@ public class MovementPillar extends Movement {
         boolean climbable = isClimbable(context.bsi, x, y, z);
         BlockState fromDown = context.get(x, y - 1, z);
         if (!climbable) {
-            if (BlockTags.CLIMBABLE.contains(fromDown.getBlock())) {
+            if (fromDown.isIn(BlockTags.CLIMBABLE)) {
                 return; // can't pillar from a ladder or vine onto something that isn't also climbable
             }
             if (fromDown.getBlock() instanceof SlabBlock && fromDown.get(SlabBlock.TYPE) == SlabType.BOTTOM) {
@@ -192,8 +192,8 @@ public class MovementPillar extends Movement {
     }
 
     private static boolean isClimbable(BlockStateInterface context, int x, int y, int z) {
-        if (BlockTags.CLIMBABLE.contains(context.get0(x, y, z).getBlock())) return true;
-        if (BlockTags.CLIMBABLE.contains(context.get0(x, y + 1, z).getBlock())) {
+        if (context.get0(x, y, z).isIn(BlockTags.CLIMBABLE)) return true;
+        if (context.get0(x, y + 1, z).isIn(BlockTags.CLIMBABLE)) {
             // you can only use a ladder at head level if you are standing on firm ground
             return MovementHelper.isBlockNormalCube(context.get0(x, y - 1, z));
         }

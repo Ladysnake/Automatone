@@ -32,6 +32,7 @@ import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.PickaxeItem;
 import net.minecraft.item.ToolItem;
 import net.minecraft.tag.Tag;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
@@ -113,7 +114,7 @@ public final class InventoryBehavior extends Behavior {
     private int firstValidThrowaway(PlayerInventory inventory) { // TODO offhand idk
         DefaultedList<ItemStack> invy = inventory.main;
         for (int i = 0; i < invy.size(); i++) {
-            if (baritone.settings().acceptableThrowawayItems.get().contains(invy.get(i).getItem())) {
+            if (invy.get(i).isIn(baritone.settings().acceptableThrowawayItems.get())) {
                 return i;
             }
         }
@@ -145,7 +146,7 @@ public final class InventoryBehavior extends Behavior {
 
     public boolean hasGenericThrowaway() {
         return throwaway(false,
-                stack -> baritone.settings().acceptableThrowawayItems.get().contains(stack.getItem()));
+                stack -> stack.isIn(baritone.settings().acceptableThrowawayItems.get()));
     }
 
     public boolean selectThrowawayForLocation(boolean select, int x, int y, int z) {
@@ -159,7 +160,7 @@ public final class InventoryBehavior extends Behavior {
             return true;
         }
         return throwaway(select,
-                stack -> baritone.settings().acceptableThrowawayItems.get().contains(stack.getItem()));
+                stack -> stack.isIn(baritone.settings().acceptableThrowawayItems.get()));
     }
 
     public boolean throwaway(boolean select, Predicate<? super ItemStack> desired) {
@@ -199,9 +200,9 @@ public final class InventoryBehavior extends Behavior {
         return false;
     }
 
-    public static int getSlotWithStack(PlayerInventory inv, Tag<Item> tag) {
+    public static int getSlotWithStack(PlayerInventory inv, TagKey<Item> tag) {
         for(int i = 0; i < inv.main.size(); ++i) {
-            if (!inv.main.get(i).isEmpty() && tag.contains(inv.main.get(i).getItem())) {
+            if (!inv.main.get(i).isEmpty() && inv.main.get(i).isIn(tag)) {
                 return i;
             }
         }

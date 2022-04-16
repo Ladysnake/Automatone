@@ -324,8 +324,8 @@ public class MovementTraverse extends Movement {
         //sneak may have been set to true in the PREPPING state while mining an adjacent block
         state.setInput(Input.SNEAK, false);
 
-        Block fd = BlockStateInterface.get(ctx, src.down()).getBlock();
-        boolean ladder = BlockTags.CLIMBABLE.contains(fd);
+        BlockState fd = BlockStateInterface.get(ctx, src.down());
+        boolean ladder = fd.isIn(BlockTags.CLIMBABLE);
 
         for (BlockState bs : bss) {
             if (tryOpenDoors(state, bs, dest, src)) {
