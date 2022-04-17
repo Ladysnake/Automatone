@@ -31,6 +31,7 @@ version project.mod_version
 chenille {
     configurePublishing {
         withArtifactory()
+        withGithubRelease()
     }
     configureTestmod {
         withBaseTestRuns()
