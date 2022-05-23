@@ -56,7 +56,6 @@ import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -78,7 +77,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     public FakeServerPlayerEntity(EntityType<? extends PlayerEntity> type, ServerWorld world, GameProfile profile) {
-        super(world.getServer(), world, profile);
+        super(world.getServer(), world, profile, null);
         ((IEntityAccessor)this).automatone$setType(type);
         this.stepHeight = 0.6f; // same step height as LivingEntity
         // Side effects go brr
@@ -194,7 +193,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     public Text getName() {
         GameProfile displayProfile = this.getDisplayProfile();
         if (displayProfile != null) {
-            return new LiteralText(displayProfile.getName());
+            return Text.literal(displayProfile.getName());
         }
         return super.getName();
     }

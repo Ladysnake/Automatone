@@ -17,7 +17,6 @@
 
 package baritone.api.command.exception;
 
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -43,6 +42,6 @@ public interface ICommandException {
      * Called when this exception is thrown, to handle the exception.
      */
     default Text handle() {
-        return new LiteralText(this.getMessage()).formatted(Formatting.RED);
+        return Text.literal(this.getMessage()).formatted(Formatting.RED);
     }
 }

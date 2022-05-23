@@ -17,7 +17,6 @@
 
 package baritone.api.command.exception;
 
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -32,6 +31,6 @@ public class CommandNotFoundException extends CommandException {
 
     @Override
     public Text handle() {
-        return new LiteralText(getMessage()).formatted(Formatting.GRAY);
+        return Text.literal(getMessage()).formatted(Formatting.GRAY);
     }
 }

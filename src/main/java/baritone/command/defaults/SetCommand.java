@@ -31,10 +31,10 @@ import baritone.api.utils.SettingsUtil;
 import baritone.command.argument.ArgConsumer;
 import baritone.utils.SettingsLoader;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Arrays;
@@ -91,19 +91,19 @@ public class SetCommand extends Command {
                                     : String.format("All %ssettings:", viewModified ? "modified " : "")
                     ),
                     setting -> {
-                        BaseText typeComponent = new LiteralText(String.format(
+                        MutableText typeComponent = Text.literal(String.format(
                                 " (%s)",
                                 settingTypeToString(setting)
                         ));
                         typeComponent.setStyle(typeComponent.getStyle().withFormatting(Formatting.DARK_GRAY));
-                        BaseText hoverComponent = new LiteralText("");
+                        MutableText hoverComponent = Text.literal("");
                         hoverComponent.setStyle(hoverComponent.getStyle().withFormatting(Formatting.GRAY));
                         hoverComponent.append(setting.getName());
                         hoverComponent.append(String.format("\nType: %s", settingTypeToString(setting)));
                         hoverComponent.append(String.format("\n\nValue:\n%s", settingValueToString(setting)));
                         hoverComponent.append(String.format("\n\nDefault Value:\n%s", settingDefaultToString(setting)));
                         String commandSuggestion = FORCE_COMMAND_PREFIX + String.format("set %s%s ", global ? "global " : "", setting.getName());
-                        BaseText component = new LiteralText(setting.getName());
+                        MutableText component = Text.literal(setting.getName());
                         component.setStyle(component.getStyle().withFormatting(Formatting.GRAY));
                         component.append(typeComponent);
                         component.setStyle(component.getStyle()
@@ -177,12 +177,12 @@ public class SetCommand extends Command {
                         settingValueToString(setting)
                 ));
             }
-            BaseText oldValueComponent = new LiteralText(String.format("Old value: %s", oldValue));
+            MutableText oldValueComponent = Text.literal(String.format("Old value: %s", oldValue));
             oldValueComponent.setStyle(oldValueComponent.getStyle()
                     .withFormatting(Formatting.GRAY)
                     .withHoverEvent(new HoverEvent(
                             HoverEvent.Action.SHOW_TEXT,
-                            new LiteralText("Click to set the setting back to this value")
+                            Text.literal("Click to set the setting back to this value")
                     ))
                     .withClickEvent(new ClickEvent(
                             ClickEvent.Action.RUN_COMMAND,

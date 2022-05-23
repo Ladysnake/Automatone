@@ -32,6 +32,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.AbstractRandom;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -138,7 +139,7 @@ public final class BlockOptionalMeta {
 
                 world.getServer().getLootManager().getTable(lootTableLocation).generateLoot(
                     new LootContext.Builder(world)
-                        .random(new Random())
+                        .random(world.random)
                         .parameter(LootContextParameters.ORIGIN, Vec3d.of(BlockPos.ZERO))
                         .parameter(LootContextParameters.TOOL, ItemStack.EMPTY)
                         .optionalParameter(LootContextParameters.BLOCK_ENTITY, null)

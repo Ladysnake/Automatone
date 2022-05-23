@@ -40,10 +40,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
 
@@ -110,12 +110,12 @@ public final class DefaultCommands {
         if (BaritoneAPI.getGlobalSettings().echoCommands.get()) {
             String msg = command + rest;
             String toDisplay = BaritoneAPI.getGlobalSettings().censorRanCommands.get() ? command + " ..." : msg;
-            BaseText component = new LiteralText(String.format("> %s", toDisplay));
+            MutableText component = Text.literal(String.format("> %s", toDisplay));
             component.setStyle(component.getStyle()
                     .withFormatting(Formatting.WHITE)
                     .withHoverEvent(new HoverEvent(
                             HoverEvent.Action.SHOW_TEXT,
-                            new LiteralText("Click to rerun command")
+                            Text.literal("Click to rerun command")
                     ))
                     .withClickEvent(new ClickEvent(
                             ClickEvent.Action.RUN_COMMAND,
@@ -127,7 +127,7 @@ public final class DefaultCommands {
 
     public static boolean runCommand(ServerCommandSource source, String msg, IBaritone baritone) throws CommandException {
         if (msg.trim().equalsIgnoreCase("damn")) {
-            source.sendFeedback(new LiteralText("daniel"), false);
+            source.sendFeedback(Text.literal("daniel"), false);
             return false;
         } else if (msg.trim().equalsIgnoreCase("orderpizza")) {
             Automatone.LOGGER.fatal("No pizza :(");

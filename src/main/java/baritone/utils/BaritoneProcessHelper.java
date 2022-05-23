@@ -19,7 +19,6 @@ package baritone.utils;
 
 import baritone.Baritone;
 import baritone.api.process.IBaritoneProcess;
-import baritone.api.utils.Helper;
 import baritone.api.utils.IEntityContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;

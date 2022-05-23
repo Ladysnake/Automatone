@@ -27,10 +27,10 @@ import baritone.api.command.helpers.Paginator;
 import baritone.api.command.helpers.TabCompleteHelper;
 import baritone.api.command.manager.ICommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Arrays;
@@ -64,17 +64,17 @@ public class HelpCommand extends Command {
                     command -> {
                         String names = String.join("/", command.getNames());
                         String name = command.getNames().get(0);
-                        BaseText shortDescComponent = new LiteralText(" - " + command.getShortDesc());
+                        MutableText shortDescComponent = Text.literal(" - " + command.getShortDesc());
                         shortDescComponent.setStyle(shortDescComponent.getStyle().withFormatting(Formatting.DARK_GRAY));
-                        BaseText namesComponent = new LiteralText(names);
+                        MutableText namesComponent = Text.literal(names);
                         namesComponent.setStyle(namesComponent.getStyle().withFormatting(Formatting.WHITE));
-                        BaseText hoverComponent = new LiteralText("");
+                        MutableText hoverComponent = Text.literal("");
                         hoverComponent.setStyle(hoverComponent.getStyle().withFormatting(Formatting.GRAY));
                         hoverComponent.append(namesComponent);
                         hoverComponent.append("\n" + command.getShortDesc());
                         hoverComponent.append("\n\nClick to view full help");
                         String clickCommand = FORCE_COMMAND_PREFIX + String.format("%s %s", label, command.getNames().get(0));
-                        BaseText component = new LiteralText(name);
+                        MutableText component = Text.literal(name);
                         component.setStyle(component.getStyle().withFormatting(Formatting.GRAY));
                         component.append(shortDescComponent);
                         component.setStyle(component.getStyle()
@@ -94,7 +94,7 @@ public class HelpCommand extends Command {
             logDirect(source, "");
             command.getLongDesc().forEach(message -> logDirect(source, message));
             logDirect(source, "");
-            BaseText returnComponent = new LiteralText("Click to return to the help menu");
+            MutableText returnComponent = Text.literal("Click to return to the help menu");
             returnComponent.setStyle(returnComponent.getStyle().withClickEvent(new ClickEvent(
                     ClickEvent.Action.RUN_COMMAND,
                     FORCE_COMMAND_PREFIX + label

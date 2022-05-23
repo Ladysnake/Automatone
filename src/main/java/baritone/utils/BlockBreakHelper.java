@@ -17,7 +17,6 @@
 
 package baritone.utils;
 
-import baritone.api.utils.Helper;
 import baritone.api.utils.IEntityContext;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;

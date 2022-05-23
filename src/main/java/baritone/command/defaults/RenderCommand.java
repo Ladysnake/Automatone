@@ -41,7 +41,7 @@ public class RenderCommand extends Command {
         MinecraftClient mc = MinecraftClient.getInstance();
         mc.execute(() -> {
             BetterBlockPos origin = baritone.getPlayerContext().feetPos();
-            int renderDistance = (mc.options.viewDistance + 1) * 16;
+            int renderDistance = (mc.options.getViewDistance().getValue() + 1) * 16;
             mc.worldRenderer.scheduleBlockRenders(
                     origin.x - renderDistance,
                     0,

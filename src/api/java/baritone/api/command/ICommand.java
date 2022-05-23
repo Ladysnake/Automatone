@@ -22,8 +22,7 @@ import baritone.api.IBaritone;
 import baritone.api.command.argument.IArgConsumer;
 import baritone.api.command.exception.CommandException;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.BaseText;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -79,11 +78,11 @@ public interface ICommand {
      * @param components The components to send
      */
     default void logDirect(ServerCommandSource source, Text... components) {
-        BaseText component = new LiteralText("");
+        MutableText component = Text.literal("");
         // If we are not logging as a Toast
         // Append the prefix to the base component line
         component.append(BaritoneAPI.getPrefix());
-        component.append(new LiteralText(" "));
+        component.append(Text.literal(" "));
         Arrays.asList(components).forEach(component::append);
         source.sendFeedback(component, false);
     }
@@ -98,7 +97,7 @@ public interface ICommand {
      */
     default void logDirect(ServerCommandSource source, String message, Formatting color) {
         Stream.of(message.split("\n")).forEach(line -> {
-            BaseText component = new LiteralText(line.replace("\t", "    "));
+            MutableText component = Text.literal(line.replace("\t", "    "));
             component.setStyle(component.getStyle().withFormatting(color));
             logDirect(source, component);
         });
