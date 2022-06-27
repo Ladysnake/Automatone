@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Entity.class)
 public abstract class MixinEntity implements IEntityAccessor {
-    @Shadow public abstract World getEntityWorld();
+    @Shadow public abstract World getWorld();
 
     @Override
     @Invoker("getEyeHeight")
@@ -46,7 +46,7 @@ public abstract class MixinEntity implements IEntityAccessor {
 
     @Inject(method = "setRemoved", at = @At("RETURN"))
     private void shutdownPathingOnUnloading(Entity.RemovalReason reason, CallbackInfo ci) {
-        if (!getEntityWorld().isClient()) {
+        if (!getWorld().isClient()) {
             IBaritone.KEY.maybeGet(this).ifPresent(b -> ((PathingBehavior) b.getPathingBehavior()).shutdown());
         }
     }

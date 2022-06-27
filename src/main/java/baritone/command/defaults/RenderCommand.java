@@ -18,10 +18,10 @@
 package baritone.command.defaults;
 
 import baritone.api.IBaritone;
-import baritone.api.utils.BetterBlockPos;
 import baritone.api.command.Command;
-import baritone.api.command.exception.CommandException;
 import baritone.api.command.argument.IArgConsumer;
+import baritone.api.command.exception.CommandException;
+import baritone.api.utils.BetterBlockPos;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -41,7 +41,7 @@ public class RenderCommand extends Command {
         MinecraftClient mc = MinecraftClient.getInstance();
         mc.execute(() -> {
             BetterBlockPos origin = baritone.getPlayerContext().feetPos();
-            int renderDistance = (mc.options.getViewDistance().getValue() + 1) * 16;
+            int renderDistance = (mc.options.getViewDistance().get() + 1) * 16;
             mc.worldRenderer.scheduleBlockRenders(
                     origin.x - renderDistance,
                     0,

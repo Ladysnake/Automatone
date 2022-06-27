@@ -28,7 +28,6 @@ import baritone.selection.SelectionRenderer;
 import baritone.utils.GuiClick;
 import baritone.utils.PathRenderer;
 import com.mojang.authlib.GameProfile;
-import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
@@ -39,8 +38,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
+import org.quiltmc.loader.api.ModContainer;
+import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -77,7 +79,7 @@ public final class AutomatoneClient implements ClientModInitializer {
     }
 
     @Override
-    public void onInitializeClient() {
+    public void onInitializeClient(ModContainer mod) {
         WorldRenderEvents.BEFORE_DEBUG_RENDER.register(AutomatoneClient::onRenderPass);
         ClientPlayNetworking.registerGlobalReceiver(ClickCommand.OPEN_CLICK_SCREEN, (client, handler, buf, responseSender) -> {
             UUID uuid = buf.readUuid();
@@ -110,6 +112,7 @@ public final class AutomatoneClient implements ClientModInitializer {
         });
         ClientEntityEvents.ENTITY_UNLOAD.register((entity, world) -> {
             //yes, it is normal to remove an IBaritone from a Baritone set
+            //noinspection SuspiciousMethodCalls
             renderList.remove(IBaritone.KEY.getNullable(entity));
             selectionRenderList.remove(ISelectionManager.KEY.getNullable(entity));
         });
@@ -122,7 +125,7 @@ public final class AutomatoneClient implements ClientModInitializer {
         P other = FakeClientPlayerEntity.createClientFakePlayer(playerType, world, new GameProfile(uuid, name));
         other.setId(id);
         other.setPosition(x, y, z);
-        other.updateTrackedPosition(x, y, z);
+        other.method_43389().method_43494(new Vec3d(x, y, z));
         other.bodyYaw = headYaw;
         other.prevBodyYaw = headYaw;
         other.headYaw = headYaw;

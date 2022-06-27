@@ -108,7 +108,7 @@ public class EntityContext implements IEntityContext {
     private Stream<Entity> streamHostileEntities() {
         return this.worldEntitiesStream()
                 .filter(entity -> entity instanceof MobEntity)
-                .filter(entity -> (!(entity instanceof SpiderEntity)) || entity.getBrightnessAtEyes() < 0.5)
+                .filter(entity -> (!(entity instanceof SpiderEntity)) || entity.method_5718() < 0.5)
                 .filter(entity -> !(entity instanceof ZombifiedPiglinEntity) || ((ZombifiedPiglinEntity) entity).getAttacker() != null)
                 .filter(entity -> !(entity instanceof EndermanEntity) || ((EndermanEntity) entity).isAngry());
     }

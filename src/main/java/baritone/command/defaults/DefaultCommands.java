@@ -34,7 +34,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -46,6 +45,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
+import org.quiltmc.qsl.command.api.CommandRegistrationCallback;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,7 +103,7 @@ public final class DefaultCommands {
         for (ICommand command : commands) {
             ICommandManager.registry.register(command);
         }
-        CommandRegistrationCallback.EVENT.register(((dispatcher, dedicated) -> register(dispatcher)));
+        CommandRegistrationCallback.EVENT.register(((dispatcher, ctx, dedicated) -> register(dispatcher)));
     }
 
     private static void logRanCommand(ServerCommandSource source, String command, String rest) {

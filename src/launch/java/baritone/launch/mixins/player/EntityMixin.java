@@ -27,10 +27,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Set;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -38,7 +35,7 @@ public abstract class EntityMixin {
     @Shadow @Mutable @Final private EntityType<?> type;
 
     @Dynamic("hasPlayerRider player check lambda")
-    @Inject(method = "method_31469", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "m_lsaraprt", at = @At(value = "HEAD"), cancellable = true)
     private static void removeFakePlayers(Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (entity instanceof AutomatoneFakePlayer) {
             cir.setReturnValue(false);

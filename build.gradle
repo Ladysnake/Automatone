@@ -18,10 +18,8 @@
 
 import net.fabricmc.loom.task.RemapJarTask
 
-import java.util.stream.Collectors
-
 plugins {
-    id 'io.github.ladysnake.chenille' version "0.7.0"
+    id 'io.github.ladysnake.chenille' version "0.9.0"
     id 'io.github.juuxel.loom-quiltflower' version "1.6.0"
 }
 
@@ -88,15 +86,19 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings "net.fabricmc:yarn:${yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+    mappings(loom.layered {
+        addLayer(quiltMappings.mappings("org.quiltmc:quilt-mappings:${minecraft_version}+build.${quilt_mappings_version}:v2"))
+    })
+    modImplementation "org.quiltmc:quilt-loader:${project.quilt_loader_version}"
+
+    modImplementation "org.quiltmc:qsl:${qsl_version}+${minecraft_version}"
+    modImplementation "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${quilted_fabric_api_version}-${minecraft_version}"
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${cca_version}"
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${cca_version}"
     modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-world:${cca_version}"
     modImplementation "com.jamieswhiteshirt:reach-entity-attributes:${reach_version}"
-    modTestImplementation("io.github.ladysnake:elmendorf:${elmendorf_version}") {
+    modLocalImplementation("io.github.ladysnake:elmendorf:${elmendorf_version}") {
         transitive = false
     }
     compileOnly "com.demonwav.mcdev:annotations:1.0"

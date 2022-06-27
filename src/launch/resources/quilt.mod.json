@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "quilt_loader": {
+    "group": "io.github.ladysnake",
+    "id": "automatone",
+    "version": "${version}",
+    "metadata": {
+      "name": "Automatone",
+      "description": "A serverside Minecraft pathfinder bot.",
+      "authors": [
+        "leijurv",
+        "Brady",
+        "Pyrofab"
+      ],
+      "icon": "assets/automatone/icon.png",
+      "contact": {
+        "sources": "https://github.com/Ladysnake/automatone",
+        "issues": "https://github.com/Ladysnake/automatone/issues"
+      },
+      "license": "LGPL-3.0"
+    },
+    "intermediate_mappings": "net.fabricmc:intermediary",
+    "entrypoints": {
+      "init": "baritone.Automatone",
+      "client_init": "baritone.AutomatoneClient",
+      "cardinal-components": "baritone.AutomatoneComponents"
+    },
+    "depends": [
+      {
+        "id": "cardinal-components-base",
+        "version": "^5.0.0-"
+      },
+      {
+        "id": "cardinal-components-entity",
+        "version": "^5.0.0-"
+      },
+      {
+        "id": "cardinal-components-world",
+        "version": "^5.0.0-"
+      },
+      {
+        "id": "fabric",
+        "version": "*"
+      },
+      {
+        "id": "reach-entity-attributes",
+        "version": "*"
+      }]
+  },
+  "mixin": "mixins.automatone.json",
+  "minecraft": {
+    "environment": "*"
+  },
+  "cardinal-components": [
+    "automatone:core",
+    "automatone:controller",
+    "automatone:selection_manager",
+    "automatone:world_data_provider"
+  ]
+}

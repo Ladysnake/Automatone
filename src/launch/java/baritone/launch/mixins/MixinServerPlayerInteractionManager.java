@@ -48,7 +48,7 @@ public abstract class MixinServerPlayerInteractionManager implements IServerPlay
     }
 
     @Inject(method = "processBlockBreakingAction", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/ServerPlayerInteractionManager;miningPos:Lnet/minecraft/util/math/BlockPos;", opcode = Opcodes.PUTFIELD))
-    private void setBrokeBlock(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, CallbackInfo ci) {
+    private void setBrokeBlock(BlockPos pos, PlayerActionC2SPacket.Action action, Direction direction, int worldHeight, int i, CallbackInfo ci) {
         this.automatone$brokeBlock = true;
     }
 }
