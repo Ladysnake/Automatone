@@ -35,7 +35,7 @@ public abstract class EntityMixin {
     @Shadow @Mutable @Final private EntityType<?> type;
 
     @Dynamic("hasPlayerRider player check lambda")
-    @Inject(method = "m_lsaraprt", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = { "m_lsaraprt", "method_31469" }, at = @At(value = "HEAD"), cancellable = true, require = 1, allow = 1)
     private static void removeFakePlayers(Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (entity instanceof AutomatoneFakePlayer) {
             cir.setReturnValue(false);
