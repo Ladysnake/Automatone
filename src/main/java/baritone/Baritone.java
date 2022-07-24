@@ -82,7 +82,6 @@ public class Baritone implements IBaritone {
     private final BaritoneCommandManager commandManager;
 
     private final IEntityContext playerContext;
-    private final WorldProvider worldProvider;
 
     private final @Nullable ClientPathingBehaviour clientPathingBehaviour;
 
@@ -116,7 +115,6 @@ public class Baritone implements IBaritone {
             this.pathingControlManager.registerProcess(farmProcess = new FarmProcess(this));
         }
 
-        this.worldProvider = (WorldProvider) IWorldProvider.KEY.get(player.world);
         this.commandManager = new BaritoneCommandManager(this);
         this.execControlProcess = DefaultCommands.controlCommands.registerProcess(this);
         this.clientPathingBehaviour = player.world.isClient ? new ClientPathingBehaviour(player) : null;
@@ -194,7 +192,7 @@ public class Baritone implements IBaritone {
 
     @Override
     public WorldProvider getWorldProvider() {
-        return this.worldProvider;
+        return (WorldProvider) IWorldProvider.KEY.get(this.getPlayerContext().world());
     }
 
     @Override
