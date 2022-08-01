@@ -18,6 +18,7 @@
 package io.github.ladysnake.otomaton;
 
 import baritone.api.fakeplayer.FakeServerPlayerEntity;
+import io.github.ladysnake.elmendorf.ElmendorfTestContext;
 import io.github.ladysnake.elmendorf.GameTestUtil;
 import io.github.ladysnake.elmendorf.impl.MockClientConnection;
 import io.github.ladysnake.otomaton.mixin.ServerWorldAccessor;
@@ -54,7 +55,7 @@ public class OtomatonTestSuite implements FabricGameTest {
 
     @GameTest(structureName = EMPTY_STRUCTURE, batchId = "sleepingBatch")
     public void shellsDoNotPreventSleeping(TestContext ctx) {
-        ServerPlayerEntity player = ctx.spawnServerPlayer(1, 0, 1);
+        ServerPlayerEntity player = ((ElmendorfTestContext) ctx).spawnServerPlayer(1, 0, 1);
         ServerPlayerEntity fakePlayer = new FakeServerPlayerEntity(Otomaton.FAKE_PLAYER, ctx.getWorld());
         fakePlayer.copyPositionAndRotation(player);
         ctx.getWorld().spawnEntity(fakePlayer);
@@ -83,11 +84,11 @@ public class OtomatonTestSuite implements FabricGameTest {
 
     @GameTest(structureName = EMPTY_STRUCTURE)
     public void realPlayersDoBroadcastAdvancements(TestContext ctx) {
-        ServerPlayerEntity player = ctx.spawnServerPlayer(1, 0, 1);
+        ServerPlayerEntity player = ((ElmendorfTestContext) ctx).spawnServerPlayer(1, 0, 1);
         // Needed for getting broadcasted messages
         ctx.getWorld().getServer().getPlayerManager().getPlayerList().add(player);
         Criteria.INVENTORY_CHANGED.trigger(player, player.getInventory(), new ItemStack(Items.COBBLESTONE));
-        ctx.verifyConnection(player, conn -> conn.sent(SystemMessageS2CPacket.class, packet -> packet.content().asComponent() instanceof TranslatableComponent tt && tt.getKey().equals("chat.type.advancement.task")).exactly(1));
+        ((ElmendorfTestContext) ctx).verifyConnection(player, conn -> conn.sent(SystemMessageS2CPacket.class, packet -> packet.content().asComponent() instanceof TranslatableComponent tt && tt.getKey().equals("chat.type.advancement.task")).exactly(1));
         ctx.getWorld().getServer().getPlayerManager().getPlayerList().remove(player);
         player.remove(Entity.RemovalReason.DISCARDED);
         ctx.complete();
@@ -102,7 +103,7 @@ public class OtomatonTestSuite implements FabricGameTest {
         // Needed for getting broadcasted messages
         ctx.getWorld().getServer().getPlayerManager().getPlayerList().add(fakePlayer);
         Criteria.INVENTORY_CHANGED.trigger(fakePlayer, fakePlayer.getInventory(), new ItemStack(Items.COBBLESTONE));
-        ctx.verifyConnection(fakePlayer, conn -> conn.allowNoPacketMatch(true).sent(SystemMessageS2CPacket.class, packet -> packet.content().asComponent() instanceof TranslatableComponent tt && tt.getKey().equals("chat.type.advancement.task")).exactly(0));
+        ((ElmendorfTestContext) ctx).verifyConnection(fakePlayer, conn -> conn.allowNoPacketMatch(true).sent(SystemMessageS2CPacket.class, packet -> packet.content().asComponent() instanceof TranslatableComponent tt && tt.getKey().equals("chat.type.advancement.task")).exactly(0));
         ctx.getWorld().getServer().getPlayerManager().getPlayerList().remove(fakePlayer);
         fakePlayer.remove(Entity.RemovalReason.DISCARDED);
         ctx.complete();

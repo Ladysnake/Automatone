@@ -125,7 +125,7 @@ public final class AutomatoneClient implements ClientModInitializer {
         P other = FakeClientPlayerEntity.createClientFakePlayer(playerType, world, new GameProfile(uuid, name));
         other.setId(id);
         other.setPosition(x, y, z);
-        other.method_43389().method_43494(new Vec3d(x, y, z));
+        other.getPacketPositionCodec().method_43494(new Vec3d(x, y, z));
         other.bodyYaw = headYaw;
         other.prevBodyYaw = headYaw;
         other.headYaw = headYaw;
