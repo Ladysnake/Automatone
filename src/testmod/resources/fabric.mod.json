@@ -19,7 +19,7 @@
     "main": [
       "io.github.ladysnake.otomaton.Otomaton"
     ],
-    "client": [
+    "client_init": [
       "io.github.ladysnake.otomaton.OtomatonClient"
     ],
     "fabric-gametest": [

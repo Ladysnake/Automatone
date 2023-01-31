@@ -97,7 +97,7 @@ public class OtomatonTestSuite implements FabricGameTest {
     @GameTest(structureName = EMPTY_STRUCTURE)
     public void fakePlayersDoNotBroadcastAdvancements(TestContext ctx) {
         ServerPlayerEntity fakePlayer = new FakeServerPlayerEntity(Otomaton.FAKE_PLAYER, ctx.getWorld());
-        fakePlayer.networkHandler = new ServerPlayNetworkHandler(ctx.getWorld().getServer(), new MockClientConnection(NetworkSide.CLIENTBOUND), fakePlayer);
+        fakePlayer.networkHandler = new ServerPlayNetworkHandler(ctx.getWorld().getServer(), new MockClientConnection(NetworkSide.S2C), fakePlayer);
         fakePlayer.setPosition(ctx.getAbsolute(new Vec3d(1, 0, 1)));
         ctx.getWorld().spawnEntity(fakePlayer);
         // Needed for getting broadcasted messages

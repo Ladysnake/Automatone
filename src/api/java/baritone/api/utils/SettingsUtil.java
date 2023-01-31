@@ -23,11 +23,12 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
-import net.minecraft.tag.TagKey;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.registry.Registry;
 
 import java.awt.*;
 import java.lang.reflect.ParameterizedType;
@@ -166,8 +167,8 @@ public class SettingsUtil {
         ),
         ITEM(
                 Item.class,
-                str -> Registry.ITEM.get(new Identifier(str.trim())), // TODO this now returns AIR on failure instead of null, is that an issue?
-                item -> Registry.ITEM.getKey(item).toString()
+                str -> Registries.ITEM.get(new Identifier(str.trim())), // TODO this now returns AIR on failure instead of null, is that an issue?
+                item -> Registries.ITEM.getKey(item).toString()
         ),
         TAG() {
             @Override
@@ -175,13 +176,13 @@ public class SettingsUtil {
                 Type type = ((ParameterizedType) context.getSetting().getType()).getActualTypeArguments()[0];
                 Identifier id = new Identifier(raw);
                 if (type == Block.class) {
-                    return TagKey.of(Registry.BLOCK_KEY, id);
+                    return TagKey.of(RegistryKeys.BLOCK, id);
                 } else if (type == Item.class) {
-                    return TagKey.of(Registry.ITEM_KEY, id);
+                    return TagKey.of(RegistryKeys.ITEM, id);
                 } else if (type == EntityType.class) {
-                    return TagKey.of(Registry.ENTITY_TYPE_KEY, id);
+                    return TagKey.of(RegistryKeys.ENTITY_TYPE, id);
                 } else if (type == Fluid.class) {
-                    return TagKey.of(Registry.FLUID_KEY, id);
+                    return TagKey.of(RegistryKeys.FLUID, id);
                 } else {
                     throw new IllegalArgumentException();
                 }

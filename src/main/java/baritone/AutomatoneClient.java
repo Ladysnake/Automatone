@@ -38,8 +38,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.loader.api.ModContainer;
 import org.quiltmc.qsl.base.api.entrypoint.client.ClientModInitializer;
@@ -88,7 +88,7 @@ public final class AutomatoneClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(FakePlayers.SPAWN_PACKET_ID, (client, handler, buf, responseSender) -> {
             int id = buf.readVarInt();
             UUID uuid = buf.readUuid();
-            EntityType<?> entityTypeId = Registry.ENTITY_TYPE.get(buf.readVarInt());
+            EntityType<?> entityTypeId = Registries.ENTITY_TYPE.get(buf.readVarInt());
             String name = buf.readString();
             double x = buf.readDouble();
             double y = buf.readDouble();
@@ -125,7 +125,7 @@ public final class AutomatoneClient implements ClientModInitializer {
         P other = FakeClientPlayerEntity.createClientFakePlayer(playerType, world, new GameProfile(uuid, name));
         other.setId(id);
         other.setPosition(x, y, z);
-        other.getPacketPositionCodec().method_43494(new Vec3d(x, y, z));
+        other.getPacketPositionCodec().m_tnxpdgof(new Vec3d(x, y, z));
         other.bodyYaw = headYaw;
         other.prevBodyYaw = headYaw;
         other.headYaw = headYaw;

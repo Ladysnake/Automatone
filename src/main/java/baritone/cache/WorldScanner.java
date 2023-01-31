@@ -177,7 +177,7 @@ public enum WorldScanner implements IWorldScanner {
             for (int yy = 0; yy < 16; yy++) {
                 for (int z = 0; z < 16; z++) {
                     for (int x = 0; x < 16; x++) {
-                        BlockState state = bsc.method_12321(x, yy, z);
+                        BlockState state = bsc.get(x, yy, z);
                         if (filter.has(state)) {
                             int y = yReal | yy;
                             if (result.size() >= max) {

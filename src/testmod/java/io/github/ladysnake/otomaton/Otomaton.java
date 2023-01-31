@@ -25,8 +25,9 @@ import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,6 +51,6 @@ public class Otomaton implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        Registry.register(Registry.ENTITY_TYPE, id("fake_player"), FAKE_PLAYER);
+        Registry.register(Registries.ENTITY_TYPE, id("fake_player"), FAKE_PLAYER);
     }
 }

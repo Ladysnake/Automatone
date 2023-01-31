@@ -52,7 +52,9 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -60,7 +62,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.CheckForNull;
@@ -77,11 +78,11 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     public FakeServerPlayerEntity(EntityType<? extends PlayerEntity> type, ServerWorld world, GameProfile profile) {
-        super(world.getServer(), world, profile, null);
+        super(world.getServer(), world, profile);
         ((IEntityAccessor)this).automatone$setType(type);
         this.stepHeight = 0.6f; // same step height as LivingEntity
         // Side effects go brr
-        new ServerPlayNetworkHandler(world.getServer(), new ClientConnection(NetworkSide.CLIENTBOUND), this);
+        new ServerPlayNetworkHandler(world.getServer(), new ClientConnection(NetworkSide.S2C), this);
     }
 
     public void selectHotbarSlot(int hotbarSlot) {
@@ -231,7 +232,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     }
 
     @Override
-    public Packet<?> createSpawnPacket() {
+    public Packet<ClientPlayPacketListener> createSpawnPacket() {
         PacketByteBuf buf = PacketByteBufs.create();
         writeToSpawnPacket(buf);
         return new CustomPayloadS2CPacket(FakePlayers.SPAWN_PACKET_ID, buf);
@@ -240,7 +241,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     protected void writeToSpawnPacket(PacketByteBuf buf) {
         buf.writeVarInt(this.getId());
         buf.writeUuid(this.getUuid());
-        buf.writeVarInt(Registry.ENTITY_TYPE.getRawId(this.getType()));
+        buf.writeVarInt(Registries.ENTITY_TYPE.getRawId(this.getType()));
         buf.writeString(this.getGameProfile().getName());
         buf.writeDouble(this.getX());
         buf.writeDouble(this.getY());

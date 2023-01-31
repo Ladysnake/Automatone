@@ -31,9 +31,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,7 +89,7 @@ public class FollowCommand extends Command {
             } else {
                 logDirect(source, "Following these types of entities:");
                 classes.stream()
-                        .map(Registry.ENTITY_TYPE::getId)
+                        .map(Registries.ENTITY_TYPE::getId)
                         .map(Objects::requireNonNull)
                         .map(Identifier::toString)
                         .forEach(message -> logDirect(source, message));

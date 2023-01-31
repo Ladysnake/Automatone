@@ -41,7 +41,6 @@ import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
@@ -57,7 +56,7 @@ public class FakeClientPlayerEntity extends OtherClientPlayerEntity implements A
     }
 
     public FakeClientPlayerEntity(EntityType<?> type, ClientWorld clientWorld, GameProfile gameProfile) {
-        super(clientWorld, gameProfile, null);
+        super(clientWorld, gameProfile);
         ((IEntityAccessor)this).automatone$setType(type);
     }
 
@@ -70,7 +69,7 @@ public class FakeClientPlayerEntity extends OtherClientPlayerEntity implements A
     public void setPlayerListEntry(@Nullable GameProfile profile) {
         this.listEntry = profile == null
             ? null
-            : new PlayerListEntry(new PlayerListS2CPacket.Entry(profile, 0, null, null, null), null, false);
+            : new PlayerListEntry(profile, false);
     }
 
     @Override

@@ -20,8 +20,8 @@ package baritone.api.command.datatypes;
 import baritone.api.command.exception.CommandException;
 import baritone.api.command.helpers.TabCompleteHelper;
 import net.minecraft.block.Block;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.stream.Stream;
 
@@ -32,7 +32,7 @@ public enum BlockById implements IDatatypeFor<Block> {
     public Block get(IDatatypeContext ctx) throws CommandException {
         Identifier id = new Identifier(ctx.getConsumer().getString());
         Block block;
-        if ((block = Registry.BLOCK.getOrEmpty(id).orElse(null)) == null) {
+        if ((block = Registries.BLOCK.getOrEmpty(id).orElse(null)) == null) {
             throw new IllegalArgumentException("no block found by that id");
         }
         return block;
@@ -42,7 +42,7 @@ public enum BlockById implements IDatatypeFor<Block> {
     public Stream<String> tabComplete(IDatatypeContext ctx) throws CommandException {
         return new TabCompleteHelper()
                 .append(
-                        Registry.BLOCK.getIds()
+                        Registries.BLOCK.getIds()
                                 .stream()
                                 .map(Object::toString)
                 )
