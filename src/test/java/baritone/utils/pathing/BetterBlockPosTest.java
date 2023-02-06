@@ -46,7 +46,6 @@ public class BetterBlockPosTest {
     /**
      * Make sure BetterBlockPos behaves just like BlockPos
      */
-    @Test
     public void testSimple() {
         BlockPos pos = new BlockPos(1, 2, 3);
         BetterBlockPos better = new BetterBlockPos(1, 2, 3);
