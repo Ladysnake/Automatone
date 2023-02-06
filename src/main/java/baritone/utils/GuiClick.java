@@ -97,9 +97,9 @@ public class GuiClick extends Screen {
             assert client.world != null;
             if (mouseButton == 0) {
                 if (clickStart != null && !clickStart.equals(currentMouseOver)) {
-                    client.player.networkHandler.m_gkszsvqi(String.format("/execute as %s run automatone sel clear", callerUuid));
-                    client.player.networkHandler.m_gkszsvqi(String.format("/execute as %s run automatone sel 1 %d %d %d", callerUuid, clickStart.getX(), clickStart.getY(), clickStart.getZ()));
-                    client.player.networkHandler.m_gkszsvqi(String.format("/execute as %s run automatone sel 2 %d %d %d", callerUuid, currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));
+                    client.player.networkHandler.m_gkszsvqi(String.format("execute as %s run automatone sel clear", callerUuid));
+                    client.player.networkHandler.m_gkszsvqi(String.format("execute as %s run automatone sel 1 %d %d %d", callerUuid, clickStart.getX(), clickStart.getY(), clickStart.getZ()));
+                    client.player.networkHandler.m_gkszsvqi(String.format("execute as %s run automatone sel 2 %d %d %d", callerUuid, currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));
                     MutableText component = Text.literal("").append(BaritoneAPI.getPrefix()).append(" Selection made! For usage: " + FORCE_COMMAND_PREFIX + "help sel");
                     component.setStyle(component.getStyle()
                             .withFormatting(Formatting.WHITE)
@@ -108,12 +108,11 @@ public class GuiClick extends Screen {
                                     FORCE_COMMAND_PREFIX + "help sel"
                             )));
                     client.inGameHud.getChatHud().addMessage(component);
-                    clickStart = null;
                 } else {
-                    client.player.networkHandler.m_gkszsvqi(String.format("/execute as %s run automatone goto %d %d %d", callerUuid, currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));
+                    client.player.networkHandler.m_gkszsvqi(String.format("execute as %s run automatone goto %d %d %d", callerUuid, currentMouseOver.getX(), currentMouseOver.getY(), currentMouseOver.getZ()));
                 }
             } else if (mouseButton == 1) {
-                client.player.networkHandler.m_gkszsvqi(String.format("/execute as %s run automatone goto %d %d %d", callerUuid, currentMouseOver.getX(), currentMouseOver.getY() + 1, currentMouseOver.getZ()));
+                client.player.networkHandler.m_gkszsvqi(String.format("execute as %s run automatone goto %d %d %d", callerUuid, currentMouseOver.getX(), currentMouseOver.getY() + 1, currentMouseOver.getZ()));
             }
         }
         clickStart = null;
