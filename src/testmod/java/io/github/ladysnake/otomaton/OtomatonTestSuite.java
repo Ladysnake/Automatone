@@ -28,6 +28,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.packet.s2c.play.SystemMessageS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -79,6 +80,17 @@ public class OtomatonTestSuite implements FabricGameTest {
         sleepManager.update(players);
         GameTestUtil.assertTrue("player should be sleeping", player.isSleeping());
         GameTestUtil.assertTrue("all players should be sleeping", sleepManager.canResetTime(100, players));
+        ctx.complete();
+    }
+
+
+    @GameTest(structureName = EMPTY_STRUCTURE)
+    public void shellsKeepUuidOnReload(TestContext ctx) {
+        ServerPlayerEntity fakePlayer = new FakeServerPlayerEntity(Otomaton.FAKE_PLAYER, ctx.getWorld());
+        ServerPlayerEntity fakePlayer2 = new FakeServerPlayerEntity(Otomaton.FAKE_PLAYER, ctx.getWorld());
+        NbtCompound nbtCompound = fakePlayer.writeNbt(new NbtCompound());
+        fakePlayer2.readNbt(nbtCompound);
+        GameTestUtil.assertTrue("Fake players should keep UUID after reload", fakePlayer2.getUuid().equals(fakePlayer.getUuid()));
         ctx.complete();
     }
 
