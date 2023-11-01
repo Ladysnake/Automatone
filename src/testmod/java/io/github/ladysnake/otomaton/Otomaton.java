@@ -42,7 +42,7 @@ public class Otomaton implements ModInitializer {
     public static final EntityType<PlayerEntity> FAKE_PLAYER = FabricEntityTypeBuilder.<PlayerEntity>createLiving()
             .spawnGroup(SpawnGroup.MISC)
             .entityFactory(FakePlayers.entityFactory(FakeServerPlayerEntity::new))
-            .defaultAttributes(PlayerEntity::createPlayerAttributes)
+            .defaultAttributes(PlayerEntity::createAttributes)
             .dimensions(EntityDimensions.changing(EntityType.PLAYER.getWidth(), EntityType.PLAYER.getHeight()))
             .trackRangeBlocks(64)
             .trackedUpdateRate(1)

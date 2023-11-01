@@ -72,7 +72,7 @@ public class EntityContext implements IEntityContext {
 
     @Override
     public ServerWorld world() {
-        World world = this.entity.world;
+        World world = this.entity.getWorld();
         if (world.isClient) throw new IllegalStateException();
         return (ServerWorld) world;
     }

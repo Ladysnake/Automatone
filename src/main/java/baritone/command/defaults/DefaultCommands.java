@@ -110,24 +110,26 @@ public final class DefaultCommands {
         if (BaritoneAPI.getGlobalSettings().echoCommands.get()) {
             String msg = command + rest;
             String toDisplay = BaritoneAPI.getGlobalSettings().censorRanCommands.get() ? command + " ..." : msg;
-            MutableText component = Text.literal(String.format("> %s", toDisplay));
-            component.setStyle(component.getStyle()
-                    .withFormatting(Formatting.WHITE)
-                    .withHoverEvent(new HoverEvent(
-                            HoverEvent.Action.SHOW_TEXT,
-                            Text.literal("Click to rerun command")
-                    ))
-                    .withClickEvent(new ClickEvent(
-                            ClickEvent.Action.RUN_COMMAND,
-                            FORCE_COMMAND_PREFIX + msg
-                    )));
-            source.sendFeedback(component, false);
+            source.sendFeedback(() -> {
+                MutableText component = Text.literal(String.format("> %s", toDisplay));
+                component.setStyle(component.getStyle()
+                        .withFormatting(Formatting.WHITE)
+                        .withHoverEvent(new HoverEvent(
+                                HoverEvent.Action.SHOW_TEXT,
+                                Text.literal("Click to rerun command")
+                        ))
+                        .withClickEvent(new ClickEvent(
+                                ClickEvent.Action.RUN_COMMAND,
+                                FORCE_COMMAND_PREFIX + msg
+                        )));
+                return component;
+            }, false);
         }
     }
 
     public static boolean runCommand(ServerCommandSource source, String msg, IBaritone baritone) throws CommandException {
         if (msg.trim().equalsIgnoreCase("damn")) {
-            source.sendFeedback(Text.literal("daniel"), false);
+            source.sendFeedback(() -> Text.literal("daniel"), false);
             return false;
         } else if (msg.trim().equalsIgnoreCase("orderpizza")) {
             Automatone.LOGGER.fatal("No pizza :(");

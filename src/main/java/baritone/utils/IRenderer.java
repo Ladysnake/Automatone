@@ -22,10 +22,13 @@ import baritone.api.Settings;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tessellator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormats;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -51,10 +54,10 @@ public interface IRenderer {
 
     static void startLines(Color color, float alpha, float lineWidth, boolean ignoreDepth) {
         RenderSystem.enableBlend();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         RenderSystem.blendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
         glColor(color, alpha);
         RenderSystem.lineWidth(lineWidth);
-        RenderSystem.disableTexture();
         RenderSystem.depthMask(false);
 
         if (ignoreDepth) {
@@ -72,7 +75,6 @@ public interface IRenderer {
         }
 
         RenderSystem.depthMask(true);
-        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
 
@@ -80,6 +82,8 @@ public interface IRenderer {
         Vec3d cameraPos = renderManager.camera.getPos();
         Box toDraw = aabb.offset(-cameraPos.x, -cameraPos.y, -cameraPos.z);
 
+        VertexConsumer vertexConsumer3 = MinecraftClient.getInstance().getBufferBuilders().getEntityVertexConsumers().getBuffer(RenderLayer.getLines());
+        WorldRenderer.drawBox(vertexConsumer3, toDraw.minX, toDraw.minY, toDraw.minZ, toDraw.maxX, toDraw.maxY, toDraw.maxZ, State.red, State.green, State.blue, State.alpha);
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         buffer.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
         // bottom

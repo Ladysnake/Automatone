@@ -248,7 +248,7 @@ public class MovementTraverse extends Movement {
                 // now that we've checked all possible directions to side place, we actually need to backplace
                 // none of the vanilla impls do a blocking or thread unsafe call, so passing the world directly should be fine
                 // also none of the full cubes actually use the pos, so we should be fine not creating a real BlockPos for this
-                if (!srcOn.getMaterial().isReplaceable() && !srcOn.isFullCube(context.world, BlockPos.ORIGIN)) {
+                if (!srcOn.materialReplaceable() && !srcOn.isFullCube(context.world, BlockPos.ORIGIN)) {
                     // If srcOn is currently replaceable, we will have a proper block when we stand on it
                     return; // can't sneak and backplace against eg. soul sand or half slabs (regardless of whether it's top half or bottom half) =/
                 }
@@ -294,7 +294,7 @@ public class MovementTraverse extends Movement {
                 return state;
             }
 
-            if (!state.getTarget().getRotation().isPresent()) {
+            if (state.getTarget().getRotation().isEmpty()) {
                 // this can happen rarely when the server lags and doesn't send the falling sand entity until you've already walked through the block and are now mining the next one
                 return state;
             }
@@ -413,13 +413,13 @@ public class MovementTraverse extends Movement {
                 state.setInput(Input.SNEAK, true);
             }
             switch (p) {
-                case READY_TO_PLACE: {
+                case READY_TO_PLACE -> {
                     if (ctx.entity().isSneaking() || baritone.settings().assumeSafeWalk.get()) {
                         state.setInput(Input.CLICK_RIGHT, true);
                     }
                     return state;
                 }
-                case ATTEMPTING: {
+                case ATTEMPTING -> {
                     if (dist1 > 0.83) {
                         // might need to go forward a bit
                         float yaw = RotationUtils.calcRotationFromVec3d(ctx.headPos(), VecUtils.getBlockPosCenter(dest), ctx.entityRotations()).getYaw();
@@ -433,8 +433,8 @@ public class MovementTraverse extends Movement {
                     }
                     return state;
                 }
-                default:
-                    break;
+                default -> {
+                }
             }
             if (feet.equals(dest)) {
                 // If we are in the block that we are trying to get to, we are sneaking over air and we need to place a block beneath us against the one we just walked off of

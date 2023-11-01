@@ -19,9 +19,8 @@
 import net.fabricmc.loom.task.RemapJarTask
 
 plugins {
-    id 'org.quiltmc.loom' version '1.+'
-    id 'io.github.ladysnake.chenille' version "0.9.0"
-    id 'io.github.juuxel.loom-quiltflower' version "1.6.0"
+    id 'org.quiltmc.loom' version '1.4.+'
+    id 'io.github.ladysnake.chenille' version "0.11.3"
 }
 
 group project.maven_group
@@ -82,6 +81,11 @@ repositories {
         jamieswhiteshirt()
     }
 
+    maven {
+        name = 'Quilt Snapshots'
+        url = 'https://maven.quiltmc.org/repository/snapshot'
+    }
+
     mavenLocal()
 }
 
@@ -93,10 +97,18 @@ dependencies {
     modImplementation "org.quiltmc:qsl:${qsl_version}+${minecraft_version}"
     modImplementation "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${quilted_fabric_api_version}-${minecraft_version}"
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${cca_version}"
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${cca_version}"
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-world:${cca_version}"
-    modImplementation "com.jamieswhiteshirt:reach-entity-attributes:${reach_version}"
+    modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${cca_version}") {
+        transitive = false
+    }
+    modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${cca_version}") {
+        transitive = false
+    }
+    modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-world:${cca_version}") {
+        transitive = false
+    }
+    modImplementation("com.jamieswhiteshirt:reach-entity-attributes:${reach_version}") {
+        transitive = false
+    }
     modLocalImplementation("io.github.ladysnake:elmendorf:${elmendorf_version}") {
         transitive = false
     }

@@ -50,7 +50,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
@@ -80,7 +80,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
     public FakeServerPlayerEntity(EntityType<? extends PlayerEntity> type, ServerWorld world, GameProfile profile) {
         super(world.getServer(), world, profile);
         ((IEntityAccessor)this).automatone$setType(type);
-        this.stepHeight = 0.6f; // same step height as LivingEntity
+        this.setStepHeight(0.6f); // same step height as LivingEntity
         // Side effects go brr
         new ServerPlayNetworkHandler(world.getServer(), new ClientConnection(NetworkSide.S2C), this);
     }
@@ -172,7 +172,7 @@ public class FakeServerPlayerEntity extends ServerPlayerEntity implements Automa
 
     @Override
     protected void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition) {
-        this.handleFall(heightDifference, onGround);
+        this.handleFall(0, heightDifference, 0, onGround);
     }
 
     @Override

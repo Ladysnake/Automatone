@@ -117,7 +117,7 @@ public class Baritone implements IBaritone {
 
         this.commandManager = new BaritoneCommandManager(this);
         this.execControlProcess = DefaultCommands.controlCommands.registerProcess(this);
-        this.clientPathingBehaviour = player.world.isClient ? new ClientPathingBehaviour(player) : null;
+        this.clientPathingBehaviour = player.getWorld().isClient ? new ClientPathingBehaviour(player) : null;
     }
 
     @Override

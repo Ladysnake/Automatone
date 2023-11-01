@@ -224,7 +224,7 @@ public final class FarmProcess extends BaritoneProcessHelper implements IFarmPro
             }
             if (state.getBlock() instanceof Fertilizable) {
                 Fertilizable ig = (Fertilizable) state.getBlock();
-                if (ig.isFertilizable(ctx.world(), pos, state, true) && ig.canGrow(ctx.world(), ctx.world().random, pos, state)) {
+                if (ig.isFertilizable(ctx.world(), pos, state, true) && ig.canFertilize(ctx.world(), ctx.world().random, pos, state)) {
                     bonemealable.add(pos);
                 }
             }
@@ -300,7 +300,7 @@ public final class FarmProcess extends BaritoneProcessHelper implements IFarmPro
         for (ItemEntity item : ctx.world().getEntitiesByClass(ItemEntity.class, ctx.entity().getBoundingBox().expand(30), Entity::isOnGround)) {
             if (PICKUP_DROPPED.contains(item.getStack().getItem())) {
                 // +0.1 because of farmland's 0.9375 dummy height lol
-                goalz.add(new GoalBlock(new BlockPos(item.getX(), item.getY() + 0.1, item.getZ())));
+                goalz.add(new GoalBlock(BlockPos.create(item.getX(), item.getY() + 0.1, item.getZ())));
             }
         }
         return new PathingCommand(new GoalComposite(goalz.toArray(new Goal[0])), PathingCommandType.SET_GOAL_AND_PATH);

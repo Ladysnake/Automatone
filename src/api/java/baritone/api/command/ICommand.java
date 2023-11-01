@@ -78,13 +78,15 @@ public interface ICommand {
      * @param components The components to send
      */
     default void logDirect(ServerCommandSource source, Text... components) {
-        MutableText component = Text.literal("");
-        // If we are not logging as a Toast
-        // Append the prefix to the base component line
-        component.append(BaritoneAPI.getPrefix());
-        component.append(Text.literal(" "));
-        Arrays.asList(components).forEach(component::append);
-        source.sendFeedback(component, false);
+        source.sendFeedback(() -> {
+            MutableText component = Text.literal("");
+            // If we are not logging as a Toast
+            // Append the prefix to the base component line
+            component.append(BaritoneAPI.getPrefix());
+            component.append(Text.literal(" "));
+            for (Text t : components) component.append(t);
+            return component;
+        }, false);
     }
 
     /**

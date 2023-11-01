@@ -197,8 +197,8 @@ public final class RotationUtils {
             return possibleRotation;
         }
 
-        BlockState state = entity.world.getBlockState(pos);
-        VoxelShape shape = state.getOutlineShape(entity.world, pos);
+        BlockState state = entity.getWorld().getBlockState(pos);
+        VoxelShape shape = state.getOutlineShape(entity.getWorld(), pos);
         if (shape.isEmpty()) {
             shape = VoxelShapes.fullCube();
         }
@@ -234,7 +234,7 @@ public final class RotationUtils {
             if (((BlockHitResult) result).getBlockPos().equals(pos)) {
                 return Optional.of(rotation);
             }
-            if (entity.world.getBlockState(pos).getBlock() instanceof AbstractFireBlock && ((BlockHitResult) result).getBlockPos().equals(pos.down())) {
+            if (entity.getWorld().getBlockState(pos).getBlock() instanceof AbstractFireBlock && ((BlockHitResult) result).getBlockPos().equals(pos.down())) {
                 return Optional.of(rotation);
             }
         }
@@ -251,6 +251,6 @@ public final class RotationUtils {
      * @return The optional rotation
      */
     public static Optional<Rotation> reachableCenter(Entity entity, BlockPos pos, double blockReachDistance, boolean wouldSneak) {
-        return reachableOffset(entity, pos, VecUtils.calculateBlockCenter(entity.world, pos), blockReachDistance, wouldSneak);
+        return reachableOffset(entity, pos, VecUtils.calculateBlockCenter(entity.getWorld(), pos), blockReachDistance, wouldSneak);
     }
 }

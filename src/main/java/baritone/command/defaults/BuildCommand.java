@@ -49,7 +49,7 @@ public class BuildCommand extends Command {
         if (FilenameUtils.getExtension(file.getAbsolutePath()).isEmpty()) {
             file = new File(file.getAbsolutePath() + "." + baritone.settings().schematicFallbackExtension.get());
         }
-        BetterBlockPos origin = new BetterBlockPos(new BlockPos(source.getPosition()));
+        BetterBlockPos origin = new BetterBlockPos(BlockPos.fromPosition(source.getPosition()));
         BetterBlockPos buildOrigin;
         if (args.hasAny()) {
             args.requireMax(3);

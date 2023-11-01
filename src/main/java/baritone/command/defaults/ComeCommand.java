@@ -38,7 +38,7 @@ public class ComeCommand extends Command {
     @Override
     public void execute(ServerCommandSource source, String label, IArgConsumer args, IBaritone baritone) throws CommandException {
         args.requireMax(0);
-        baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(new BlockPos(source.getPosition())));
+        baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(BlockPos.fromPosition(source.getPosition())));
         logDirect(source, "Coming");
     }
 

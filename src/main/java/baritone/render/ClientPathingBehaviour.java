@@ -39,7 +39,7 @@ public class ClientPathingBehaviour {
     public Goal getGoal() {
         // Reaching across sides is fun
         return Optional.ofNullable(MinecraftClient.getInstance().getServer())
-                .map(s -> s.getWorld(this.entity.world.getRegistryKey()))
+                .map(s -> s.getWorld(this.entity.getWorld().getRegistryKey()))
                 .map(w -> w.getEntity(this.entity.getUuid()))
                 .map(IBaritone.KEY::getNullable)
                 .map(IBaritone::getPathingBehavior)
@@ -50,7 +50,7 @@ public class ClientPathingBehaviour {
     public Optional<? extends IPathFinder> getInProgress() {
         // Reaching across sides is fun
         return Optional.ofNullable(MinecraftClient.getInstance().getServer())
-                .map(s -> s.getWorld(this.entity.world.getRegistryKey()))
+                .map(s -> s.getWorld(this.entity.getWorld().getRegistryKey()))
                 .map(w -> w.getEntity(this.entity.getUuid()))
                 .map(IBaritone.KEY::getNullable)
                 .map(IBaritone::getPathingBehavior)

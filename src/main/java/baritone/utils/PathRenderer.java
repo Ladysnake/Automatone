@@ -83,7 +83,7 @@ public final class PathRenderer implements IRenderer {
         Goal goal = behavior.getGoal();
         MinecraftClient mc = MinecraftClient.getInstance();
 
-        DimensionType thisPlayerDimension = behavior.entity.world.getDimension();
+        DimensionType thisPlayerDimension = behavior.entity.getWorld().getDimension();
         World world = Objects.requireNonNull(MinecraftClient.getInstance().world);
         DimensionType currentRenderViewDimension = world.getDimension();
 
@@ -94,7 +94,7 @@ public final class PathRenderer implements IRenderer {
 
         Entity renderView = mc.getCameraEntity();
 
-        if (renderView.world != world) {
+        if (renderView.getWorld() != world) {
             Automatone.LOGGER.error("I have no idea what's going on");
             Automatone.LOGGER.error("The primary baritone is in a different world than the render view entity");
             Automatone.LOGGER.error("Not rendering the path");
@@ -207,8 +207,8 @@ public final class PathRenderer implements IRenderer {
         IRenderer.startLines(color, settings.pathRenderLineWidthPixels.get(), settings.renderSelectionBoxesIgnoreDepth.get());
 
         positions.forEach(pos -> {
-            BlockState state = player.world.getBlockState(pos);
-            VoxelShape shape = state.getOutlineShape(player.world, pos);
+            BlockState state = player.getWorld().getBlockState(pos);
+            VoxelShape shape = state.getOutlineShape(player.getWorld(), pos);
             Box toDraw = shape.isEmpty() ? VoxelShapes.fullCube().getBoundingBox() : shape.getBoundingBox();
             toDraw = toDraw.offset(pos);
             IRenderer.drawAABB(toDraw, .002D);
@@ -263,9 +263,9 @@ public final class PathRenderer implements IRenderer {
                         TEXTURE_BEACON_BEAM,
                         partialTicks,
                         1.0F,
-                        player.world.getTime(),
+                        player.getWorld().getTime(),
                         0,
-                        player.world.getHeight(),
+                        player.getWorld().getHeight(),
                         color.getColorComponents(null),
 
                         // Arguments filled by the private method lol
@@ -291,7 +291,7 @@ public final class PathRenderer implements IRenderer {
             y1 = 0;
             y2 = 0;
             minY = 0 - renderPosY;
-            maxY = player.world.getHeight() - renderPosY;
+            maxY = player.getWorld().getHeight() - renderPosY;
         } else if (goal instanceof GoalComposite) {
             for (Goal g : ((GoalComposite) goal).goals()) {
                 drawDankLitGoalBox(stack, player, g, partialTicks, color);

@@ -80,22 +80,22 @@ public class ServerPlayerController implements IPlayerController {
 
     @Override
     public ActionResult processRightClickBlock(PlayerEntity player, World world, Hand hand, BlockHitResult result) {
-        return this.player.interactionManager.interactBlock(this.player, this.player.world, this.player.getStackInHand(hand), hand, result);
+        return this.player.interactionManager.interactBlock(this.player, this.player.getWorld(), this.player.getStackInHand(hand), hand, result);
     }
 
     @Override
     public ActionResult processRightClick(PlayerEntity player, World world, Hand hand) {
-        return this.player.interactionManager.interactItem(this.player, this.player.world, this.player.getStackInHand(hand), hand);
+        return this.player.interactionManager.interactItem(this.player, this.player.getWorld(), this.player.getStackInHand(hand), hand);
     }
 
     @Override
     public boolean clickBlock(BlockPos loc, Direction face) {
-        BlockState state = this.player.world.getBlockState(loc);
+        BlockState state = this.player.getWorld().getBlockState(loc);
         if (state.isAir()) return false;
 
         this.player.interactionManager.processBlockBreakingAction(loc, PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, face, this.player.getWorld().getTopY(), sequence++);
         // Success = starting the mining process or insta-mining
-        return ((IServerPlayerInteractionManager) this.player.interactionManager).isMining() || this.player.world.isAir(loc);
+        return ((IServerPlayerInteractionManager) this.player.interactionManager).isMining() || this.player.getWorld().isAir(loc);
     }
 
     @Override

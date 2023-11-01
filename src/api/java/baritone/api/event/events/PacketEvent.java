@@ -19,7 +19,7 @@ package baritone.api.event.events;
 
 import baritone.api.event.events.type.EventState;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 
 /**
  * @author Brady

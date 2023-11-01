@@ -47,7 +47,7 @@ public final class BaritoneProvider implements IBaritoneProvider {
 
     @Override
     public IBaritone getBaritone(LivingEntity entity) {
-        if (entity.world.isClient()) throw new IllegalStateException("Lol we only support servers now");
+        if (entity.getWorld().isClient()) throw new IllegalStateException("Lol we only support servers now");
         return IBaritone.KEY.get(entity);
     }
 
